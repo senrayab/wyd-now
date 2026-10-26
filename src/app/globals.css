@@ -454,6 +454,12 @@ svg.lucide {
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
+/* 회색 카드 안의 삭제 버튼은 옅은 빨강이 묻히므로 꽉 찬 빨강 */
+.card-flat .btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+
 /* 흰 알약 (회색 바탕 위) */
 .btn-ghost {
   background: var(--card);
@@ -553,6 +559,11 @@ form .chip[aria-pressed="true"] {
   font-size: 12px;
   background: var(--fill);
   color: var(--ink-2);
+}
+
+/* 회색 카드 안에서는 흰 바탕 */
+.card-flat .tag {
+  background: var(--card);
 }
 
 .tag .dot {

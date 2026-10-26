@@ -102,7 +102,7 @@ export default function VotesScreen() {
                 <button type="button" className="btn btn-accent" onClick={loadDefaults} disabled={busy}>
                   {busy ? <Spinner /> : <Download size={16} />} {busy ? "불러오는 중" : "자주 쓰는 투표 사이트 불러오기"}
                 </button>
-                <Link href="/vote/new" className="btn btn-ghost">
+                <Link href="/vote/new" className="btn btn-soft">
                   직접 등록하기
                 </Link>
               </div>

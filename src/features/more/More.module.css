@@ -50,6 +50,21 @@
   transition: background 0.2s ease;
 }
 
+/* 항목 사이 1px 구분선 (하위 메뉴 목록과 같게, 아이콘 뒤 글자 시작점부터) */
+.menuItem {
+  position: relative;
+}
+
+.menuItem + .menuItem::before {
+  content: "";
+  position: absolute;
+  top: -2.5px;
+  left: 60px;
+  right: 10px;
+  height: 1px;
+  background: var(--line);
+}
+
 .menuItem:hover,
 .menuItem:focus-visible {
   background: var(--card-2);
