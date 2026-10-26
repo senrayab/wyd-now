@@ -40,9 +40,22 @@ function htmlPathFor(pathname) {
   return /\.[a-z0-9]+$/i.test(clean) ? clean : `${clean}.html`;
 }
 
+/**
+ * Cloudflare Pages 는 /x.html → /x 로 308 리다이렉트하므로 캐시된 응답에 redirected 표시가 남음.
+ * Safari 는 리다이렉트된 응답으로 페이지 이동을 응답하면 거부하므로 깨끗한 응답으로 다시 만듦.
+ */
+function unredirect(response) {
+  if (!response || !response.redirected) return response;
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 async function fromPrecache(pathname) {
   const cache = await caches.open(PRECACHE);
-  return (await cache.match(pathname)) || (await cache.match(htmlPathFor(pathname)));
+  return unredirect((await cache.match(pathname)) || (await cache.match(htmlPathFor(pathname))));
 }
 
 async function handleNavigation(request) {
@@ -52,7 +65,10 @@ async function handleNavigation(request) {
     if (response.ok) return response;
     return (await fromPrecache(url.pathname)) || response;
   } catch {
-    return (await fromPrecache(url.pathname)) || (await caches.match("/offline.html", { cacheName: PRECACHE }));
+    return (
+      (await fromPrecache(url.pathname)) ||
+      unredirect(await caches.match("/offline.html", { cacheName: PRECACHE }))
+    );
   }
 }
 
