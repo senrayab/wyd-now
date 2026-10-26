@@ -38,10 +38,10 @@
   --illo-solid: #1c1c1c;
   --float: 0 16px 34px -20px rgba(0, 0, 0, 0.3);
 
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 24px;
-  --r-xl: 30px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 22px;
   --nav-h: 70px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 

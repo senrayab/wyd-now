@@ -41,11 +41,11 @@
 }
 
 .side:first-child {
-  border-top-left-radius: 26px;
+  border-top-left-radius: var(--r-xl);
 }
 
 .side:last-child {
-  border-top-right-radius: 26px;
+  border-top-right-radius: var(--r-xl);
 }
 
 .notch {

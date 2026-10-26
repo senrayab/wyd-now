@@ -46,7 +46,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 10px;
-  border-radius: 14px;
+  border-radius: calc(var(--r-xl) - 8px); /* 겉 카드(padding 8)와 동심 */
   transition: background 0.2s ease;
 }
 
