@@ -1,0 +1,255 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 0 18px;
+}
+
+.titleBlock {
+  flex: 1;
+  padding-top: 1px;
+}
+
+.titleBlock h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.titleBlock p {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.monthRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2px 12px;
+}
+
+.monthRow h2 {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* 요일 줄: 선택한 날은 검정 둥근 사각형 */
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 8px;
+  border-radius: 14px;
+}
+
+.day small {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.day span {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.day i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.day i[data-has="true"] {
+  background: var(--muted);
+}
+
+.day[data-today="true"] span {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.day[aria-pressed="true"] {
+  background: var(--ink);
+}
+
+.day[aria-pressed="true"] small,
+.day[aria-pressed="true"] span {
+  color: var(--on-inverse);
+}
+
+.day[aria-pressed="true"] i[data-has="true"] {
+  background: var(--on-inverse);
+}
+
+/* 시간 + 카드 */
+.list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 18px;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 50px 12px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+/* 시간과 카드 사이 세로선 + 점 (현재·다음 일정은 꽉 찬 점) */
+.rail {
+  position: relative;
+  align-self: stretch;
+}
+
+.rail::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  /* 다음 항목 선과 살짝 겹쳐 이음매가 보이지 않게 */
+  top: -1px;
+  bottom: -16px;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: var(--line-strong);
+}
+
+.item:first-child .rail::before {
+  top: 24px;
+}
+
+.item:last-child .rail::before {
+  bottom: auto;
+  height: 24px;
+}
+
+.item:only-child .rail::before {
+  display: none;
+}
+
+/* 점: 짝수 크기 + translate 로 선의 정확한 가운데에 */
+.rail::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 24px;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.2px solid var(--muted);
+}
+
+.rail[data-current="true"]::after {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--bg);
+}
+
+.time {
+  padding-top: 17px;
+  text-align: right;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.card {
+  display: block;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+}
+
+.card[data-live="true"] {
+  background: var(--accent-soft);
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fill);
+}
+
+.card[data-live="true"] .icon {
+  background: var(--card);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.text strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.faces {
+  display: flex;
+}
+
+.faces > :global(.avatar) + :global(.avatar) {
+  margin-left: -8px;
+}
+
+.faces > :global(.avatar) {
+  box-shadow: 0 0 0 2px var(--card);
+}
+
+/* 진행 중인 일정의 안내 펼침 */
+.note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--card);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+}

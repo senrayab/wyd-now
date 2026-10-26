@@ -1,0 +1,40 @@
+.form {
+  gap: 22px;
+}
+
+.members {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.color {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: var(--shadow-raised);
+}
+
+.color[aria-checked="true"] {
+  outline: 2.5px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.submit {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  margin-top: 8px;
+}

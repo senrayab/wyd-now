@@ -1,0 +1,176 @@
+/* 화면 맨 아래에 꽉 붙는 바 (좌우·아래 여백 없음, 위쪽만 둥글게) */
+.wrap {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 520px;
+  z-index: 50;
+  transition: transform 0.3s ease, opacity 0.2s ease;
+}
+
+/* 입력 화면: 아래로 내려 숨김 (선택 위치는 유지) */
+.wrap[data-hidden="true"] {
+  transform: translate(-50%, calc(100% + 30px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: calc(70px + var(--safe-bottom));
+  padding: 0 14px var(--safe-bottom);
+  /* 그림자가 파인 모양을 그대로 따라가도록 drop-shadow */
+  filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.08));
+}
+
+/* 바 배경: 양옆은 사각형(바깥 위 모서리만 둥글게), 가운데는 파인 곡선 */
+.shape {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+.side {
+  flex: 1;
+  background: var(--card);
+}
+
+.side:first-child {
+  border-top-left-radius: 26px;
+}
+
+.side:last-child {
+  border-top-right-radius: 26px;
+}
+
+.notch {
+  flex: none;
+  width: 120px;
+  /* 이음매가 생기지 않게 양옆과 1px 겹침 */
+  margin: 0 -1px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 곡선은 늘어나지 않게 실제 크기(120×70) 그대로 */
+.notch svg {
+  display: block;
+  width: 120px;
+  height: 70px;
+  flex: none;
+}
+
+.notch path {
+  fill: var(--card);
+}
+
+/* 기기 아래 안전 영역만큼 이어 채움 */
+.notch > span {
+  flex: 1;
+  margin-top: -1px;
+  background: var(--card);
+}
+
+.group {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+/* 가운데 + 버튼 자리 */
+.gap {
+  flex: none;
+  width: 72px;
+}
+
+/* 선택 배경 (연한 회색 알약 — '전체 보기' 버튼과 같은 색). 위치·너비는 BottomNav 가 지정 */
+.indicator {
+  position: absolute;
+  top: 13px;
+  left: 0;
+  height: 44px;
+  width: 44px;
+  border-radius: 999px;
+  background: var(--fill);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.indicator[data-ready="true"] {
+  transition:
+    transform 0.42s cubic-bezier(0.34, 1.25, 0.5, 1),
+    width 0.42s cubic-bezier(0.34, 1.25, 0.5, 1),
+    opacity 0.2s ease;
+}
+
+.tab {
+  position: relative;
+  z-index: 1;
+  height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--muted);
+  transition: color 0.3s ease;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: none;
+}
+
+.tab[data-active="true"] {
+  color: var(--ink);
+}
+
+.tab[data-active="true"] .label {
+  display: inline;
+}
+
+@media (max-width: 349px) {
+  .tab[data-active="true"] .label {
+    display: none;
+  }
+}
+
+/* 가운데 위로 솟은 검정 + 버튼 — 바는 그 둘레가 부드럽게 파여 있음 */
+.add {
+  position: absolute;
+  left: 50%;
+  /* 지름 56 → 중심이 바 위쪽 2px (파인 원과 같은 중심) */
+  top: -26px;
+  width: 56px;
+  height: 56px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--on-inverse);
+  box-shadow: none;
+  transition: transform 0.15s ease;
+}
+
+.add:active {
+  transform: translateX(-50%) scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator[data-ready="true"],
+  .tab,
+  .wrap {
+    transition: none;
+  }
+}

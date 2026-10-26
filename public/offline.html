@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>오프라인 · wyd now</title>
+  <style>
+    :root { color-scheme: light dark; --bg: #efedf8; --ink: #1f1c3d; --muted: #9895b4; --card: #fff; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #14122a; --ink: #f2f0fb; --card: #1f1c3a; } }
+    * { box-sizing: border-box; margin: 0; }
+    body { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--bg); color: var(--ink);
+      font-family: "Pretendard Variable", Pretendard, -apple-system, system-ui, "Malgun Gothic", sans-serif; }
+    main { width: min(360px, 100%); padding: 32px 24px; border-radius: 32px; background: var(--card); text-align: center; position: relative; overflow: hidden; }
+    .orb { position: absolute; width: 220px; height: 220px; right: -70px; top: -90px; border-radius: 50%; filter: blur(28px);
+      background: radial-gradient(circle, #a597ff, #ffc2d7 60%, transparent 72%); }
+    h1 { position: relative; font-size: 20px; margin: 8px 0; }
+    p { position: relative; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    a { position: relative; display: inline-block; margin-top: 20px; padding: 14px 22px; border-radius: 999px; background: var(--ink); color: var(--bg); text-decoration: none; font-weight: 600; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <span class="orb"></span>
+    <h1>오프라인 상태예요</h1>
+    <p>이 화면은 아직 기기에 저장되지 않았어요.<br />인터넷에 연결되면 다시 시도해 주세요.</p>
+    <a href="/">홈으로</a>
+  </main>
+</body>
+</html>

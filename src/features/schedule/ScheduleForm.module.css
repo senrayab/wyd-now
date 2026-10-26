@@ -1,0 +1,110 @@
+.form {
+  gap: 22px;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+.categoryIcon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--card);
+  transition: background 0.2s ease;
+}
+
+.category[aria-checked="true"] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.category[aria-checked="true"] .categoryIcon {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.artistPick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.artistPick :global(.chip) {
+  padding-left: 5px;
+}
+
+.artistPick a:global(.chip) {
+  padding-left: 12px;
+}
+
+.timeBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.timeRow > label {
+  width: 36px;
+  flex: none;
+}
+
+.stampRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stampRow > label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-left: 4px;
+}
+
+.stamp {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.stamp[data-all-day="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.stamp :global(.input) {
+  min-width: 0;
+  padding: 0 12px;
+  font-size: 14.5px;
+  background: var(--card);
+}
+
+.submit {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+  margin-top: 8px;
+}

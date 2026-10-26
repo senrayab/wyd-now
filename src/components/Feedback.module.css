@@ -1,0 +1,63 @@
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + 28px + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 100;
+  max-width: calc(100% - 48px);
+  padding: 12px 20px;
+  border-radius: 12px;
+  background: var(--inverse);
+  color: var(--on-inverse);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: var(--float);
+  animation: rise 0.25s ease;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 10, 12, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.dialog {
+  width: min(360px, 100%);
+  padding: 26px 22px 20px;
+  border-radius: var(--radius-xl);
+  background: var(--card);
+  box-shadow: var(--float);
+}
+
+.dialog h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dialog p {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 22px;
+}

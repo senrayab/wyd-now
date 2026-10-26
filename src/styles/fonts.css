@@ -1,0 +1,92 @@
+/*
+ * 글꼴 설정
+ *
+ * 렌더링 순서: 영문·숫자(Lato | Poppins) → 이모지(Tossface) → 한글(Pretendard | 에스코어드림)
+ *  - 영문 글꼴에는 한글이 없어서 한글은 자동으로 한글 글꼴로 넘어갑니다.
+ *  - Tossface 는 unicode-range 로 이모지만 담당합니다 (tossface.css 참고).
+ *  - Lato / Poppins 는 src/app/layout.tsx 에서 next/font 로 불러오고
+ *    --font-lato / --font-poppins 변수로 주입됩니다.
+ *
+ * 전환: <html data-font-ko="pretendard|scdream" data-font-en="poppins|lato">
+ * 확정되면 쓰지 않는 글꼴의 @import / @font-face / next/font 와 data 속성 분기를 지우면 됩니다.
+ */
+
+/* 한글 — Pretendard (가변 글꼴, 동적 서브셋) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+/* 이모지 — Tossface */
+@import url("./tossface.css");
+
+/* 한글 — 에스코어드림 (눈누, 100~900 을 한 family 로 묶음) */
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 100;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-1Thin.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 200;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-2ExtraLight.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 300;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-4Regular.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 500;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-5Medium.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 600;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-6Bold.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-7ExtraBold.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 800;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-8Heavy.woff") format("woff");
+}
+@font-face {
+  font-family: "S-Core Dream";
+  font-weight: 900;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-9Black.woff") format("woff");
+}
+
+:root {
+  --font-ko: "Pretendard Variable", "Pretendard";
+  --font-en: var(--font-poppins);
+  --font-emoji: "Tossface";
+  --font-fallback: -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo",
+    "Noto Sans KR", "Malgun Gothic", sans-serif;
+
+  --font-sans: var(--font-en), var(--font-emoji), var(--font-ko), var(--font-fallback);
+}
+
+:root[data-font-ko="scdream"] {
+  --font-ko: "S-Core Dream";
+}
+
+:root[data-font-en="lato"] {
+  --font-en: var(--font-lato);
+}
