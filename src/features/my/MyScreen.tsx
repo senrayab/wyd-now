@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Lock } from "lucide-react";
+import { Bookmark, ChevronRight, Lock } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
 import NewsTimeline from "@/features/news/NewsTimeline";
@@ -60,7 +60,7 @@ export default function MyScreen() {
           <NewsTimeline items={scrapped} artists={map} />
         ) : (
           <div className="card">
-            <Empty emoji="🔖" action={<Link href="/news" className="btn btn-primary btn-sm">아티스트 소식 보러 가기</Link>}>
+            <Empty icon={Bookmark} action={<Link href="/news" className="btn btn-primary btn-sm">아티스트 소식 보러 가기</Link>}>
               기사 카드의 북마크 버튼을 누르면 여기에 모여요.
             </Empty>
           </div>

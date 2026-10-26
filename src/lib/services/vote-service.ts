@@ -9,16 +9,14 @@ export interface VoteTypeMeta {
   label: string;
   description: string;
   icon: LucideIcon;
-  /** 격자 카드용 토스페이스 이모지 */
-  emoji: string;
   color: string;
 }
 
 export const VOTE_TYPES: VoteTypeMeta[] = [
-  { id: "musicshow", label: "음악방송", description: "음악방송 사전·생방송 투표", icon: Tv, emoji: "📺", color: "#c49a72" },
-  { id: "award", label: "시상식", description: "연말·연초 시상식 인기상 투표", icon: Trophy, emoji: "🏆", color: "#b8a66e" },
-  { id: "app", label: "투표 앱", description: "아이돌 순위·응원 투표 앱", icon: Smartphone, emoji: "📱", color: "#7d95b0" },
-  { id: "etc", label: "기타", description: "그 밖의 투표", icon: Vote, emoji: "🗳️", color: "#968fc0" },
+  { id: "musicshow", label: "음악방송", description: "음악방송 사전·생방송 투표", icon: Tv, color: "#c49a72" },
+  { id: "award", label: "시상식", description: "연말·연초 시상식 인기상 투표", icon: Trophy, color: "#b8a66e" },
+  { id: "app", label: "투표 앱", description: "아이돌 순위·응원 투표 앱", icon: Smartphone, color: "#7d95b0" },
+  { id: "etc", label: "기타", description: "그 밖의 투표", icon: Vote, color: "#968fc0" },
 ];
 
 export function getVoteType(id: VoteType) {

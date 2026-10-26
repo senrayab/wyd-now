@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, SearchX, X } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import ScheduleRow from "@/components/ScheduleRow";
 import { ArtistAvatar, Empty } from "@/components/ui";
@@ -69,9 +69,9 @@ export default function SearchScreen() {
       </label>
 
       {!q ? (
-        <Empty emoji="🔎">찾고 싶은 일정이나 아티스트를 입력해 주세요.</Empty>
+        <Empty icon={Search}>찾고 싶은 일정이나 아티스트를 입력해 주세요.</Empty>
       ) : artistHits.length + scheduleHits.length + voteHits.length + newsHits.length === 0 ? (
-        <Empty emoji="🫥">‘{query}’ 검색 결과가 없어요.</Empty>
+        <Empty icon={SearchX}>‘{query}’ 검색 결과가 없어요.</Empty>
       ) : (
         <>
           {artistHits.length > 0 && (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Download, LayoutGrid, List, Plus } from "lucide-react";
+import { Download, Inbox, LayoutGrid, List, Plus, SearchX, Vote } from "lucide-react";
 import { useFeedback } from "@/components/Feedback";
 import { Empty, Loading, Spinner } from "@/components/ui";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
@@ -96,7 +96,7 @@ export default function VotesScreen() {
       ) : all.length === 0 ? (
         <div className="card">
           <Empty
-            emoji="🗳️"
+            icon={Vote}
             action={
               <div className="stack" style={{ width: "100%" }}>
                 <button type="button" className="btn btn-accent" onClick={loadDefaults} disabled={busy}>
@@ -135,7 +135,7 @@ export default function VotesScreen() {
 
           {shown.length === 0 ? (
             <div className="card-flat" style={{ marginTop: 8 }}>
-              <Empty emoji={tab === "closed" ? "📭" : "🔍"}>{EMPTY[tab]}</Empty>
+              <Empty icon={tab === "closed" ? Inbox : SearchX}>{EMPTY[tab]}</Empty>
             </div>
           ) : (
             <div className={voteLayout === "grid" ? styles.grid : "stack"} style={{ marginTop: 8 }}>

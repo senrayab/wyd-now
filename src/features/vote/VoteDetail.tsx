@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Pencil, Share2, Trash2 } from "lucide-react";
+import { ArrowUpRight, Pencil, SearchX, Share2, Trash2 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
@@ -27,7 +27,7 @@ export default function VoteDetail() {
     return (
       <main>
         <PageHeader back="/votes" title="투표" />
-        <Empty emoji="🔍" action={<Link href="/votes" className="btn btn-primary btn-sm">투표 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/votes" className="btn btn-primary btn-sm">투표 목록</Link>}>
           투표 사이트를 찾을 수 없어요.
         </Empty>
       </main>

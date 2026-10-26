@@ -293,9 +293,8 @@
   border-radius: inherit;
 }
 
-.tileEmoji {
-  font-size: 26px;
-  line-height: 1;
+.tileIcon {
+  flex: none;
 }
 
 .tileCheck {

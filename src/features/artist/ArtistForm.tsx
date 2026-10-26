@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, X } from "lucide-react";
+import { Plus, SearchX, X } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
 import LinksEditor from "@/components/LinksEditor";
 import PageHeader, { useBack } from "@/components/PageHeader";
@@ -28,7 +28,7 @@ export default function ArtistFormScreen({ mode }: { mode: "new" | "edit" }) {
     return (
       <main>
         <PageHeader back="/artists" title="아티스트 수정" compact />
-        <Empty emoji="🔍" action={<Link href="/artists" className="btn btn-primary btn-sm">아티스트 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/artists" className="btn btn-primary btn-sm">아티스트 목록</Link>}>
           수정할 아티스트를 찾을 수 없어요.
         </Empty>
       </main>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, SearchX } from "lucide-react";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
@@ -26,7 +26,7 @@ export default function VoteFormScreen({ mode }: { mode: "new" | "edit" }) {
     return (
       <main>
         <PageHeader back="/votes" title="투표 사이트 수정" compact />
-        <Empty emoji="🔍" action={<Link href="/votes" className="btn btn-primary btn-sm">투표 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/votes" className="btn btn-primary btn-sm">투표 목록</Link>}>
           수정할 투표 사이트를 찾을 수 없어요.
         </Empty>
       </main>

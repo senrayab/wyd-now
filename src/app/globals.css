@@ -816,9 +816,10 @@ form .chip[aria-pressed="true"] {
   line-height: 1.6;
 }
 
-.empty .emoji {
-  font-size: 32px;
-  line-height: 1;
+.empty .empty-icon {
+  color: var(--muted);
+  opacity: 0.75;
+  margin-bottom: 2px;
 }
 
 /* 로딩: 버튼 안 회전 원 */

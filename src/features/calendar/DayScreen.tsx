@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useBack } from "@/components/PageHeader";
 import { ArtistAvatar, Empty } from "@/components/ui";
 import { getCategory } from "@/lib/categories";
@@ -80,7 +80,7 @@ export default function DayScreen() {
       {onDay.length === 0 ? (
         <div className="card" style={{ marginTop: 18 }}>
           <Empty
-            emoji="🫧"
+            icon={CalendarOff}
             action={
               <Link href={`/schedule/new?date=${date}`} className="btn btn-primary btn-sm">
                 <Plus size={15} /> 일정 등록

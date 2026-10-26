@@ -199,6 +199,11 @@
   font-size: 14px;
 }
 
+.bdayIcon {
+  flex: none;
+  color: var(--accent);
+}
+
 .bdayText {
   flex: 1;
   font-weight: 500;

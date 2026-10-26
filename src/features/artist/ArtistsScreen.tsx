@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Heart, Plus, Search } from "lucide-react";
+import { Heart, Plus, Search, SearchX, UsersRound } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
@@ -43,12 +43,12 @@ export default function ArtistsScreen() {
         <Loading />
       ) : artists.length === 0 ? (
         <div className="card" style={{ marginTop: 16 }}>
-          <Empty emoji="🌟" action={<Link href="/artist/new" className="btn btn-primary btn-sm">아티스트 등록</Link>}>
+          <Empty icon={UsersRound} action={<Link href="/artist/new" className="btn btn-primary btn-sm">아티스트 등록</Link>}>
             등록된 아티스트가 없어요.
           </Empty>
         </div>
       ) : shown.length === 0 ? (
-        <Empty emoji="🔍">‘{query}’에 맞는 아티스트가 없어요.</Empty>
+        <Empty icon={SearchX}>‘{query}’에 맞는 아티스트가 없어요.</Empty>
       ) : (
         <>
           {mine.length > 0 && (

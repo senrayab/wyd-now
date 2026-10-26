@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Bookmark, Pencil, Plus, Share2, Trash2 } from "lucide-react";
+import { ArrowUpRight, Bookmark, Newspaper, Pencil, Plus, SearchX, Share2, Trash2 } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
@@ -62,7 +62,7 @@ export function NewsListScreen() {
         <Loading />
       ) : shown.length === 0 ? (
         <div className="card" style={{ marginTop: 8 }}>
-          <Empty emoji="📰" action={<Link href={artistId ? `/news/new?artist=${artistId}` : "/news/new"} className="btn btn-primary btn-sm">기사 등록</Link>}>
+          <Empty icon={Newspaper} action={<Link href={artistId ? `/news/new?artist=${artistId}` : "/news/new"} className="btn btn-primary btn-sm">기사 등록</Link>}>
             {artistId ? "이 아티스트의 소식이 아직 없어요." : "아직 모아 둔 소식이 없어요."}
           </Empty>
         </div>
@@ -89,7 +89,7 @@ export function NewsDetailScreen() {
     return (
       <main>
         <PageHeader back="/news" title="소식" />
-        <Empty emoji="🔍" action={<Link href="/news" className="btn btn-primary btn-sm">소식 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/news" className="btn btn-primary btn-sm">소식 목록</Link>}>
           기사를 찾을 수 없어요.
         </Empty>
       </main>
@@ -185,7 +185,7 @@ export function NewsFormScreen({ mode }: { mode: "new" | "edit" }) {
     return (
       <main>
         <PageHeader back="/news" title="기사 수정" compact />
-        <Empty emoji="🔍" action={<Link href="/news" className="btn btn-primary btn-sm">소식 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/news" className="btn btn-primary btn-sm">소식 목록</Link>}>
           수정할 기사를 찾을 수 없어요.
         </Empty>
       </main>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, Clock3, Plus, Search, X } from "lucide-react";
+import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Clock3, Inbox, Plus, Search, X } from "lucide-react";
 import ScheduleRow from "@/components/ScheduleRow";
 import { Empty, Loading } from "@/components/ui";
 import { CATEGORIES, getCategory, isCategoryId } from "@/lib/categories";
@@ -166,7 +166,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
         ) : (
           <div className="card-flat">
             <Empty
-              emoji="🗓️"
+              icon={CalendarDays}
               action={
                 <Link href={`/schedule/new?date=${selected}`} className="btn btn-soft btn-sm">
                   <Plus size={15} /> 이 날 일정 등록
@@ -244,7 +244,7 @@ function ListView({
         <Loading />
       ) : groups.size === 0 ? (
         <div className="card-flat" style={{ marginTop: 12 }}>
-          <Empty emoji={past ? "📭" : "🌙"}>{past ? "지난 일정이 없어요." : "조건에 맞는 다가오는 일정이 없어요."}</Empty>
+          <Empty icon={past ? Inbox : CalendarOff}>{past ? "지난 일정이 없어요." : "조건에 맞는 다가오는 일정이 없어요."}</Empty>
         </div>
       ) : (
         [...groups.entries()].map(([ym, items]) => {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, CalendarPlus, ChevronLeft, ExternalLink, Globe, Info, MapPin, Pencil, Share2, Trash2 } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronLeft, ExternalLink, Globe, Info, MapPin, Pencil, SearchX, Share2, Trash2 } from "lucide-react";
 import ImageActions from "@/components/ImageActions";
 import { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
@@ -31,7 +31,7 @@ export default function ScheduleDetail() {
   if (!schedule) {
     return (
       <main style={{ paddingTop: 80 }}>
-        <Empty emoji="🔍" action={<Link href="/calendar" className="btn btn-primary btn-sm">캘린더로 가기</Link>}>
+        <Empty icon={SearchX} action={<Link href="/calendar" className="btn btn-primary btn-sm">캘린더로 가기</Link>}>
           일정을 찾을 수 없어요. 삭제되었거나 주소가 잘못되었어요.
         </Empty>
       </main>

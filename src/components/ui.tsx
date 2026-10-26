@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import { getCategory } from "@/lib/categories";
 import { getArtistColors } from "@/lib/palette";
 import { useImageUrl } from "@/lib/hooks";
@@ -52,12 +53,11 @@ export function Switch({ checked, onChange, label }: { checked: boolean; onChang
   );
 }
 
-export function Empty({ emoji, children, action }: { emoji: string; children: ReactNode; action?: ReactNode }) {
+/** 빈 상태: 앱이 보여주는 기본 문구에는 이모지 대신 선 아이콘 (이모지는 사용자가 쓴 글에만) */
+export function Empty({ icon: Icon, children, action }: { icon: LucideIcon; children: ReactNode; action?: ReactNode }) {
   return (
     <div className="empty">
-      <span className="emoji" aria-hidden>
-        {emoji}
-      </span>
+      <Icon className="empty-icon" size={34} strokeWidth={1.5} aria-hidden />
       <div>{children}</div>
       {action}
     </div>

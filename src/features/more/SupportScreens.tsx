@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
 import { CheckCircle2, ExternalLink, Plus, Share, SquarePlus, WifiOff } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
@@ -32,8 +32,11 @@ export function InstallScreen() {
       <section className={`card ${styles.preview}`}>
         <Illustration category="content" className={styles.previewIllo} />
         <p className={`${styles.previewBig} num`}>wyd now</p>
-        <p className={styles.previewBody} style={{ marginTop: 10 }}>
-          홈 화면에 설치하면 앱처럼 전체 화면으로 열리고, 인터넷 연결 없이도 저장된 일정과 이미지를 볼 수 있어요.
+        {/* 오른쪽 위 일러스트와 겹치지 않게 본문을 일러스트 아래로 */}
+        <p className={styles.previewBody} style={{ marginTop: 42 }}>
+          홈 화면에 설치하면 앱처럼 전체 화면으로 열리고,
+          <br />
+          인터넷 연결 없이도 저장된 일정과 이미지를 볼 수 있어요.
         </p>
         <div style={{ marginTop: 18 }}>
           {state === "installed" ? (
@@ -148,20 +151,37 @@ const FAQ = [
   },
 ];
 
+/** 한 번에 하나만 열리는 아코디언: 높이는 grid-template-rows 0fr↔1fr 로 부드럽게 */
 export function HelpScreen() {
+  const [open, setOpen] = useState<number | null>(null);
+  const baseId = useId();
+
   return (
     <main>
       <PageHeader back="/more/support" title="도움말" />
       <div className={`list ${styles.faq}`}>
-        {FAQ.map((item) => (
-          <details key={item.q}>
-            <summary>
-              {item.q}
-              <Plus size={18} />
-            </summary>
-            <p>{item.a}</p>
-          </details>
-        ))}
+        {FAQ.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div key={item.q} className={styles.faqItem} data-open={isOpen}>
+              <button
+                type="button"
+                className={styles.faqQ}
+                aria-expanded={isOpen}
+                aria-controls={`${baseId}-${i}`}
+                onClick={() => setOpen(isOpen ? null : i)}
+              >
+                {item.q}
+                <Plus size={18} className={styles.faqIcon} aria-hidden />
+              </button>
+              <div id={`${baseId}-${i}`} className={styles.faqA} role="region" aria-hidden={!isOpen}>
+                <div>
+                  <p>{item.a}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
       <Link href="/more/support/install" className="btn btn-soft btn-block" style={{ marginTop: 16 }}>
         앱 설치 · 오프라인 안내 보기

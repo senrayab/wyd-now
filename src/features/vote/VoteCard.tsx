@@ -41,18 +41,17 @@ export default function VoteCard({ vote, artists, checkable }: { vote: VoteSite;
   );
 }
 
-/** 격자형 카드 (Due Tasks 스타일): 이모지 · 체크 · 이름 · 마감 */
+/** 격자형 카드 (Due Tasks 스타일): 아이콘 · 체크 · 이름 · 마감 */
 export function VoteTile({ vote }: { vote: VoteSite }) {
   const type = getVoteType(vote.type);
+  const Icon = type.icon;
   const status = voteStatus(vote);
   const urgent = isUrgent(vote);
   const { isDone } = useVoteDone();
   return (
     <div className={styles.tile} data-status={status.kind} data-done={isDone(vote.id)}>
       <Link href={`/vote?id=${vote.id}`} className={styles.tileLink} aria-label={`${vote.name} 자세히`} />
-      <span className={styles.tileEmoji} aria-hidden>
-        {type.emoji}
-      </span>
+      <Icon className={styles.tileIcon} size={26} strokeWidth={1.7} style={{ color: type.color }} aria-hidden />
       <DoneCheck vote={vote} className={styles.tileCheck} />
       <strong className={styles.tileName}>{vote.name}</strong>
       <small className={`${styles.tileDue} num`} data-urgent={urgent}>

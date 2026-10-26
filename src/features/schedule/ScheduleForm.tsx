@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, SearchX } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
 import LinksEditor from "@/components/LinksEditor";
 import PageHeader, { useBack } from "@/components/PageHeader";
@@ -31,7 +31,7 @@ export default function ScheduleFormScreen({ mode }: { mode: "new" | "edit" }) {
     return (
       <main>
         <PageHeader back="/calendar" title="일정 수정" compact />
-        <Empty emoji="🔍" action={<Link href="/calendar" className="btn btn-primary btn-sm">캘린더로 가기</Link>}>
+        <Empty icon={SearchX} action={<Link href="/calendar" className="btn btn-primary btn-sm">캘린더로 가기</Link>}>
           수정할 일정을 찾을 수 없어요.
         </Empty>
       </main>

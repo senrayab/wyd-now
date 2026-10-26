@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, ExternalLink, Heart, ImagePlus, Lock, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Cake, CalendarOff, ChevronLeft, ExternalLink, Heart, ImagePlus, Lock, Newspaper, Pencil, Plus, SearchX, Trash2, Vote, X } from "lucide-react";
 import ImageActions from "@/components/ImageActions";
 import { useBack } from "@/components/PageHeader";
 import ScheduleRow from "@/components/ScheduleRow";
@@ -38,7 +38,7 @@ export default function ArtistDetail() {
   if (!artist) {
     return (
       <main style={{ paddingTop: 80 }}>
-        <Empty emoji="🔍" action={<Link href="/artists" className="btn btn-primary btn-sm">아티스트 목록</Link>}>
+        <Empty icon={SearchX} action={<Link href="/artists" className="btn btn-primary btn-sm">아티스트 목록</Link>}>
           아티스트를 찾을 수 없어요.
         </Empty>
       </main>
@@ -147,7 +147,7 @@ export default function ArtistDetail() {
             </div>
           ) : (
             <div className="card-flat">
-              <Empty emoji="🌙">예정된 일정이 없어요.</Empty>
+              <Empty icon={CalendarOff}>예정된 일정이 없어요.</Empty>
             </div>
           )}
           {pastCount > 0 && (
@@ -172,7 +172,7 @@ export default function ArtistDetail() {
               </div>
             ) : (
               <div className="card-flat">
-                <Empty emoji="🗳️" action={<Link href="/votes" className="btn btn-soft btn-sm">투표 사이트 모음 보기</Link>}>
+                <Empty icon={Vote} action={<Link href="/votes" className="btn btn-soft btn-sm">투표 사이트 모음 보기</Link>}>
                   {artist.name} 전용으로 등록된 투표가 없어요.
                 </Empty>
               </div>
@@ -194,7 +194,7 @@ export default function ArtistDetail() {
               <NewsTimeline items={mine.slice(0, 3)} artists={map} />
             ) : (
               <div className="card-flat">
-                <Empty emoji="📰" action={<Link href={`/news/new?artist=${artist.id}`} className="btn btn-soft btn-sm">기사 등록</Link>}>
+                <Empty icon={Newspaper} action={<Link href={`/news/new?artist=${artist.id}`} className="btn btn-soft btn-sm">기사 등록</Link>}>
                   {artist.name} 소식이 아직 없어요.
                 </Empty>
               </div>
@@ -296,7 +296,7 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
 
       {birthday && bias && (
         <Link href={`/schedule?id=${birthday.id}`} className={styles.bday}>
-          <span aria-hidden>🎂</span>
+          <Cake size={18} strokeWidth={1.8} className={styles.bdayIcon} aria-hidden />
           <span className={styles.bdayText}>
             {bias.name} 생일 <span className="muted num">· {formatShortDate(datePart(birthday.startAt))}</span>
           </span>
