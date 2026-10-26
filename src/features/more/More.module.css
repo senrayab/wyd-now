@@ -30,8 +30,8 @@
   align-items: center;
   font-size: 12.5px;
   font-weight: 600;
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--accent-strong);
+  color: #ffffff;
 }
 
 .menu {
@@ -139,8 +139,8 @@
 }
 
 .myIcon[data-tone="ink"] {
-  background: var(--ink);
-  color: var(--on-inverse);
+  background: var(--raised);
+  color: var(--ink);
 }
 
 .myIcon {

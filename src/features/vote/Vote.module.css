@@ -116,8 +116,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--ink);
-  color: var(--on-inverse);
+  background: var(--raised);
+  color: var(--ink);
 }
 
 /* 상세 */
@@ -257,8 +257,9 @@
 }
 
 .check[aria-checked="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: #ffffff;
 }
 
 .card .check {
@@ -327,8 +328,3 @@
   color: var(--danger);
 }
 
-.layoutBtn {
-  background: var(--ink);
-  color: var(--on-inverse);
-  border-radius: 12px;
-}

@@ -132,7 +132,7 @@
 
 .myTitle em {
   font-style: normal;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* 멤버 이니셜 원 */
@@ -201,7 +201,7 @@
 
 .bdayIcon {
   flex: none;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .bdayText {
@@ -212,7 +212,7 @@
 .bday b {
   font-size: 15px;
   font-weight: 600;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* 작은 숫자 칸 */

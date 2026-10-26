@@ -37,7 +37,7 @@ export default function DayScreen() {
   return (
     <main>
       <header className={styles.header}>
-        <button type="button" className="icon-btn" onClick={back} aria-label="뒤로">
+        <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
           <ChevronLeft size={20} />
         </button>
         <div className={styles.titleBlock}>

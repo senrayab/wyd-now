@@ -67,7 +67,7 @@ export default function ArtistDetail() {
     <main className={styles.page}>
       <div className={`card ${styles.hero}`}>
         <div className={styles.heroBar}>
-          <button type="button" className="icon-btn" onClick={back} aria-label="뒤로">
+          <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
             <ChevronLeft size={22} />
           </button>
           <Link href={`/artist/edit?id=${artist.id}`} className="icon-btn" aria-label="아티스트 정보 수정">

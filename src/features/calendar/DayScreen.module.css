@@ -75,21 +75,21 @@
 }
 
 .day[data-today="true"] span {
-  color: var(--accent);
+  color: var(--accent-text);
   font-weight: 700;
 }
 
 .day[aria-pressed="true"] {
-  background: var(--ink);
+  background: var(--accent);
 }
 
 .day[aria-pressed="true"] small,
 .day[aria-pressed="true"] span {
-  color: var(--on-inverse);
+  color: #ffffff;
 }
 
 .day[aria-pressed="true"] i[data-has="true"] {
-  background: var(--on-inverse);
+  background: #ffffff;
 }
 
 /* 시간 + 카드 */
@@ -159,7 +159,7 @@
   width: 6px;
   height: 6px;
   background: var(--accent);
-  border-color: var(--accent);
+  border-color: var(--accent-text);
   box-shadow: 0 0 0 3px var(--bg);
 }
 

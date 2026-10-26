@@ -62,7 +62,7 @@ export default function ScheduleDetail() {
   return (
     <main>
       <header className="page-header">
-        <button type="button" className="icon-btn" onClick={back} aria-label="뒤로">
+        <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
           <ChevronLeft size={20} />
         </button>
         <span className="spacer" />

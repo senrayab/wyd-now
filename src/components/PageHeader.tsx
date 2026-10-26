@@ -26,7 +26,7 @@ export default function PageHeader({ title, back, actions, compact }: Props) {
   return (
     <header className="page-header">
       {back && (
-        <button type="button" className="icon-btn" onClick={goBack} aria-label="뒤로">
+        <button type="button" className="icon-btn back" onClick={goBack} aria-label="뒤로">
           <ChevronLeft size={22} />
         </button>
       )}

@@ -80,8 +80,8 @@
 }
 
 .cell[aria-pressed="true"] .dayNum {
-  background: var(--select-bg);
-  color: var(--select-ink);
+  background: var(--accent);
+  color: #ffffff;
   font-weight: 700;
   box-shadow: var(--glow);
 }
