@@ -18,6 +18,8 @@ import styles from "./HomeScreen.module.css";
 
 const onDay = (s: Schedule, key: string) => datePart(s.startAt) <= key && datePart(s.endAt) >= key;
 
+const AGENDA_LIMIT = 6;
+
 export default function HomeScreen() {
   const prefs = usePrefs();
   const today = todayKey();
@@ -29,6 +31,8 @@ export default function HomeScreen() {
   const { toast } = useFeedback();
   const [seeding, setSeeding] = useState(false);
   const [range, setRange] = useState<"today" | "week">("today");
+  // 홈 카드가 끝없이 길어지지 않게 처음엔 몇 개만, 나머지는 펼쳐서
+  const [expanded, setExpanded] = useState(false);
 
   const d = parseLocal(today);
   const all = data ?? [];
@@ -42,6 +46,7 @@ export default function HomeScreen() {
   const liveVotes = sortVotes(votes ?? []).filter((v) => voteStatus(v).kind !== "closed");
   const isEmpty = !loading && !artistsLoading && all.length === 0 && artists.length === 0;
   const listed = range === "today" ? todays : weekItems;
+  const shown = expanded ? listed : listed.slice(0, AGENDA_LIMIT);
 
   async function seed() {
     setSeeding(true);
@@ -126,17 +131,17 @@ export default function HomeScreen() {
                 <small className="muted num">{range === "today" ? formatShortDate(today) : `${formatShortDate(today)} – ${formatShortDate(week[6])}`}</small>
               </div>
               <div className="segmented" role="tablist" aria-label="기간">
-                <button type="button" role="tab" aria-selected={range === "today"} onClick={() => setRange("today")}>
+                <button type="button" role="tab" aria-selected={range === "today"} onClick={() => { setRange("today"); setExpanded(false); }}>
                   오늘
                 </button>
-                <button type="button" role="tab" aria-selected={range === "week"} onClick={() => setRange("week")}>
+                <button type="button" role="tab" aria-selected={range === "week"} onClick={() => { setRange("week"); setExpanded(false); }}>
                   이번 주
                 </button>
               </div>
             </div>
-            {listed.length ? (
+            {listed.length > 0 && (
               <ul className={styles.agenda}>
-                {listed.map((s) => (
+                {shown.map((s) => (
                   <li key={s.id}>
                     <Link href={`/schedule?id=${s.id}`}>
                       <strong>{s.title}</strong>
@@ -150,7 +155,13 @@ export default function HomeScreen() {
                   </li>
                 ))}
               </ul>
-            ) : (
+            )}
+            {listed.length > AGENDA_LIMIT && (
+              <button type="button" className={`btn btn-soft btn-sm btn-block ${styles.more}`} onClick={() => setExpanded((v) => !v)}>
+                {expanded ? "접기" : `${listed.length - AGENDA_LIMIT}개 더 보기`}
+              </button>
+            )}
+            {!listed.length && (
               <p className={styles.none}>{range === "today" ? "오늘은 예정된 일정이 없어요." : "이번 주에 남은 일정이 없어요."}</p>
             )}
           </section>
@@ -175,27 +186,6 @@ export default function HomeScreen() {
               <small>아티스트 {artists.length}팀 등록</small>
             </Link>
           </div>
-
-          {/* 최근 소식 */}
-          <section className="section">
-            <div className="section-head">
-              <h2>최근 소식</h2>
-              <Link href="/news">전체</Link>
-            </div>
-            {news && news.length ? (
-              <NewsTimeline items={news.slice(0, 2)} artists={map} />
-            ) : (
-              <Link href="/news/new" className={`card ${styles.newsEmpty}`}>
-                <span>
-                  <strong>아티스트 소식 모으기</strong>
-                  <small>기사와 공식 소식을 타임라인으로 모아 보세요.</small>
-                </span>
-                <span className="round-action" aria-hidden>
-                  <ArrowUpRight size={15} />
-                </span>
-              </Link>
-            )}
-          </section>
 
           {/* 투표 */}
           <section className={`card ${styles.votes}`}>
@@ -222,9 +212,11 @@ export default function HomeScreen() {
                         </small>
                       </span>
                     </Link>
-                    <a href={v.url} target="_blank" rel="noopener noreferrer" className="round-action" aria-label={`${v.name} 열기`}>
-                      <ArrowUpRight size={15} />
-                    </a>
+                    {v.url && (
+                      <a href={v.url} target="_blank" rel="noopener noreferrer" className="round-action" aria-label={`${v.name} 열기`}>
+                        <ArrowUpRight size={15} />
+                      </a>
+                    )}
                   </div>
                 );
               })
@@ -232,6 +224,27 @@ export default function HomeScreen() {
               <p className={styles.none}>
                 모아 둔 투표 사이트가 없어요. <Link href="/votes">투표 사이트 모으기</Link>
               </p>
+            )}
+          </section>
+
+          {/* 최근 소식 */}
+          <section className="section">
+            <div className="section-head">
+              <h2>최근 소식</h2>
+              <Link href="/news">전체</Link>
+            </div>
+            {news && news.length ? (
+              <NewsTimeline items={news.slice(0, 2)} artists={map} />
+            ) : (
+              <Link href="/news/new" className={`card ${styles.newsEmpty}`}>
+                <span>
+                  <strong>아티스트 소식 모으기</strong>
+                  <small>기사와 공식 소식을 타임라인으로 모아 보세요.</small>
+                </span>
+                <span className="round-action" aria-hidden>
+                  <ArrowUpRight size={15} />
+                </span>
+              </Link>
             )}
           </section>
         </>

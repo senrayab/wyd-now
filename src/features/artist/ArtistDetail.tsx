@@ -12,10 +12,9 @@ import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
 import { datePart, dDay, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { ACCEPT_ATTR } from "@/lib/image/image-service";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
-import { getArtistColors } from "@/lib/palette";
 import { usePrefs } from "@/lib/prefs";
-import { addMyPhoto, deleteArtist, MAX_MY_PHOTOS, removeMyPhoto, setBiasMember, setFollowed } from "@/lib/services/artist-service";
-import type { Artist, MySpace, Schedule, StoredImage } from "@/lib/storage/types";
+import { addMyPhoto, biasIdsOf, deleteArtist, MAX_BIAS, MAX_MY_PHOTOS, removeMyPhoto, setFollowed, toggleBiasMember } from "@/lib/services/artist-service";
+import type { Artist, Member, MySpace, Schedule, StoredImage } from "@/lib/storage/types";
 import NewsTimeline from "@/features/news/NewsTimeline";
 import VoteCard from "@/features/vote/VoteCard";
 import { sortVotes } from "@/lib/services/vote-service";
@@ -45,7 +44,6 @@ export default function ArtistDetail() {
     );
   }
 
-  const colors = getArtistColors(artist.color);
   const today = todayKey();
   const upcoming = (schedules ?? []).filter((s) => datePart(s.endAt) >= today);
   const pastCount = (schedules ?? []).length - upcoming.length;
@@ -65,7 +63,8 @@ export default function ArtistDetail() {
 
   return (
     <main className={styles.page}>
-      <div className={`card ${styles.hero}`}>
+      <div className={`card ${styles.hero}`} data-cover={!!artist.coverImageId}>
+        {artist.coverImageId && <HeroCover imageId={artist.coverImageId} />}
         <div className={styles.heroBar}>
           <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
             <ChevronLeft size={22} />
@@ -75,8 +74,7 @@ export default function ArtistDetail() {
           </Link>
         </div>
         <div className={styles.heroBody}>
-          {/* 프로필 링: 팔로우 중이면 라임 */}
-          <span className={styles.avatarRing} data-on={!!space?.followed} style={{ ["--ring" as string]: colors[0] }}>
+          <span className={styles.avatarWrap}>
             <ArtistAvatar artist={artist} size={104} />
           </span>
           <h1>{artist.name}</h1>
@@ -215,6 +213,14 @@ export default function ArtistDetail() {
   );
 }
 
+/** 상단 배경 이미지: 카드 위쪽을 채우고 아래로 갈수록 카드 색으로 사라짐 */
+function HeroCover({ imageId }: { imageId: string }) {
+  const { url } = useImageUrl(imageId);
+  if (!url) return null;
+  // eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL
+  return <img src={url} alt="" className={styles.heroCover} />;
+}
+
 /** 작은 개인 공간: 팔로우 · 최애 멤버 · 내 사진 (이 기기에만 저장) */
 function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySpace; schedules: Schedule[] }) {
   const inputId = useId();
@@ -225,10 +231,13 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
   const [busy, setBusy] = useState(false);
   const [viewing, setViewing] = useState<StoredImage | null>(null);
 
-  const bias = artist.members.find((m) => m.id === space.biasMemberId);
+  const biasIds = biasIdsOf(space);
+  const biases = biasIds.map((id) => artist.members.find((m) => m.id === id)).filter((m): m is Member => !!m);
   const today = todayKey();
-  // 최애 생일 일정 (예: "원빈 생일") — 오늘 이후 가장 가까운 것
-  const birthday = bias ? schedules.find((s) => s.title === `${bias.name} 생일` && datePart(s.endAt) >= today) : undefined;
+  // 최애 생일 일정 (예: "원빈 생일") — 최애마다 오늘 이후 가장 가까운 것
+  const birthdays = biases
+    .map((m) => ({ member: m, schedule: schedules.find((s) => s.title === `${m.name} 생일` && datePart(s.endAt) >= today) }))
+    .filter((b): b is { member: Member; schedule: Schedule } => !!b.schedule);
   const artistNews = new Set((news ?? []).filter((n) => n.artistIds.includes(artist.id)).map((n) => n.id));
   const scrapCount = (scraps ?? []).filter((s) => artistNews.has(s.newsId)).length;
 
@@ -267,9 +276,9 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
       </div>
 
       <h2 className={styles.myTitle}>
-        {bias ? (
+        {biases.length ? (
           <>
-            나의 최애 <em>{bias.name}</em>
+            나의 최애 <em>{biases.map((m) => m.name).join(" · ")}</em>
           </>
         ) : artist.members.length ? (
           "최애 멤버를 골라 보세요"
@@ -281,11 +290,19 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
       </h2>
 
       {artist.members.length > 0 && (
-        <div className={styles.faces} role="radiogroup" aria-label="최애 멤버">
+        <div className={styles.faces} role="group" aria-label={`최애 멤버 (최대 ${MAX_BIAS}명)`}>
           {artist.members.map((m) => {
-            const on = space.biasMemberId === m.id;
+            const on = biasIds.includes(m.id);
             return (
-              <button key={m.id} type="button" role="radio" aria-checked={on} className={styles.face} onClick={() => setBiasMember(artist.id, on ? undefined : m.id)}>
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={on}
+                className={styles.face}
+                onClick={async () => {
+                  if ((await toggleBiasMember(artist.id, m.id)) === "full") toast(`최애는 ${MAX_BIAS}명까지 고를 수 있어요. 한 명을 먼저 해제해 주세요.`);
+                }}
+              >
                 <span className={styles.faceCircle}>{m.name.slice(0, 1)}</span>
                 <small>{m.name}</small>
               </button>
@@ -294,15 +311,15 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
         </div>
       )}
 
-      {birthday && bias && (
-        <Link href={`/schedule?id=${birthday.id}`} className={styles.bday}>
+      {birthdays.map(({ member, schedule }) => (
+        <Link key={member.id} href={`/schedule?id=${schedule.id}`} className={styles.bday}>
           <Cake size={18} strokeWidth={1.8} className={styles.bdayIcon} aria-hidden />
           <span className={styles.bdayText}>
-            {bias.name} 생일 <span className="muted num">· {formatShortDate(datePart(birthday.startAt))}</span>
+            {member.name} 생일 <span className="muted num">· {formatShortDate(datePart(schedule.startAt))}</span>
           </span>
-          <b className="num">{dDay(datePart(birthday.startAt))}</b>
+          <b className="num">{dDay(datePart(schedule.startAt))}</b>
         </Link>
-      )}
+      ))}
 
       <div className={styles.myStats}>
         <Link href="/my">

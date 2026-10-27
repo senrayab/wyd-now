@@ -82,7 +82,7 @@ export default function DayScreen() {
           <Empty
             icon={CalendarOff}
             action={
-              <Link href={`/schedule/new?date=${date}`} className="btn btn-primary btn-sm">
+              <Link href={`/schedule/new?date=${date}`} className="btn btn-ghost btn-sm">
                 <Plus size={15} /> 일정 등록
               </Link>
             }

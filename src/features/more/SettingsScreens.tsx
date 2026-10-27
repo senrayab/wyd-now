@@ -133,6 +133,15 @@ export function CalendarSettings() {
           { value: "list", label: "목록", description: "다가오는 일정을 날짜순으로" },
         ]}
       />
+      <OptionGroup<Prefs["showVoteDeadlines"]>
+        title="투표 마감일 표시"
+        value={prefs.showVoteDeadlines}
+        onChange={(showVoteDeadlines) => setPrefs({ showVoteDeadlines })}
+        options={[
+          { value: false, label: "표시 안 함", description: "캘린더에는 일정만 보여요" },
+          { value: true, label: "옅은 점으로 표시", description: "월간 캘린더의 마감일에 점이 찍히고, 날짜를 누르면 마감하는 투표가 보여요" },
+        ]}
+      />
     </main>
   );
 }

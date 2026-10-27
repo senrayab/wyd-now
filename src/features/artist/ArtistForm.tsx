@@ -47,6 +47,7 @@ function ArtistForm({ initial, existing }: { initial: ArtistFormValues; existing
   const { toast } = useFeedback();
   const [values, setValues] = useState(initial);
   const [image, setImage] = useState<ImageChange>({ kind: "keep" });
+  const [cover, setCover] = useState<ImageChange>({ kind: "keep" });
   const [errors, setErrors] = useState<ReturnType<typeof validateArtist>>({});
   const [saving, setSaving] = useState(false);
 
@@ -62,7 +63,7 @@ function ArtistForm({ initial, existing }: { initial: ArtistFormValues; existing
     }
     setSaving(true);
     try {
-      const saved = await saveArtist(values, image, existing);
+      const saved = await saveArtist(values, image, existing, cover);
       toast(existing ? "아티스트 정보를 수정했어요." : "아티스트를 등록했어요.");
       router.replace(`/artist?id=${saved.id}`);
     } catch {
@@ -77,6 +78,7 @@ function ArtistForm({ initial, existing }: { initial: ArtistFormValues; existing
 
       <form className={`stack ${styles.form}`} onSubmit={onSubmit} noValidate>
         <ImagePicker label="프로필 이미지" shape="round" currentImageId={existing?.imageId} change={image} onChange={setImage} />
+        <ImagePicker label="배경 이미지" currentImageId={existing?.coverImageId} change={cover} onChange={setCover} />
 
         <div className="field">
           <label htmlFor="name">이름</label>

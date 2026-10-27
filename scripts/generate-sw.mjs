@@ -12,7 +12,7 @@ const outDir = join(root, "out");
 const template = await readFile(join(root, "scripts", "sw-template.js"), "utf8");
 
 // 미리 캐시하지 않을 파일 (sw 자신, 소스맵, Cloudflare 설정 파일)
-const SKIP = [/^sw\.js$/, /\.map$/, /^_headers$/, /^_redirects$/];
+const SKIP = [/^sw\.js$/, /\.map$/, /^_headers$/, /^_redirects$/, /^_routes\.json$/];
 
 async function walk(dir) {
   const entries = await readdir(dir, { withFileTypes: true });

@@ -31,12 +31,14 @@ export default function VoteCard({ vote, artists, checkable }: { vote: VoteSite;
             <StatusBadge vote={vote} />
           </span>
           <strong>{vote.name}</strong>
-          <small>{names || vote.description || vote.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}</small>
+          <small>{names || vote.description || vote.url.replace(/^https?:\/\//, "").replace(/\/$/, "") || "투표 주소 미등록"}</small>
         </span>
       </Link>
-      <a href={vote.url} target="_blank" rel="noopener noreferrer" className={styles.go} aria-label={`${vote.name} 사이트 열기`}>
-        <ArrowUpRight size={18} />
-      </a>
+      {vote.url && (
+        <a href={vote.url} target="_blank" rel="noopener noreferrer" className={styles.go} aria-label={`${vote.name} 사이트 열기`}>
+          <ArrowUpRight size={18} />
+        </a>
+      )}
     </div>
   );
 }

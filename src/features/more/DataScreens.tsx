@@ -64,7 +64,6 @@ export function BackupScreen() {
         title: "백업으로 복원할까요?",
         message: `지금 기기의 정보는 모두 지워지고\n아티스트 ${backup.artists.length}명, 일정 ${backup.schedules.length}개로 바뀌어요.`,
         confirmLabel: "복원",
-        danger: true,
       });
       if (!ok) return;
       setBusy("import");

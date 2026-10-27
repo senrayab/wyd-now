@@ -61,7 +61,8 @@ export function sortVotes(list: VoteSite[]) {
 export function validateVote(values: VoteInput) {
   const errors: Partial<Record<"name" | "url" | "endDate", string>> = {};
   if (!values.name.trim()) errors.name = "이름을 입력해 주세요.";
-  if (!isValidUrl(values.url)) errors.url = "http:// 또는 https:// 로 시작하는 주소를 입력해 주세요.";
+  // 주소는 나중에 채워도 됨. 적었다면 올바른 형식이어야 함
+  if (values.url.trim() && !isValidUrl(values.url)) errors.url = "http:// 또는 https:// 로 시작하는 주소를 입력해 주세요.";
   if (values.startDate && values.endDate && values.endDate < values.startDate) errors.endDate = "마감일이 시작일보다 빨라요.";
   return errors;
 }

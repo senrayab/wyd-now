@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Bookmark, Newspaper, Pencil, Plus, SearchX, Share2, Trash2 } from "lucide-react";
+import { ArrowUpRight, Bookmark, Newspaper, Pencil, Plus, SearchX, Share2, Sparkles, Trash2 } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
 import { formatDate, todayKey } from "@/lib/date";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
+import { convertToWebP } from "@/lib/image/image-service";
 import type { ImageChange } from "@/lib/services/image-attach";
+import { fetchLinkImage, fetchLinkMeta } from "@/lib/services/link-meta";
+import { isValidUrl } from "@/lib/services/schedule-service";
 import { deleteNews, hostOf, saveNews, validateNews, type NewsFormValues } from "@/lib/services/news-service";
 import { shareText } from "@/lib/services/share-service";
 import type { NewsItem } from "@/lib/storage/types";
@@ -208,8 +211,51 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
   const [image, setImage] = useState<ImageChange>({ kind: "keep" });
   const [errors, setErrors] = useState<ReturnType<typeof validateNews>>({});
   const [saving, setSaving] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
   const set = <K extends keyof NewsFormValues>(key: K, value: NewsFormValues[K]) => setValues((v) => ({ ...v, [key]: value }));
+
+  /** 기사 주소로 제목·매체·날짜·요약·썸네일 채우기. 이미 적어 둔 칸은 건드리지 않음 */
+  async function fillFromLink() {
+    setFetching(true);
+    try {
+      const meta = await fetchLinkMeta(values.url.trim());
+      const patch: Partial<NewsFormValues> = {};
+      const filled: string[] = [];
+      if (meta.title && !values.title.trim()) {
+        patch.title = meta.title;
+        filled.push("제목");
+      }
+      if (meta.source && !values.source?.trim()) {
+        patch.source = meta.source;
+        filled.push("매체");
+      }
+      // 날짜는 처음 값(새 기사면 오늘) 그대로일 때만 기사 날짜로
+      if (meta.publishedAt && values.publishedAt === initial.publishedAt) {
+        patch.publishedAt = meta.publishedAt;
+        filled.push("날짜");
+      }
+      if (meta.summary && !values.summary?.trim()) {
+        patch.summary = meta.summary;
+        filled.push("요약");
+      }
+      setValues((v) => ({ ...v, ...patch }));
+      const hasImage = image.kind === "replace" || (image.kind === "keep" && !!existing?.imageId);
+      if (meta.image && !hasImage) {
+        try {
+          setImage({ kind: "replace", webp: await convertToWebP(await fetchLinkImage(meta.image)) });
+          filled.push("썸네일");
+        } catch {
+          // 썸네일만 실패하면 나머지는 그대로 사용
+        }
+      }
+      toast(filled.length ? `${filled.join("·")}을 불러왔어요. 내용을 확인해 주세요.` : "이미 입력한 칸은 그대로 두었어요.");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "기사 정보를 불러오지 못했어요.");
+    } finally {
+      setFetching(false);
+    }
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -238,6 +284,9 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
           <label htmlFor="news-url">기사 주소</label>
           <input id="news-url" className="input" type="url" inputMode="url" placeholder="https://" value={values.url} aria-invalid={!!errors.url} onChange={(e) => set("url", e.target.value)} />
           {errors.url && <span className="error">{errors.url}</span>}
+          <button type="button" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-start" }} onClick={fillFromLink} disabled={fetching || !isValidUrl(values.url.trim())}>
+            {fetching ? <Spinner /> : <Sparkles size={15} />} {fetching ? "불러오는 중" : "기사 정보 불러오기"}
+          </button>
         </div>
 
         <div className="field">

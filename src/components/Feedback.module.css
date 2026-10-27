@@ -57,7 +57,13 @@
 
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
   margin-top: 22px;
+}
+
+/* 확인창의 삭제 버튼은 되돌릴 수 없는 동작이라 꽉 찬 빨강 */
+.actions :global(.btn-danger) {
+  background: var(--danger);
+  color: #ffffff;
 }

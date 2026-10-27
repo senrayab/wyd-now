@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarDays, CalendarPlus, ChevronLeft, ExternalLink, Globe, Info, MapPin, Pencil, SearchX, Share2, Trash2 } from "lucide-react";
-import ImageActions from "@/components/ImageActions";
 import { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import Illustration from "@/components/Illustration";
@@ -25,7 +24,7 @@ export default function ScheduleDetail() {
   const { toast, confirm } = useFeedback();
   const { map } = useArtists();
   const { data: schedule, loading } = useStoreQuery((s) => s.schedules.get(id), `schedule:${id}`);
-  const { url: imageUrl, image } = useImageUrl(schedule?.imageId);
+  const { url: imageUrl } = useImageUrl(schedule?.imageId);
 
   if (loading) return <div style={{ paddingTop: 96 }}><Loading /></div>;
   if (!schedule) {
@@ -105,7 +104,7 @@ export default function ScheduleDetail() {
             </div>
           </li>
           {schedule.place && (
-            <li>
+            <li className={styles.placeRow}>
               <MapPin size={18} />
               <div>
                 <strong>{schedule.place}</strong>
@@ -158,16 +157,6 @@ export default function ScheduleDetail() {
                 </a>
               ))}
             </div>
-          </section>
-        )}
-
-        {image && (
-          <section className={styles.block}>
-            <h2>이미지</h2>
-            <p className="muted" style={{ fontSize: 12.5, marginBottom: 10 }}>
-              앱에는 WebP로 보관되고, 저장·공유할 때는 PNG 파일로 바뀌어요.
-            </p>
-            <ImageActions image={image} title={schedule.title} />
           </section>
         )}
 

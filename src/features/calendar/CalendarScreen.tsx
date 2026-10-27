@@ -9,7 +9,8 @@ import { CATEGORIES, getCategory, isCategoryId } from "@/lib/categories";
 import { addMonths, datePart, formatDate, isDateKey, monthGrid, parseLocal, todayKey, WEEKDAYS } from "@/lib/date";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { setPrefs, usePrefs } from "@/lib/prefs";
-import type { Artist, Schedule } from "@/lib/storage/types";
+import type { Artist, Schedule, VoteSite } from "@/lib/storage/types";
+import VoteCard from "@/features/vote/VoteCard";
 import styles from "./CalendarScreen.module.css";
 
 export default function CalendarScreen() {
@@ -78,6 +79,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
   const from = grid[0].key;
   const to = grid[grid.length - 1].key;
   const { data } = useStoreQuery((s) => s.schedules.listInRange(from, to), `month:${from}`);
+  const { data: votes } = useStoreQuery((s) => (prefs.showVoteDeadlines ? s.votes.list() : Promise.resolve([])), `month-votes:${prefs.showVoteDeadlines}`);
 
   const byDay = new Map<string, Schedule[]>();
   for (const s of data ?? []) {
@@ -88,6 +90,10 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
     }
   }
   const dayList = byDay.get(selected) ?? [];
+  // 설정에서 켠 경우만: 마감일별 투표
+  const dueByDay = new Map<string, VoteSite[]>();
+  for (const v of votes ?? []) if (v.endDate) dueByDay.set(v.endDate, [...(dueByDay.get(v.endDate) ?? []), v]);
+  const dueList = dueByDay.get(selected) ?? [];
   const weekdayLabels = Array.from({ length: 7 }, (_, i) => (i + prefs.weekStart) % 7);
 
   const moveMonth = (delta: number) => {
@@ -134,7 +140,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
               data-out={!cell.inMonth}
               data-weekday={cell.weekday}
               aria-pressed={cell.key === selected}
-              aria-label={`${formatDate(cell.key)} 일정 ${items.length}개`}
+              aria-label={`${formatDate(cell.key)} 일정 ${items.length}개${dueByDay.has(cell.key) ? `, 투표 마감 ${dueByDay.get(cell.key)!.length}개` : ""}`}
               onClick={() => onSelect(cell.key)}
             >
               <span className={`${styles.dayNum} num`} data-today={cell.key === today}>
@@ -144,6 +150,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
                 {cats.map((c) => (
                   <span key={c} style={{ background: getCategory(c).colors[0] }} />
                 ))}
+                {dueByDay.has(cell.key) && <span className={styles.voteDot} />}
               </span>
             </button>
           );
@@ -168,7 +175,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
             <Empty
               icon={CalendarDays}
               action={
-                <Link href={`/schedule/new?date=${selected}`} className="btn btn-soft btn-sm">
+                <Link href={`/schedule/new?date=${selected}`} className="btn btn-ghost btn-sm">
                   <Plus size={15} /> 이 날 일정 등록
                 </Link>
               }
@@ -178,6 +185,22 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
           </div>
         )}
       </section>
+
+      {dueList.length > 0 && (
+        <section className="section">
+          <div className="section-head">
+            <h2>
+              이 날 마감하는 투표 <span className="muted num">{dueList.length}</span>
+            </h2>
+            <Link href="/votes">투표</Link>
+          </div>
+          <div className="stack">
+            {dueList.map((v) => (
+              <VoteCard key={v.id} vote={v} artists={map} />
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

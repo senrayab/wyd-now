@@ -43,7 +43,7 @@ export default function VoteDetail() {
       : "상시 투표";
 
   async function onShare() {
-    const result = await shareText(vote!.name, [`[투표] ${vote!.name}`, period, vote!.url].join("\n"));
+    const result = await shareText(vote!.name, [`[투표] ${vote!.name}`, period, vote!.url].filter(Boolean).join("\n"));
     if (result === "copied") toast("투표 정보를 복사했어요.");
     if (result === "failed") toast("공유하지 못했어요.");
   }
@@ -77,10 +77,18 @@ export default function VoteDetail() {
           <StatusBadge vote={vote} />
         </div>
         <h2>{vote.name}</h2>
-        <p className={styles.url}>{vote.url}</p>
-        <a href={vote.url} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-block">
-          투표하러 가기 <ArrowUpRight size={17} />
-        </a>
+        {vote.url ? (
+          <>
+            <p className={styles.url}>{vote.url}</p>
+            <a href={vote.url} target="_blank" rel="noopener noreferrer" className="btn btn-accent btn-block">
+              투표하러 가기 <ArrowUpRight size={17} />
+            </a>
+          </>
+        ) : (
+          <Link href={`/vote/edit?id=${vote.id}`} className="btn btn-ghost btn-block">
+            <Pencil size={16} /> 투표 주소 추가하기
+          </Link>
+        )}
         <dl className={styles.facts}>
           <div>
             <dt>기간</dt>

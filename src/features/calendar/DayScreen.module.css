@@ -39,7 +39,7 @@
 /* 요일 줄: 선택한 날은 검정 둥근 사각형 */
 .week {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 4px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--line-strong);
@@ -104,7 +104,8 @@
 .item {
   position: relative;
   display: grid;
-  grid-template-columns: 50px 12px 1fr;
+  /* minmax(0, …): 긴 제목이 칸을 늘려 화면 전체가 넓어지지 않게 */
+  grid-template-columns: 50px 12px minmax(0, 1fr);
   gap: 14px;
   align-items: start;
 }
@@ -217,12 +218,16 @@
   gap: 3px;
 }
 
+/* 긴 제목은 두 줄까지 보이고 나머지는 말줄임 */
 .text strong {
   font-size: 14.5px;
   font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .text small {

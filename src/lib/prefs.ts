@@ -14,6 +14,8 @@ export interface Prefs {
   hour12: boolean;
   calendarView: "month" | "list";
   voteLayout: "grid" | "list";
+  /** 월간 캘린더에 투표 마감일을 옅은 점으로 표시 */
+  showVoteDeadlines: boolean;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -24,6 +26,7 @@ export const DEFAULT_PREFS: Prefs = {
   hour12: false,
   calendarView: "month",
   voteLayout: "grid",
+  showVoteDeadlines: false,
 };
 
 const KEY = "wyd:prefs";

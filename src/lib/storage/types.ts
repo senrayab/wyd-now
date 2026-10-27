@@ -59,6 +59,8 @@ export interface Artist {
   /** palette key (lib/palette.ts) */
   color: string;
   imageId?: string;
+  /** 아티스트 페이지 상단 배경 이미지 */
+  coverImageId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -127,6 +129,9 @@ export interface MyScrap {
 export interface MySpace {
   artistId: string;
   followed: boolean;
+  /** 최애 멤버 (최대 2명, 고른 순서대로) */
+  biasMemberIds?: string[];
+  /** @deprecated 한 명만 고르던 시절 값. biasIdsOf() 로 읽음 */
   biasMemberId?: string;
   photoIds: string[];
   updatedAt: string;

@@ -105,7 +105,7 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
         <div className="field">
           <label htmlFor="vote-url">투표 주소</label>
           <input id="vote-url" className="input" type="url" inputMode="url" placeholder="https://" value={values.url} aria-invalid={!!errors.url} onChange={(e) => set("url", e.target.value)} />
-          {errors.url && <span className="error">{errors.url}</span>}
+          {errors.url ? <span className="error">{errors.url}</span> : <span className="hint">아직 모르면 비워 두고 나중에 수정해서 넣어도 돼요.</span>}
         </div>
 
         <div className="card-flat stack">

@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Download, Inbox, LayoutGrid, List, Plus, SearchX, Vote } from "lucide-react";
+import { Clock3, Download, Inbox, LayoutGrid, List, Plus, SearchX, Vote } from "lucide-react";
 import { useFeedback } from "@/components/Feedback";
 import { Empty, Loading, Spinner } from "@/components/ui";
+import { todayKey, weekDays } from "@/lib/date";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { isVoteType, loadDefaultVoteSites, sortVotes, VOTE_TYPES, voteStatus } from "@/lib/services/vote-service";
 import { setPrefs, usePrefs } from "@/lib/prefs";
@@ -36,7 +37,7 @@ export default function VotesScreen() {
   const { map } = useArtists();
   const { data, loading } = useStoreQuery((s) => s.votes.list(), "votes");
   const [busy, setBusy] = useState(false);
-  const { voteLayout } = usePrefs();
+  const { voteLayout, weekStart } = usePrefs();
   const { count: doneCount } = useVoteDone();
   const type = isVoteType(params.get("type")) ? params.get("type") : null;
 
@@ -51,6 +52,10 @@ export default function VotesScreen() {
   const tabParam = params.get("tab");
   const tab: Tab = isTab(tabParam) ? tabParam : all.some((v) => ["open", "upcoming"].includes(voteStatus(v).kind)) ? "live" : "always";
   const shown = groups[tab];
+  // 이번 주(오늘 ~ 이번 주 마지막 날) 안에 마감하는 투표
+  const today = todayKey();
+  const weekEnd = weekDays(today, weekStart)[6];
+  const dueThisWeek = all.filter((v) => v.endDate && v.endDate >= today && v.endDate <= weekEnd);
 
   const go = (patch: { type?: string | null; tab?: Tab }) => {
     const next = new URLSearchParams(params.toString());
@@ -113,6 +118,22 @@ export default function VotesScreen() {
         </div>
       ) : (
         <>
+          {dueThisWeek.length > 0 && (
+            <div className={styles.weekDue}>
+              <Clock3 size={16} aria-hidden />
+              <span>
+                이번 주 마감 <b className="num">{dueThisWeek.length}</b>개
+              </span>
+              <small>
+                {dueThisWeek
+                  .slice(0, 2)
+                  .map((v) => v.name)
+                  .join(", ")}
+                {dueThisWeek.length > 2 && ` 외 ${dueThisWeek.length - 2}개`}
+              </small>
+            </div>
+          )}
+
           <div className={`segmented ${styles.tabs}`} role="tablist" aria-label="투표 상태">
             {TABS.map((t) => (
               <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => go({ tab: t.id })}>
