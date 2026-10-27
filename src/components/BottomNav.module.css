@@ -24,7 +24,7 @@
   height: calc(70px + var(--safe-bottom));
   padding: 0 14px var(--safe-bottom);
   /* 그림자가 파인 모양을 그대로 따라가도록 drop-shadow */
-  filter: drop-shadow(0 -4px 14px rgba(0, 0, 0, 0.08));
+  filter: var(--nav-shadow);
 }
 
 /* 바 배경: 양옆은 사각형(바깥 위 모서리만 둥글게), 가운데는 파인 곡선 */
