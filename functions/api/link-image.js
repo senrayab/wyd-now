@@ -8,17 +8,30 @@
 import { badRequest, fetchPublic, json, parsePublicUrl } from "./_shared.js";
 
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const ACCEPT = "image/avif,image/webp,image/png,image/jpeg,image/gif,image/*";
 
 export async function onRequestGet({ request }) {
   const target = parsePublicUrl(new URL(request.url).searchParams.get("url"));
   if (!target) return badRequest("invalid-url");
 
-  let res;
-  try {
-    res = await fetchPublic(target, "image/avif,image/webp,image/png,image/jpeg,image/gif,image/*");
-  } catch {
-    return json({ error: "fetch-failed" }, 502);
+  // http:// 썸네일은 https:// 로 먼저 시도 (일부 언론사 서버가 Cloudflare 의 http 요청을 거절함)
+  const candidates = [target];
+  if (target.protocol === "http:") {
+    const secure = new URL(target.href);
+    secure.protocol = "https:";
+    candidates.unshift(secure);
   }
+
+  let res;
+  for (const url of candidates) {
+    try {
+      res = await fetchPublic(url, ACCEPT);
+      if (res.ok) break;
+    } catch {
+      res = undefined;
+    }
+  }
+  if (!res) return json({ error: "fetch-failed" }, 502);
   if (!res.ok) return json({ error: "fetch-failed", status: res.status }, 502);
 
   const type = res.headers.get("content-type") ?? "";

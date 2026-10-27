@@ -13,7 +13,7 @@
 
 .monthHead h2 b {
   font-weight: 700;
-  color: var(--accent-ink);
+  color: var(--ink);
 }
 
 .grid {

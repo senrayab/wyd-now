@@ -163,7 +163,7 @@ export function NewsDetailScreen() {
       )}
 
       <div className={styles.actions}>
-        <Link href={`/news/edit?id=${item.id}`} className="btn btn-soft" style={{ flex: 1 }}>
+        <Link href={`/news/edit?id=${item.id}`} className="btn btn-ghost" style={{ flex: 1 }}>
           <Pencil size={16} /> 수정
         </Link>
         <button type="button" className="btn btn-danger" onClick={onDelete} aria-label="기사 삭제">
@@ -241,15 +241,18 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
       }
       setValues((v) => ({ ...v, ...patch }));
       const hasImage = image.kind === "replace" || (image.kind === "keep" && !!existing?.imageId);
+      let thumbFailed = false;
       if (meta.image && !hasImage) {
         try {
           setImage({ kind: "replace", webp: await convertToWebP(await fetchLinkImage(meta.image)) });
           filled.push("썸네일");
         } catch {
-          // 썸네일만 실패하면 나머지는 그대로 사용
+          // 썸네일만 실패하면 나머지는 그대로 쓰고 안내만 따로
+          thumbFailed = true;
         }
       }
-      toast(filled.length ? `${filled.join("·")}을 불러왔어요. 내용을 확인해 주세요.` : "이미 입력한 칸은 그대로 두었어요.");
+      const done = filled.length ? `${filled.join("·")}을 불러왔어요.` : "이미 입력한 칸은 그대로 두었어요.";
+      toast(thumbFailed ? `${done} 썸네일은 가져오지 못했어요. 직접 골라 주세요.` : filled.length ? `${done} 내용을 확인해 주세요.` : done);
     } catch (e) {
       toast(e instanceof Error ? e.message : "기사 정보를 불러오지 못했어요.");
     } finally {

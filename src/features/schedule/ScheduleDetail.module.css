@@ -109,6 +109,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1.4;
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
@@ -148,4 +149,10 @@
 .actionRow :global(.btn-danger) {
   width: 52px;
   padding: 0;
+}
+
+/* 작은 회색 제목(안내 등): 한글 글리프 높이에 맞춰 아이콘을 살짝 올림 */
+.block h2 > svg {
+  flex: none;
+  translate: 0 -0.08em;
 }

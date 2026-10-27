@@ -85,7 +85,7 @@ export default function VoteDetail() {
             </a>
           </>
         ) : (
-          <Link href={`/vote/edit?id=${vote.id}`} className="btn btn-ghost btn-block">
+          <Link href={`/vote/edit?id=${vote.id}`} className="btn btn-primary btn-block">
             <Pencil size={16} /> 투표 주소 추가하기
           </Link>
         )}
@@ -119,7 +119,7 @@ export default function VoteDetail() {
       )}
 
       <div className={styles.actions}>
-        <Link href={`/vote/edit?id=${vote.id}`} className="btn btn-primary" style={{ flex: 1 }}>
+        <Link href={`/vote/edit?id=${vote.id}`} className="btn btn-ghost" style={{ flex: 1 }}>
           <Pencil size={16} /> 수정
         </Link>
         <button type="button" className="btn btn-danger" onClick={onDelete} aria-label="투표 사이트 삭제">
