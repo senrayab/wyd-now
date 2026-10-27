@@ -38,6 +38,18 @@ export async function deleteNews(item: NewsItem) {
   await news.remove(item.id);
 }
 
+/**
+ * 기사 요약 다듬기
+ * - 문단이 붙어 버린 "…됐다.‘Insomnia’는" 처럼 마침표 뒤 공백이 빠진 곳에 공백
+ * - 언론사가 글자 수로 자른 요약("라이즈는 오")처럼 문장이 끝나지 않으면 말줄임표
+ */
+export function tidySummary(text: string) {
+  const spaced = text.trim().replace(/([다요음함죠까네])([.!?])(?=[^\s.!?…"'”’)\]])/g, "$1$2 ");
+  // 마침표가 없어도 "~했다", "~해요" 처럼 끝맺은 문장이면 그대로
+  if (!spaced || /[.!?…。"'”’)\]]$/.test(spaced) || /[다요]$/.test(spaced)) return spaced;
+  return `${spaced.replace(/[\s,·]+$/, "")}…`;
+}
+
 /** 주소에서 매체 이름 후보 (예: https://www.yna.co.kr/… → yna.co.kr) */
 export function hostOf(url: string) {
   try {

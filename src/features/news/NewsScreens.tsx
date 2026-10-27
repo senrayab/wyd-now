@@ -15,7 +15,7 @@ import { convertToWebP } from "@/lib/image/image-service";
 import type { ImageChange } from "@/lib/services/image-attach";
 import { fetchLinkImage, fetchLinkMeta } from "@/lib/services/link-meta";
 import { isValidUrl } from "@/lib/services/schedule-service";
-import { deleteNews, hostOf, saveNews, validateNews, type NewsFormValues } from "@/lib/services/news-service";
+import { deleteNews, hostOf, saveNews, tidySummary, validateNews, type NewsFormValues } from "@/lib/services/news-service";
 import { shareText } from "@/lib/services/share-service";
 import type { NewsItem } from "@/lib/storage/types";
 import NewsTimeline from "./NewsTimeline";
@@ -143,7 +143,7 @@ export function NewsDetailScreen() {
         {source && <p className={styles.meta}>{source}</p>}
         {item.summary && (
           <p className="prose" style={{ marginTop: 14 }}>
-            {item.summary}
+            {tidySummary(item.summary)}
           </p>
         )}
         <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-block" style={{ marginTop: 20 }}>
@@ -240,7 +240,7 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
         filled.push("날짜");
       }
       if (meta.summary && !values.summary?.trim()) {
-        patch.summary = meta.summary;
+        patch.summary = tidySummary(meta.summary);
         filled.push("요약");
       }
       setValues((v) => ({ ...v, ...patch }));

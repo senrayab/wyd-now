@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { formatShortDate, timeAgo } from "@/lib/date";
 import { useImageUrl } from "@/lib/hooks";
-import { hostOf } from "@/lib/services/news-service";
+import { hostOf, tidySummary } from "@/lib/services/news-service";
 import type { Artist, NewsItem } from "@/lib/storage/types";
-import ScrapButton from "./ScrapButton";
 import styles from "./News.module.css";
 
 /** 날짜별로 묶은 기사 목록: 날짜 라벨 + 흰 카드 안의 기사 줄 */
@@ -39,17 +38,19 @@ function NewsRow({ item, artists }: { item: NewsItem; artists: Map<string, Artis
   const source = item.source || hostOf(item.url);
 
   return (
-    <li className={styles.row}>
-      <Link href={`/news/view?id=${item.id}`} className={styles.rowMain}>
-        <span className={styles.meta}>{[source, names].filter(Boolean).join(" · ")}</span>
-        <strong>{item.title}</strong>
-        {item.summary && <small>{item.summary}</small>}
+    <li>
+      {/* 북마크는 상세 화면에서. 목록은 썸네일까지 한 덩어리로 눌러 상세로 */}
+      <Link href={`/news/view?id=${item.id}`} className={styles.row}>
+        <span className={styles.rowMain}>
+          <span className={styles.meta}>{[source, names].filter(Boolean).join(" · ")}</span>
+          <strong>{item.title}</strong>
+          {item.summary && <small>{tidySummary(item.summary)}</small>}
+        </span>
+        {url && (
+          // eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL
+          <img src={url} alt="" className={styles.thumb} />
+        )}
       </Link>
-      {url && (
-        // eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL
-        <img src={url} alt="" className={styles.thumb} />
-      )}
-      <ScrapButton newsId={item.id} title={item.title} />
     </li>
   );
 }

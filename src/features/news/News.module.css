@@ -31,11 +31,11 @@
 .row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px 12px 14px 20px;
+  gap: 14px;
+  padding: 14px 18px 14px 20px;
 }
 
-.row + .row {
+li + li > .row {
   border-top: 1px solid var(--line);
 }
 
