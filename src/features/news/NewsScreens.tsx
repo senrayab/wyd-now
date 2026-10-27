@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
-import { createPortal } from "react-dom";
+import { useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Bookmark, Newspaper, Pencil, Plus, SearchX, Share2, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowUpRight, Bookmark, Newspaper, Pencil, Plus, SearchX, Share2, Sparkles, Trash2 } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
+import { Zoomable } from "@/components/ImageZoom";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
@@ -79,29 +79,6 @@ export function NewsListScreen() {
   );
 }
 
-/**
- * 사진 크게 보기: 화면 가득, 원본 비율 그대로. 바깥·닫기·Esc 로 닫힘
- * body 로 portal — 화면 등장 애니메이션(transform)이 걸린 카드 안에서는 position: fixed 가 카드 기준이 됨
- */
-function ImageZoom({ src, onClose }: { src: string; onClose: () => void }) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return createPortal(
-    <div className={styles.zoom} role="dialog" aria-modal="true" aria-label="사진 크게 보기" onClick={onClose}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL */}
-      <img src={src} alt="" />
-      <button type="button" className={`icon-btn ${styles.zoomClose}`} onClick={onClose} aria-label="닫기">
-        <X size={18} />
-      </button>
-    </div>,
-    document.body,
-  );
-}
-
 /** /news/view?id= — 기사 상세 */
 export function NewsDetailScreen() {
   const id = useSearchParams().get("id") ?? "";
@@ -110,7 +87,6 @@ export function NewsDetailScreen() {
   const { map } = useArtists();
   const { data: item, loading } = useStoreQuery((s) => s.news.get(id), `news:${id}`);
   const { url: imageUrl } = useImageUrl(item?.imageId);
-  const [zoomed, setZoomed] = useState(false);
 
   if (loading) return <div style={{ paddingTop: 96 }}><Loading /></div>;
   if (!item) {
@@ -157,12 +133,11 @@ export function NewsDetailScreen() {
       <article className={`card ${styles.detail}`}>
         {imageUrl && (
           // 상세에서는 칸에 맞춰 잘려 보이므로, 누르면 원본 비율로 크게
-          <button type="button" className={styles.heroBtn} onClick={() => setZoomed(true)} aria-label="사진 크게 보기">
+          <Zoomable src={imageUrl} className={styles.heroBtn}>
             {/* eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL */}
             <img src={imageUrl} alt="" className={styles.hero} />
-          </button>
+          </Zoomable>
         )}
-        {zoomed && imageUrl && <ImageZoom src={imageUrl} onClose={() => setZoomed(false)} />}
         <span className="eyebrow num">{formatDate(item.publishedAt)}</span>
         <h2>{item.title}</h2>
         {source && <p className={styles.meta}>{source}</p>}

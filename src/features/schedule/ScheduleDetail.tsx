@@ -6,6 +6,7 @@ import { CalendarDays, CalendarPlus, ChevronLeft, ExternalLink, Globe, Info, Map
 import { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import Illustration from "@/components/Illustration";
+import { Zoomable } from "@/components/ImageZoom";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
 import { getCategory } from "@/lib/categories";
 import { datePart, dDay, durationLabel, formatDate, formatTime, timePart } from "@/lib/date";
@@ -71,14 +72,16 @@ export default function ScheduleDetail() {
       </header>
 
       {/* 대표 이미지가 있으면 사진, 없으면 카테고리 일러스트 */}
-      <div className={styles.hero}>
-        {imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL
+      {imageUrl ? (
+        <Zoomable src={imageUrl} className={styles.hero}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL */}
           <img src={imageUrl} alt="" className={styles.heroImg} />
-        ) : (
+        </Zoomable>
+      ) : (
+        <div className={styles.hero}>
           <Illustration category={schedule.category} className={styles.heroIllo} />
-        )}
-      </div>
+        </div>
+      )}
 
       <article className={`card ${styles.sheet}`}>
         <div className="row">
