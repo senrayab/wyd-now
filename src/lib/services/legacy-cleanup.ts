@@ -5,7 +5,7 @@
  */
 import { getDataStore } from "../storage";
 import { loadRiizeSampleNews, loadUrgentVoteSample } from "./riize-sample-news";
-import { loadRiizeReleases, RELEASES_SAMPLE_KEY } from "./riize-sample-releases";
+import { fixEpilogueTitle, loadRiizeReleases, RELEASES_SAMPLE_KEY } from "./riize-sample-releases";
 import { hasRiize, loadRiizeTestData } from "./riize-test-data";
 
 const LEGACY = new Map([
@@ -59,6 +59,7 @@ async function run() {
   await removeLegacy();
   await addNewSamples();
   await addReleaseSamples();
+  await fixEpilogueTitle();
   return true;
 }
 

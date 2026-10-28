@@ -26,7 +26,7 @@ const RELEASES: SampleRelease[] = [
     4118686,
   ],
   ["Hug (포옹)", "etc", "2025-01-08", [["Hug (포옹)", "title"]], undefined, 4112607],
-  ["RIIZING : Epilogue", "mini", "2024-09-04", [["Combo", "title"], "Boom Boom Bass", "Siren", "Impossible", "9 Days", "Honestly", "One Kiss", "Talk Saxy", "Love 119"], undefined, 4106635],
+  ["RIIZING : Epilogue", "mini", "2024-09-04", ["Combo", ["Boom Boom Bass", "title"], "Siren", "Impossible", "9 Days", "Honestly", "One Kiss", "Talk Saxy", "Love 119"], undefined, 4106635],
   ["RIIZING", "mini", "2024-06-17", [["Boom Boom Bass", "title"], "Siren", "Impossible", "9 Days", "Honestly", "One Kiss", "Talk Saxy", "Love 119"], yt("78lNnCitcBM"), 4099766],
   ["Impossible", "digital", "2024-04-18", [["Impossible", "title"]], yt("Ey53EQhkLY8")],
   ["Siren", "digital", "2024-04-03", [["Siren", "title"]]],
@@ -47,6 +47,19 @@ function toInput(artistId: string, [title, kind, releaseDate, tracks, mv, bugs]:
     mvUrl: mv,
     links: bugs ? [{ label: "벅스", url: `https://music.bugs.co.kr/album/${bugs}` }] : [],
   };
+}
+
+/**
+ * 처음 넣은 샘플에서 RIIZING : Epilogue 타이틀곡을 Combo 로 잘못 표시했던 것 바로잡기.
+ * 샘플 그대로(Combo 만 타이틀)인 경우만 고치고, 사용자가 직접 바꾼 내용은 건드리지 않음
+ */
+export async function fixEpilogueTitle() {
+  const { releases } = getDataStore();
+  const target = (await releases.list()).find((r) => r.title === "RIIZING : Epilogue");
+  if (!target) return;
+  const titles = target.tracks.filter((t) => t.isTitle).map((t) => t.title);
+  if (titles.length !== 1 || titles[0] !== "Combo") return;
+  await releases.update(target.id, { tracks: target.tracks.map((t) => ({ title: t.title, isTitle: t.title === "Boom Boom Bass" || undefined })) });
 }
 
 /** 시작할 때 한 번만 넣었는지 표시 (사용자가 지운 앨범이 다시 생기지 않게) */
