@@ -9,7 +9,8 @@
  * - 구글 뉴스 RSS 는 Cloudflare 서버에서 요청하면 503(비정상 트래픽)으로 막혀서 쓰지 않음
  * - 검색어·제외 출처·기간·개수는 src/config/riize-news.json 한 곳에서 관리
  * - 같은 주제는 30분 동안 Cloudflare 캐시에 보관해 외부 호출을 최소화
- * 응답: { topic, source, fetchedAt, items: [{ id, title, source, link, image?, publishedAt, members }] }
+ * - 제목 + 요약(기사 첫 문장)에 그룹·멤버 이름이 있는 기사만 (본문에 잠깐 언급된 기사 제외)
+ * 응답: { topic, source, fetchedAt, stats: { dropped, keptBySummary }, items: [{ id, title, source, link, image?, publishedAt, members }] }
  */
 import config from "../../src/config/riize-news.json";
 import { json } from "./_shared.js";
@@ -44,8 +45,15 @@ export async function onRequestGet({ request, env, waitUntil }) {
   // 받은 기사가 하나도 없고 외부 호출도 실패했으면 실패로 돌려 앱이 기존 목록을 그대로 쓰게 함
   if (naverKeys && naver[0]?.status !== "fulfilled" && bing.length === 0) return json({ error: "feed-failed" }, 502);
 
-  const items = merge(naverItems, bing);
-  const response = json({ topic: topic.id, source: naverKeys ? "naver" : "bing", fetchedAt: new Date().toISOString(), items }, 200, {
+  const stats = { dropped: 0, keptBySummary: 0 };
+  const relevant = (it) => {
+    const verdict = relevance(it, topic);
+    if (verdict === "summary") stats.keptBySummary += 1;
+    if (!verdict) stats.dropped += 1;
+    return !!verdict;
+  };
+  const items = merge(naverItems.filter(relevant), bing.filter(relevant));
+  const response = json({ topic: topic.id, source: naverKeys ? "naver" : "bing", fetchedAt: new Date().toISOString(), stats, items }, 200, {
     "cache-control": `public, max-age=${config.refreshMinutes * 60}`,
   });
   if (cache) waitUntil(cache.put(cacheKey, response.clone()).catch(() => {}));
@@ -64,7 +72,7 @@ async function naverFeed(topic, keys) {
   const body = await res.json();
   return (body.items ?? []).map((it) => {
     const link = it.originallink || it.link;
-    return { title: decode(stripTags(it.title ?? "")), link, source: hostLabel(link), sourceUrl: link, pubDate: it.pubDate };
+    return { title: decode(stripTags(it.title ?? "")), summary: decode(stripTags(it.description ?? "")), link, source: hostLabel(link), sourceUrl: link, pubDate: it.pubDate };
   });
 }
 
@@ -90,6 +98,7 @@ async function bingFeed(topic) {
     const image = decode(pick("News:Image") ?? "");
     return {
       title: decode(pick("title") ?? ""),
+      summary: decode(stripTags(decode(pick("description") ?? ""))),
       link,
       source: decode(pick("News:Source") ?? ""),
       sourceUrl: link,
@@ -98,6 +107,28 @@ async function bingFeed(topic) {
       image: image ? `${image.replace(/^http:/, "https:")}&w=320&h=180&c=14` : undefined,
     };
   });
+}
+
+/* ---------- 관련 기사만: 제목 + 요약(기사 첫 문장) 기준 ---------- */
+
+const has = (text, names) => {
+  const t = (text ?? "").toLowerCase();
+  return names.some((n) => t.includes(n.toLowerCase()));
+};
+
+/**
+ * 본문 어딘가에 이름이 한 번 나온 기사(여러 아티스트 나열·시상식 순위 등)까지 걸리는 것을 줄이기 위해
+ * - 제목에 그룹·멤버 이름이 있으면 남김 → "title"
+ * - 아니면 요약(보통 "그룹 라이즈(RIIZE)가…" 로 시작하는 첫 문장)에 이름이 있으면 남김 → "summary"
+ *   (전체: 그룹 이름, 멤버 필터: 그 멤버 이름)
+ * - 둘 다 없으면 뺌 → ""
+ */
+function relevance(it, topic) {
+  const groupNames = config.group.names;
+  const titleNames = isGroup(topic) ? [...groupNames, ...config.members.flatMap((m) => m.names)] : [...groupNames, ...topic.names];
+  if (has(it.title, titleNames)) return "title";
+  if (has(it.summary, isGroup(topic) ? groupNames : topic.names)) return "summary";
+  return "";
 }
 
 /* ---------- 정리: 기간·출처 거르기, 중복 제거, 썸네일 보강 ---------- */
