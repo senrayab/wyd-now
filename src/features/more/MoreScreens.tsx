@@ -21,7 +21,7 @@ export function MoreHome() {
       <Link href="/more/support/install" className={`card ${styles.appCard}`}>
         <span className={styles.appText}>
           <strong className="logo">wyd now</strong>
-          <small>아티스트 스케줄 · 투표 모음</small>
+          <small>스케줄 · 뉴스 · 투표 모음</small>
         </span>
         <span className={styles.installPill}>앱 설치</span>
       </Link>
@@ -36,7 +36,8 @@ export function MoreHome() {
         )}
         <span className={styles.myText}>
           <strong>{focus ? focus.name : "아티스트"}</strong>
-          <small>프로필 · 일정 · 소식 · MY 공간</small>
+          {/* 전용 모드의 아티스트 페이지는 프로필·멤버·채널·디스코그래피만 */}
+          <small>{focus ? "프로필 · 멤버 · 디스코그래피" : "프로필 · 일정 · 소식 · MY 공간"}</small>
         </span>
         <ChevronRight size={17} className="muted" />
       </Link>
@@ -47,7 +48,8 @@ export function MoreHome() {
         </span>
         <span className={styles.myText}>
           <strong>내 공간</strong>
-          <small>스크랩한 기사 · 팔로우 · 오늘 투표</small>
+          {/* 전용 모드에서는 MY 공간(최애·내 사진)이 여기로 옴 */}
+          <small>{focus ? "최애 · 내 사진 · 스크랩한 기사" : "스크랩한 기사 · 팔로우 · 오늘 투표"}</small>
         </span>
         <ChevronRight size={17} className="muted" />
       </Link>

@@ -23,6 +23,9 @@ export interface FeedItem {
   members: string[];
 }
 
+/** 목록은 하나 (멤버별 칩 없이, 제목에 이름이 나온 멤버는 이름표) */
+export const FEED_TOPIC = "all";
+
 export interface Feed {
   /** 목록을 만든 곳: 네이버 검색 API 또는 (키가 없을 때) 빙 */
   source?: "naver" | "bing";
@@ -31,7 +34,6 @@ export interface Feed {
   items: FeedItem[];
 }
 
-export const NEWS_TOPICS = [config.group, ...config.members].map((t) => ({ id: t.id, label: t.label }));
 export const REFRESH_MS = config.refreshMinutes * 60 * 1000;
 
 const cacheKey = (topic: NewsTopicId) => `wyd:feed:${topic}`;
@@ -60,7 +62,7 @@ export function fetchFeed(topic: NewsTopicId, fresh = false): Promise<Feed> {
   const running = inflight.get(topic);
   if (running) return running;
   const request = (async () => {
-    const res = await fetch(`/api/riize-news?topic=${encodeURIComponent(topic)}${fresh ? "&fresh=1" : ""}`, fresh ? { cache: "no-store" } : undefined);
+    const res = await fetch(`/api/riize-news${fresh ? "?fresh=1" : ""}`, fresh ? { cache: "no-store" } : undefined);
     const type = res.headers.get("content-type") ?? "";
     // 함수가 없는 곳(로컬 정적 서버)은 HTML 404 가 옴
     if (!res.ok || !type.includes("application/json")) throw new Error("뉴스를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");

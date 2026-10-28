@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Bookmark, Newspaper, RotateCw } from "lucide-react";
 import { useFeedback } from "@/components/Feedback";
 import HomeLink from "@/components/HomeLink";
@@ -14,8 +13,8 @@ import {
   fetchFeed,
   isStale,
   loadFeedMeta,
+  FEED_TOPIC,
   NEWS_CONFIG,
-  NEWS_TOPICS,
   readFeedCache,
   REFRESH_MS,
   scrapFeedItem,
@@ -28,11 +27,9 @@ import styles from "./Feed.module.css";
 
 const memberLabel = new Map(NEWS_CONFIG.members.map((m) => [m.id, m.label]));
 
-/** /feed — RIIZE 뉴스 (최근 7일 기사 자동 수집) */
+/** /feed — 뉴스 (최근 7일 기사 자동 수집, 목록 하나 + 멤버 이름표) */
 export default function FeedScreen() {
-  const params = useSearchParams();
-  const router = useRouter();
-  const topic = NEWS_TOPICS.some((t) => t.id === params.get("m")) ? params.get("m")! : NEWS_CONFIG.group.id;
+  const topic = FEED_TOPIC;
   // 이 기기에 저장해 둔 목록을 먼저 보여 줌
   const [feed, setFeed] = useState<Feed | null>(() => readFeedCache(topic));
   const [loading, setLoading] = useState(false);
@@ -97,20 +94,6 @@ export default function FeedScreen() {
       <p className={styles.updated} role="status">
         {loading ? "새 기사를 확인하는 중…" : feed ? `마지막 업데이트 ${agoLabel(feed.fetchedAt)} · 최근 ${NEWS_CONFIG.days}일` : `최근 ${NEWS_CONFIG.days}일 기사`}
       </p>
-
-      <div className="chips" role="group" aria-label="멤버">
-        {NEWS_TOPICS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            className="chip"
-            aria-pressed={topic === t.id}
-            onClick={() => router.replace(t.id === NEWS_CONFIG.group.id ? "/feed" : `/feed?m=${t.id}`, { scroll: false })}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
 
       {error && (
         <p className={styles.error} role="alert">

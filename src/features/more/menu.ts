@@ -46,7 +46,7 @@ export const MORE_MENU: MenuSection[] = [
     id: "explore",
     href: "/more/explore",
     label: "둘러보기",
-    description: "카테고리별·기간별로 일정 모아 보기",
+    description: "카테고리별·기간별 일정, 기사 모음, 투표 사이트",
     icon: Compass,
     colors: ["#ff6f9f", "#ffe1ec"],
     items: [

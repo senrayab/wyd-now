@@ -1,5 +1,5 @@
 {
-  "title": "RIIZE NEWS",
+  "title": "뉴스",
   "group": { "id": "all", "label": "전체", "query": "RIIZE", "names": ["RIIZE", "라이즈"] },
   "members": [
     { "id": "shotaro", "label": "쇼타로", "names": ["쇼타로", "SHOTARO"] },
@@ -9,6 +9,7 @@
     { "id": "sohee", "label": "소희", "names": ["소희", "SOHEE"] },
     { "id": "anton", "label": "앤톤", "names": ["앤톤", "ANTON"] }
   ],
+  "titleKeywords": ["Insomnia", "인섬니아", "브리즈", "BRIIZE"],
   "excludeSources": ["weverse.io", "note.com", "youtube.com", "youtu.be", "t.co", "x.com", "twitter.com", "instagram.com", "tiktok.com", "facebook.com"],
   "days": 7,
   "fetchLimit": 100,

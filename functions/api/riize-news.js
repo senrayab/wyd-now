@@ -1,5 +1,5 @@
 /*
- * Cloudflare Pages Function — GET /api/riize-news?topic=all|<멤버 id>
+ * Cloudflare Pages Function — GET /api/riize-news (새로고침 버튼은 ?fresh=1)
  *
  * 최근 기사 목록을 JSON 으로 돌려줍니다. 기사 본문은 읽거나 저장하지 않고 제목·출처·시각·링크·썸네일 주소만 다룹니다.
  * - 네이버 검색 API: 목록의 중심. 언론사 원문 주소를 줌. 썸네일은 없음
@@ -9,13 +9,15 @@
  * - 구글 뉴스 RSS 는 Cloudflare 서버에서 요청하면 503(비정상 트래픽)으로 막혀서 쓰지 않음
  * - 검색어·제외 출처·기간·개수는 src/config/riize-news.json 한 곳에서 관리
  * - 같은 주제는 30분 동안 Cloudflare 캐시에 보관해 외부 호출을 최소화
- * - 제목 + 요약(기사 첫 문장)에 그룹·멤버 이름이 있는 기사만 (본문에 잠깐 언급된 기사 제외)
- * 응답: { topic, source, fetchedAt, stats: { dropped, keptBySummary }, items: [{ id, title, source, link, image?, publishedAt, members }] }
+ * - 목록은 하나: 그룹 검색 + 멤버별 검색을 합쳐 중복 제거, 제목에 이름이 나온 멤버는 이름표(members)
+ * - 제목에 그룹·멤버 이름이나 추가 키워드(활동곡·팬덤명)가 있는 기사만
+ *   (네이버 요약은 검색어 주변 발췌라 본문에 잠깐 언급된 기사도 걸려서 요약으로는 거르지 않음)
+ * 응답: { source, fetchedAt, stats: { dropped }, items: [{ id, title, source, link, image?, publishedAt, members }] }
  */
 import config from "../../src/config/riize-news.json";
 import { json } from "./_shared.js";
 
-const TOPICS = new Map([[config.group.id, config.group], ...config.members.map((m) => [m.id, m])]);
+const TOPICS = [config.group, ...config.members];
 const isGroup = (topic) => topic.id === config.group.id;
 
 /** 검색어: 그룹은 영문명("라이즈" 단독은 같은 이름의 회사 기사가 섞임), 멤버는 "그룹명 + 멤버 이름" */
@@ -23,13 +25,12 @@ const searchQuery = (topic) => (isGroup(topic) ? config.group.query : `${config.
 
 export async function onRequestGet({ request, env, waitUntil }) {
   const url = new URL(request.url);
-  const topic = TOPICS.get(url.searchParams.get("topic") ?? config.group.id);
-  if (!topic) return json({ error: "unknown-topic" }, 400);
+  const topic = config.group;
   const naverKeys = env?.NAVER_CLIENT_ID && env?.NAVER_CLIENT_SECRET ? { id: env.NAVER_CLIENT_ID, secret: env.NAVER_CLIENT_SECRET } : null;
 
   // 같은 주제는 30분 동안 캐시 (Cache API 를 못 쓰는 환경이면 매번 새로 읽음)
   // 새로고침 버튼(?fresh=1)은 받은 지 manualRefreshMinutes(2분)가 지났을 때만 새로 받음 → 연속으로 눌러도 한도 보호
-  const cacheKey = new Request(`${url.origin}/api/riize-news?topic=${topic.id}&src=${naverKeys ? "naver" : "bing"}`);
+  const cacheKey = new Request(`${url.origin}/api/riize-news?v=2&src=${naverKeys ? "naver" : "bing"}`);
   const cache = globalThis.caches?.default;
   if (cache) {
     const hit = await cache.match(cacheKey).catch(() => undefined);
@@ -40,8 +41,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
     }
   }
 
-  // 전체 = 그룹 + 멤버별 검색을 합쳐 중복 제거 (멤버 기사도 전체에 한 번만)
-  const topics = isGroup(topic) ? [...TOPICS.values()] : [topic];
+  // 그룹 + 멤버별 검색을 합쳐 중복 제거 (멤버 이름으로만 검색되는 기사도 빠지지 않게)
+  const topics = TOPICS;
   const [naver, bing] = await Promise.all([
     naverKeys ? Promise.allSettled(topics.map((t) => naverFeed(t, naverKeys))) : Promise.resolve([]),
     bingFeed(topic).catch(() => []),
@@ -50,15 +51,14 @@ export async function onRequestGet({ request, env, waitUntil }) {
   // 받은 기사가 하나도 없고 외부 호출도 실패했으면 실패로 돌려 앱이 기존 목록을 그대로 쓰게 함
   if (naverKeys && naver[0]?.status !== "fulfilled" && bing.length === 0) return json({ error: "feed-failed" }, 502);
 
-  const stats = { dropped: 0, keptBySummary: 0 };
+  const stats = { dropped: 0 };
   const relevant = (it) => {
-    const verdict = relevance(it, topic);
-    if (verdict === "summary") stats.keptBySummary += 1;
-    if (!verdict) stats.dropped += 1;
-    return !!verdict;
+    const ok = relevant_(it);
+    if (!ok) stats.dropped += 1;
+    return ok;
   };
   const items = merge(naverItems.filter(relevant), bing.filter(relevant));
-  const response = json({ topic: topic.id, source: naverKeys ? "naver" : "bing", fetchedAt: new Date().toISOString(), stats, items }, 200, {
+  const response = json({ source: naverKeys ? "naver" : "bing", fetchedAt: new Date().toISOString(), stats, items }, 200, {
     "cache-control": `public, max-age=${config.refreshMinutes * 60}`,
   });
   if (cache) waitUntil(cache.put(cacheKey, response.clone()).catch(() => {}));
@@ -114,26 +114,14 @@ async function bingFeed(topic) {
   });
 }
 
-/* ---------- 관련 기사만: 제목 + 요약(기사 첫 문장) 기준 ---------- */
+/* ---------- 관련 기사만: 제목 기준 ---------- */
 
-const has = (text, names) => {
-  const t = (text ?? "").toLowerCase();
-  return names.some((n) => t.includes(n.toLowerCase()));
-};
+const TITLE_NAMES = [...config.group.names, ...config.members.flatMap((m) => m.names), ...(config.titleKeywords ?? [])].map((n) => n.toLowerCase());
 
-/**
- * 본문 어딘가에 이름이 한 번 나온 기사(여러 아티스트 나열·시상식 순위 등)까지 걸리는 것을 줄이기 위해
- * - 제목에 그룹·멤버 이름이 있으면 남김 → "title"
- * - 아니면 요약(보통 "그룹 라이즈(RIIZE)가…" 로 시작하는 첫 문장)에 이름이 있으면 남김 → "summary"
- *   (전체: 그룹 이름, 멤버 필터: 그 멤버 이름)
- * - 둘 다 없으면 뺌 → ""
- */
-function relevance(it, topic) {
-  const groupNames = config.group.names;
-  const titleNames = isGroup(topic) ? [...groupNames, ...config.members.flatMap((m) => m.names)] : [...groupNames, ...topic.names];
-  if (has(it.title, titleNames)) return "title";
-  if (has(it.summary, isGroup(topic) ? groupNames : topic.names)) return "summary";
-  return "";
+/** 제목에 그룹·멤버 이름이나 추가 키워드가 있는 기사만 (여러 아티스트 나열·시상식 순위 같은 기사 제외) */
+function relevant_(it) {
+  const title = (it.title ?? "").toLowerCase();
+  return TITLE_NAMES.some((n) => title.includes(n));
 }
 
 /* ---------- 정리: 기간·출처 거르기, 중복 제거, 썸네일 보강 ---------- */
