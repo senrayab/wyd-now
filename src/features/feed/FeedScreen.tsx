@@ -45,11 +45,11 @@ export default function FeedScreen() {
   const scrappedIds = new Set((scraps ?? []).map((s) => s.newsId));
   const scrappedByLink = new Map((savedNews ?? []).filter((n) => scrappedIds.has(n.id)).map((n) => [n.url, n.id]));
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (fresh = false) => {
     setLoading(true);
     setError(undefined);
     try {
-      setFeed(await fetchFeed(topic));
+      setFeed(await fetchFeed(topic, fresh));
     } catch (e) {
       // 실패해도 기존 목록은 그대로 두고 안내만
       setError(e instanceof Error ? e.message : "뉴스를 불러오지 못했어요.");
@@ -88,7 +88,7 @@ export default function FeedScreen() {
         <HomeLink />
         <h1>{NEWS_CONFIG.title}</h1>
         <div className="header-actions">
-          <button type="button" className="icon-btn" onClick={refresh} disabled={loading} aria-label="새로고침">
+          <button type="button" className="icon-btn" onClick={() => refresh(true)} disabled={loading} aria-label="새로고침">
             <RotateCw size={18} className={loading ? styles.spin : undefined} />
           </button>
         </div>

@@ -28,11 +28,16 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const naverKeys = env?.NAVER_CLIENT_ID && env?.NAVER_CLIENT_SECRET ? { id: env.NAVER_CLIENT_ID, secret: env.NAVER_CLIENT_SECRET } : null;
 
   // 같은 주제는 30분 동안 캐시 (Cache API 를 못 쓰는 환경이면 매번 새로 읽음)
+  // 새로고침 버튼(?fresh=1)은 받은 지 manualRefreshMinutes(2분)가 지났을 때만 새로 받음 → 연속으로 눌러도 한도 보호
   const cacheKey = new Request(`${url.origin}/api/riize-news?topic=${topic.id}&src=${naverKeys ? "naver" : "bing"}`);
   const cache = globalThis.caches?.default;
   if (cache) {
     const hit = await cache.match(cacheKey).catch(() => undefined);
-    if (hit) return hit;
+    if (hit) {
+      if (!url.searchParams.has("fresh")) return hit;
+      const fetchedAt = Date.parse((await hit.clone().json().catch(() => ({}))).fetchedAt ?? "");
+      if (Number.isNaN(fetchedAt) || Date.now() - fetchedAt < config.manualRefreshMinutes * 60 * 1000) return hit;
+    }
   }
 
   // 전체 = 그룹 + 멤버별 검색을 합쳐 중복 제거 (멤버 기사도 전체에 한 번만)

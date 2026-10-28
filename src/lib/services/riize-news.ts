@@ -51,12 +51,16 @@ export function isStale(feed: Feed | null) {
 
 const inflight = new Map<NewsTopicId, Promise<Feed>>();
 
-/** 새로 받기. 같은 주제를 받는 중이면 그 요청을 같이 기다림 */
-export function fetchFeed(topic: NewsTopicId): Promise<Feed> {
+/**
+ * 받기. 같은 주제를 받는 중이면 그 요청을 같이 기다림
+ * - 기본: 서버가 30분 동안 보관한 결과
+ * - fresh(새로고침 버튼): 서버가 받은 지 2분이 지났으면 네이버에서 새로 받음
+ */
+export function fetchFeed(topic: NewsTopicId, fresh = false): Promise<Feed> {
   const running = inflight.get(topic);
   if (running) return running;
   const request = (async () => {
-    const res = await fetch(`/api/riize-news?topic=${encodeURIComponent(topic)}`);
+    const res = await fetch(`/api/riize-news?topic=${encodeURIComponent(topic)}${fresh ? "&fresh=1" : ""}`, fresh ? { cache: "no-store" } : undefined);
     const type = res.headers.get("content-type") ?? "";
     // 함수가 없는 곳(로컬 정적 서버)은 HTML 404 가 옴
     if (!res.ok || !type.includes("application/json")) throw new Error("뉴스를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");

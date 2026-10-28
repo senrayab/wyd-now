@@ -13,5 +13,6 @@
   "days": 7,
   "fetchLimit": 100,
   "pageSize": 20,
-  "refreshMinutes": 30
+  "refreshMinutes": 30,
+  "manualRefreshMinutes": 2
 }
