@@ -776,6 +776,12 @@ form .chip[aria-pressed="true"] {
   gap: 8px;
 }
 
+/* 필수 입력 표시 * */
+.req {
+  margin-left: 2px;
+  color: var(--danger);
+}
+
 .field > label,
 .field > .field-label {
   font-size: 13px;

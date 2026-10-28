@@ -7,7 +7,7 @@ import { Plus, SearchX } from "lucide-react";
 import ImagePicker from "@/components/ImagePicker";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
-import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
+import { ArtistAvatar, Empty, Loading, Req, Switch, Spinner } from "@/components/ui";
 import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import type { ImageChange } from "@/lib/services/image-attach";
@@ -102,7 +102,9 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
       <PageHeader back={existing ? `/vote?id=${existing.id}` : "/votes"} title={existing ? "투표 수정" : "투표 등록"} compact />
       <form className={`stack ${styles.form}`} onSubmit={onSubmit} noValidate>
         <div className="field">
-          <span className="field-label">종류</span>
+          <span className="field-label">
+            종류 <Req />
+          </span>
           <div className={styles.types} role="radiogroup" aria-label="종류">
             {VOTE_TYPES.map((t) => {
               const Icon = t.icon;
@@ -117,7 +119,9 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
         </div>
 
         <div className="field">
-          <label htmlFor="vote-name">투표 제목</label>
+          <label htmlFor="vote-name">
+            투표 제목 <Req />
+          </label>
           <input id="vote-name" className="input" placeholder="예: 엠카운트다운 사전 투표" value={values.name} aria-invalid={!!errors.name} onChange={(e) => set("name", e.target.value)} />
           {errors.name && <span className="error">{errors.name}</span>}
         </div>
@@ -141,12 +145,16 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
           {hasPeriod ? (
             <>
               <div className={styles.when}>
-                <span>시작</span>
+                <span>
+                  시작 <Req />
+                </span>
                 <input type="date" className="input" aria-label="시작 날짜" value={values.startDate ?? ""} aria-invalid={!!errors.startDate} onChange={(e) => setStartDate(e.target.value)} />
                 <input type="time" className="input" aria-label="시작 시각" value={values.startTime ?? ""} aria-invalid={!!errors.startDate} onChange={(e) => set("startTime", e.target.value)} />
               </div>
               <div className={styles.when}>
-                <span>마감</span>
+                <span>
+                  마감 <Req />
+                </span>
                 <input type="date" className="input" aria-label="마감 날짜" value={values.endDate ?? ""} aria-invalid={!!errors.endDate} onChange={(e) => set("endDate", e.target.value)} />
                 <input type="time" className="input" aria-label="마감 시각" value={values.endTime ?? ""} aria-invalid={!!errors.endDate} onChange={(e) => set("endTime", e.target.value)} />
               </div>

@@ -64,6 +64,15 @@ export function Empty({ icon: Icon, children, action }: { icon: LucideIcon; chil
   );
 }
 
+/** 필수 입력 표시: 항목명 옆 * (읽기 프로그램에는 "필수"로) */
+export function Req() {
+  return (
+    <span className="req" aria-label="필수">
+      *
+    </span>
+  );
+}
+
 /** 버튼 안에 넣는 작은 회전 원 (글자색을 따라감) */
 export function Spinner({ size = 14 }: { size?: number }) {
   return <span className="spinner" style={{ width: size, height: size }} aria-hidden />;

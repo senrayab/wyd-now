@@ -8,7 +8,7 @@ import ImagePicker from "@/components/ImagePicker";
 import LinksEditor from "@/components/LinksEditor";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
-import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
+import { ArtistAvatar, Empty, Loading, Req, Switch, Spinner } from "@/components/ui";
 import { CATEGORIES } from "@/lib/categories";
 import { datePart, isDateKey, timePart, todayKey } from "@/lib/date";
 import { useFocusArtist } from "@/lib/focus";
@@ -113,7 +113,9 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
 
       <form className={`stack ${styles.form}`} onSubmit={onSubmit} noValidate>
         <div className="field">
-          <span className="field-label">카테고리</span>
+          <span className="field-label">
+            카테고리 <Req />
+          </span>
           <div className={styles.categories} role="radiogroup" aria-label="카테고리">
             {CATEGORIES.map((c) => {
               const Icon = c.icon;
@@ -138,7 +140,9 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
         </div>
 
         <div className="field">
-          <label htmlFor="title">제목</label>
+          <label htmlFor="title">
+            제목 <Req />
+          </label>
           <input id="title" className="input" placeholder="예: 2nd 월드투어 서울 공연" value={values.title} aria-invalid={!!errors.title} onChange={(e) => set("title", e.target.value)} />
           {errors.title && <span className="error">{errors.title}</span>}
         </div>
@@ -173,7 +177,9 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
           </div>
           {(["startAt", "endAt"] as const).map((key) => (
             <div key={key} className={styles.stampRow}>
-              <label htmlFor={`${key}-date`}>{key === "startAt" ? "시작" : "종료"}</label>
+              <label htmlFor={`${key}-date`}>
+                {key === "startAt" ? "시작" : "종료"} <Req />
+              </label>
               <div className={styles.stamp} data-all-day={values.allDay}>
                 <input id={`${key}-date`} type="date" className="input" value={datePart(values[key])} onChange={(e) => e.target.value && setStamp(key, "date", e.target.value)} />
                 {!values.allDay && (
