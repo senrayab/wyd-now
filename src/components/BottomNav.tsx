@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Ellipsis, Newspaper, Plus, Vote, type LucideIcon } from "lucide-react";
+import { CalendarDays, CalendarPlus, Ellipsis, House, Plus, Vote, type LucideIcon } from "lucide-react";
 import styles from "./BottomNav.module.css";
 
 interface Tab {
@@ -13,10 +14,11 @@ interface Tab {
   match: (p: string) => boolean;
 }
 
-/** 가운데 + 버튼을 기준으로 왼쪽 2개 · 오른쪽 2개 (홈은 각 탭 화면 제목 앞의 홈 아이콘으로) */
+/** 가운데 + 버튼을 기준으로 왼쪽 2개(홈 · 캘린더) · 오른쪽 2개(투표 · 더보기) */
 const LEFT: Tab[] = [
+  // 뉴스는 홈의 ‘최근 소식 → 전체’로 들어가므로 홈으로 표시
+  { href: "/", label: "홈", icon: House, match: (p) => p === "/" || p.startsWith("/feed") },
   { href: "/calendar", label: "캘린더", icon: CalendarDays, match: (p) => p.startsWith("/calendar") || p.startsWith("/schedule") || p === "/search" },
-  { href: "/feed", label: "뉴스", icon: Newspaper, match: (p) => p.startsWith("/feed") },
 ];
 const RIGHT: Tab[] = [
   { href: "/votes", label: "투표", icon: Vote, match: (p) => p === "/votes" || p === "/vote" || p.startsWith("/vote/") },
@@ -30,6 +32,17 @@ export default function BottomNav({ hidden = false }: { hidden?: boolean }) {
   const activeIndex = TABS.findIndex((t) => t.match(pathname));
   const tabRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const indicatorRef = useRef<HTMLSpanElement>(null);
+  // + 버튼: 누르면 위로 동그란 등록 버튼(일정 · 투표)이 펼쳐짐
+  const [addOpen, setAddOpen] = useState(false);
+  const [openedAt, setOpenedAt] = useState(pathname);
+  // 다른 화면으로 이동하면 닫힘
+  if (addOpen && openedAt !== pathname) setAddOpen(false);
+  useEffect(() => {
+    if (!addOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setAddOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [addOpen]);
 
   // 선택 배경을 선택된 탭의 위치·너비로 옮김 (CSS transition 으로 미끄러지듯 이동)
   useLayoutEffect(() => {
@@ -100,9 +113,36 @@ export default function BottomNav({ hidden = false }: { hidden?: boolean }) {
         <span className={styles.gap} aria-hidden />
         <div className={styles.group}>{RIGHT.map((t, i) => renderTab(t, LEFT.length + i))}</div>
       </div>
-      <Link href="/schedule/new" className={styles.add} aria-label="일정 등록">
+      {/* 펼쳐지는 등록 버튼: + 위로 부채꼴 (왼쪽 일정 · 오른쪽 투표) */}
+      <div className={styles.addMenu} data-open={addOpen} aria-hidden={!addOpen || undefined} inert={!addOpen || undefined}>
+        <Link href="/schedule/new" className={styles.addItem} data-pos="left" onClick={() => setAddOpen(false)}>
+          <span className={styles.addCircle}>
+            <CalendarPlus size={22} />
+          </span>
+          <span className={styles.addLabel}>일정 등록</span>
+        </Link>
+        <Link href="/vote/new" className={styles.addItem} data-pos="right" onClick={() => setAddOpen(false)}>
+          <span className={styles.addCircle}>
+            <Vote size={22} />
+          </span>
+          <span className={styles.addLabel}>투표 등록</span>
+        </Link>
+      </div>
+      <button
+        type="button"
+        className={styles.add}
+        data-open={addOpen}
+        aria-label={addOpen ? "등록 메뉴 닫기" : "등록"}
+        aria-expanded={addOpen}
+        onClick={() => {
+          setOpenedAt(pathname);
+          setAddOpen((v) => !v);
+        }}
+      >
         <Plus size={24} strokeWidth={2} />
-      </Link>
+      </button>
+      {/* 바깥을 누르면 닫힘 (하단 바의 transform 에 갇히지 않게 body 로) */}
+      {addOpen && createPortal(<div className={styles.addBackdrop} onClick={() => setAddOpen(false)} aria-hidden />, document.body)}
     </nav>
   );
 }

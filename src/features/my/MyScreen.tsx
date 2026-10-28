@@ -1,18 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, ChevronRight, Lock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bookmark, ChevronRight, Lock, Vote } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
 import { MySpaceCard } from "@/features/artist/ArtistDetail";
 import NewsTimeline from "@/features/news/NewsTimeline";
+import { VoteTodoRow } from "@/features/vote/VoteCard";
 import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import type { NewsItem } from "@/lib/storage/types";
+import { sortVotes, voteStatus } from "@/lib/services/vote-service";
+import { useVoteBookmarks } from "@/lib/vote-bookmarks";
 import { useVoteDone } from "@/lib/vote-done";
 import styles from "./My.module.css";
 
-/** /my — 이 기기에만 저장되는 개인 공간: 스크랩한 기사 · 팔로우 · 오늘 투표 */
+/** /my — 이 기기에만 저장되는 개인 공간: 북마크한 투표(오늘 완료 체크) · 스크랩한 기사 · 팔로우 */
 export default function MyScreen() {
   const { artists, map } = useArtists();
   const { data: scraps, loading } = useStoreQuery((s) => s.scraps.list(), "scraps");
@@ -22,6 +26,19 @@ export default function MyScreen() {
   const { focus } = useFocusArtist();
   const { data: focusSpace } = useStoreQuery((s) => (focus ? s.mySpaces.get(focus.id) : Promise.resolve(undefined)), `space:${focus?.id}`);
   const { data: focusSchedules } = useStoreQuery((s) => (focus ? s.schedules.listByArtist(focus.id) : Promise.resolve([])), `artist-schedules:${focus?.id}`);
+
+  const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
+  const { ids: bookmarkIds, keepOnly } = useVoteBookmarks();
+  const [editingVotes, setEditingVotes] = useState(false);
+  // 북마크한 투표: 마감했거나 삭제된 것은 빼고, 진행 중 → 예정 → 상시 순
+  const myVotes = sortVotes((votes ?? []).filter((v) => bookmarkIds.includes(v.id) && voteStatus(v).kind !== "closed"));
+  // 마감·삭제된 투표의 북마크는 저장소에서도 정리 (투표 목록을 다 읽은 뒤에만)
+  useEffect(() => {
+    if (!votes) return;
+    const live = new Set(votes.filter((v) => voteStatus(v).kind !== "closed").map((v) => v.id));
+    keepOnly((id) => live.has(id));
+  }, [votes, keepOnly]);
+  const isEditing = editingVotes && myVotes.length > 0;
 
   const byId = new Map((news ?? []).map((n) => [n.id, n]));
   const scrapped = (scraps ?? []).map((s) => byId.get(s.newsId)).filter((n): n is NewsItem => !!n);
@@ -55,13 +72,48 @@ export default function MyScreen() {
             <b className="num">{followed.length}</b>
             <small>팔로우 아티스트</small>
           </Link>
-          <Link href="/votes" className="card">
+          <Link href="#my-votes" className="card">
             <span className="eyebrow">Today</span>
             <b className="num">{votedToday}</b>
             <small>투표 완료</small>
           </Link>
         </div>
       )}
+
+      <section className="section" id="my-votes">
+        <div className="section-head">
+          <h2>
+            북마크한 투표 {myVotes.length > 0 && <span className="muted num">{myVotes.length}</span>}
+          </h2>
+          {myVotes.length > 0 ? (
+            <button type="button" className={styles.editBtn} onClick={() => setEditingVotes((v) => !v)} aria-pressed={isEditing}>
+              {isEditing ? "완료" : "편집"}
+            </button>
+          ) : (
+            <Link href="/votes">
+              투표 보기 <ChevronRight size={14} />
+            </Link>
+          )}
+        </div>
+        {myVotes.length ? (
+          <>
+            <div className="stack">
+              {myVotes.map((v) => (
+                <VoteTodoRow key={v.id} vote={v} editing={isEditing} />
+              ))}
+            </div>
+            <p className={styles.note}>오늘 투표한 곳은 체크해 두세요. 체크는 날이 바뀌면 풀리고, 투표 기간이 끝나면 목록에서 자동으로 빠져요.</p>
+          </>
+        ) : (
+          <div className="card">
+            <Empty icon={Vote} action={<Link href="/votes" className="btn btn-primary btn-sm">투표 보러 가기</Link>}>
+              투표 목록에서 북마크한 투표가 여기에 모여요.
+              <br />
+              매일 투표했는지 체크할 수 있어요.
+            </Empty>
+          </div>
+        )}
+      </section>
 
       <section className="section">
         <div className="section-head">

@@ -14,9 +14,11 @@ interface Props {
   showDate?: boolean;
   /** 시간대별로 묶인 목록 안에서는 시간을 생략 */
   hideTime?: boolean;
+  /** 지난 일정: 비활성 모습(흐린 배경·글자) */
+  past?: boolean;
 }
 
-export default function ScheduleRow({ schedule, artists, hour12, showDate, hideTime }: Props) {
+export default function ScheduleRow({ schedule, artists, hour12, showDate, hideTime, past }: Props) {
   const category = getCategory(schedule.category);
   const Icon = category.icon;
   const { url } = useImageUrl(schedule.imageId);
@@ -24,7 +26,7 @@ export default function ScheduleRow({ schedule, artists, hour12, showDate, hideT
   const sub = [names, schedule.place].filter(Boolean).join(" · ");
 
   return (
-    <Link href={`/schedule?id=${schedule.id}`} className={styles.row}>
+    <Link href={`/schedule?id=${schedule.id}`} className={styles.row} data-past={past || undefined}>
       {url ? (
         // eslint-disable-next-line @next/next/no-img-element -- IndexedDB blob URL
         <img src={url} alt="" className={styles.thumb} />

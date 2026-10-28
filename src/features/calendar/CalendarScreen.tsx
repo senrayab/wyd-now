@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Clock3, Inbox, Plus, Search, X } from "lucide-react";
-import HomeLink from "@/components/HomeLink";
+import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Clock3, Inbox, List, Plus, Search, X } from "lucide-react";
 import ScheduleRow from "@/components/ScheduleRow";
 import { Empty, Loading } from "@/components/ui";
 import { CATEGORIES, getCategory, isCategoryId } from "@/lib/categories";
@@ -35,15 +34,15 @@ export default function CalendarScreen() {
     setParams({ view: v });
   };
 
-  // 보기 방식 › 그 보기의 세부 조작(월 이동 / 기간)을 한 줄에
+  // 보기 방식(아이콘) › 그 보기의 세부 조작(월 이동 / 기간)을 한 줄에
   const switcher = (
     <>
       <div className="segmented" role="group" aria-label="보기 방식">
-        <button type="button" aria-pressed={view === "month"} onClick={() => switchView("month")}>
-          월간
+        <button type="button" aria-pressed={view === "month"} onClick={() => switchView("month")} aria-label="월간" title="월간">
+          <CalendarDays size={17} />
         </button>
-        <button type="button" aria-pressed={view === "list"} onClick={() => switchView("list")}>
-          목록
+        <button type="button" aria-pressed={view === "list"} onClick={() => switchView("list")} aria-label="목록" title="목록">
+          <List size={17} />
         </button>
       </div>
       <ChevronRight size={15} className={styles.toolbarSep} aria-hidden />
@@ -53,7 +52,6 @@ export default function CalendarScreen() {
   return (
     <main>
       <header className="page-header">
-        <HomeLink />
         <h1>캘린더</h1>
         <div className="header-actions">
           <Link href="/search" className="icon-btn" aria-label="일정 검색">
@@ -257,11 +255,12 @@ function ListView({
     <>
       <div className={styles.toolbar}>
         {switcher}
-        <div className="segmented" role="group" aria-label="기간">
-          <button type="button" aria-pressed={!past} onClick={() => onChange({ range: null })}>
+        {/* 아래 카테고리 칩과 겹쳐 보이지 않게 글자 탭 */}
+        <div className="tabs" role="tablist" aria-label="기간">
+          <button type="button" role="tab" aria-selected={!past} onClick={() => onChange({ range: null })}>
             다가오는
           </button>
-          <button type="button" aria-pressed={past} onClick={() => onChange({ range: "past" })}>
+          <button type="button" role="tab" aria-selected={past} onClick={() => onChange({ range: "past" })}>
             지난 일정
           </button>
         </div>
@@ -304,7 +303,7 @@ function ListView({
               </div>
               <div className="stack">
                 {items.map((s) => (
-                  <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate />
+                  <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate past={past} />
                 ))}
               </div>
             </section>

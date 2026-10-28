@@ -49,3 +49,17 @@
 .mySpace > :global(section) {
   margin-top: 0;
 }
+
+/* 북마크한 투표: 편집 / 완료 */
+.editBtn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.note {
+  margin: 10px 4px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}

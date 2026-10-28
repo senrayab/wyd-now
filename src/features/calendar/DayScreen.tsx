@@ -38,17 +38,17 @@ export default function DayScreen() {
 
   return (
     <main>
-      <header className={styles.header}>
+      {/* 다른 화면과 같은 머리글 (제목 위치·크기를 맞춤) */}
+      <header className="page-header">
         <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
-          <ChevronLeft size={20} />
+          <ChevronLeft size={22} />
         </button>
-        <div className={styles.titleBlock}>
-          <h1>타임라인</h1>
-          <p>하루 일정을 시간순으로 확인해요.</p>
+        <h1>타임라인</h1>
+        <div className="header-actions">
+          <Link href={`/calendar?date=${date}`} className="icon-btn" aria-label="월간 캘린더">
+            <CalendarDays size={18} />
+          </Link>
         </div>
-        <Link href={`/calendar?date=${date}`} className="icon-btn" aria-label="월간 캘린더">
-          <CalendarDays size={18} />
-        </Link>
       </header>
 
       <div className={styles.monthRow}>

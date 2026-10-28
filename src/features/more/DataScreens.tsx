@@ -125,6 +125,7 @@ export function StorageScreen() {
     const owners = [
       ...(await s.schedules.list()).map((x) => x.imageId),
       ...(await s.artists.list()).map((x) => x.imageId),
+      ...(await s.votes.list()).map((x) => x.imageId),
       ...spaces.flatMap((sp) => sp.photoIds),
     ].filter((x): x is string => !!x);
     const images = await Promise.all(owners.map((id) => s.images.get(id)));

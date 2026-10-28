@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ClientGate from "@/components/ClientGate";
 import VoteFormScreen from "@/features/vote/VoteForm";
 
-export const metadata: Metadata = { title: "투표 사이트 등록" };
+export const metadata: Metadata = { title: "투표 등록" };
 
 export default function Page() {
   return (

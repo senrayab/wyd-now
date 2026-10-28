@@ -13,7 +13,6 @@ export interface Prefs {
   weekStart: 0 | 1;
   hour12: boolean;
   calendarView: "month" | "list";
-  voteLayout: "grid" | "list";
   /** 월간 캘린더에 투표 마감일을 옅은 점으로 표시 */
   showVoteDeadlines: boolean;
   /** 내 아티스트: "auto"(한 팀뿐이면 그 팀) · "all"(전체 보기) · 아티스트 id */
@@ -27,7 +26,6 @@ export const DEFAULT_PREFS: Prefs = {
   weekStart: 0,
   hour12: false,
   calendarView: "month",
-  voteLayout: "grid",
   showVoteDeadlines: false,
   focusArtist: "auto",
 };

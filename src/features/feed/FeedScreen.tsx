@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bookmark, Newspaper, RotateCw } from "lucide-react";
+import { Bookmark, ChevronLeft, Newspaper, RotateCw } from "lucide-react";
 import { useFeedback } from "@/components/Feedback";
-import HomeLink from "@/components/HomeLink";
+import { useBack } from "@/components/PageHeader";
 import { Empty, Loading } from "@/components/ui";
 import { useFocusArtist } from "@/lib/focus";
 import { useStoreQuery } from "@/lib/hooks";
@@ -27,9 +27,10 @@ import styles from "./Feed.module.css";
 
 const memberLabel = new Map(NEWS_CONFIG.members.map((m) => [m.id, m.label]));
 
-/** /feed — 뉴스 (최근 7일 기사 자동 수집, 목록 하나 + 멤버 이름표) */
+/** /feed — 뉴스 (최근 7일 기사 자동 수집, 목록 하나 + 멤버 이름표). 홈의 최근 소식 → 전체로 들어옴 */
 export default function FeedScreen() {
   const topic = FEED_TOPIC;
+  const back = useBack("/");
   // 이 기기에 저장해 둔 목록을 먼저 보여 줌
   const [feed, setFeed] = useState<Feed | null>(() => readFeedCache(topic));
   const [loading, setLoading] = useState(false);
@@ -77,7 +78,10 @@ export default function FeedScreen() {
   return (
     <main>
       <header className="page-header">
-        <HomeLink />
+        {/* 홈의 ‘최근 소식 → 전체’로 들어오는 화면이라 뒤로(홈) */}
+        <button type="button" className="icon-btn back" onClick={back} aria-label="뒤로">
+          <ChevronLeft size={22} />
+        </button>
         <h1>{NEWS_CONFIG.title}</h1>
         <div className="header-actions">
           <button type="button" className="icon-btn" onClick={() => refresh(true)} disabled={loading} aria-label="새로고침">

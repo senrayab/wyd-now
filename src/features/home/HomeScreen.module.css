@@ -264,103 +264,12 @@
   color: var(--muted);
 }
 
-/* 작은 위젯 */
-.widgets {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-  margin-top: 14px;
+/* 투표하러 가기: 홈 카드들 사이 버튼 하나 */
+.voteBtn {
+  margin-top: 12px;
+  gap: 8px;
 }
 
-.widget {
-  min-height: 160px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 18px;
-}
-
-.big {
-  margin: 6px 0 auto;
-  font-size: 38px;
-  font-weight: 300;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.widget strong {
-  margin-top: auto;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.widget small {
-  font-size: 12px;
-  color: var(--muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.faces {
-  display: grid;
-  grid-template-columns: repeat(2, 34px);
-  gap: 6px;
-}
-
-/* 투표 */
-.votes {
-  margin-top: 14px;
-  padding: 20px 20px 8px;
-}
-
-.votesHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.votesHead h2 {
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.voteRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-}
-
-.voteRow + .voteRow {
-  border-top: 1px solid var(--line);
-}
-
-.voteMain {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.voteMain > span:last-child {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.voteMain strong {
-  font-size: 14.5px;
-  font-weight: 500;
-}
-
-.voteMain small {
-  font-size: 12px;
-  color: var(--muted);
-}
 
 /* 비어 있을 때 */
 .onboard {

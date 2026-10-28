@@ -104,6 +104,7 @@ export async function loadUrgentVoteSample(riizeId: string) {
   const today = todayKey();
   await votes.create({
     name: URGENT_NAME,
+    site: "Mnet Plus",
     url: "https://www.mnetplus.world/",
     type: "musicshow",
     description: "※ 마감 임박 표시를 확인하기 위한 샘플이에요. 실제 투표 일정이 아니에요.",

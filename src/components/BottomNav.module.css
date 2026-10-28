@@ -19,6 +19,8 @@
 
 .bar {
   position: relative;
+  /* 펼쳐지는 등록 버튼(.addMenu)보다 위: 버튼이 바 뒤에서 올라옴 */
+  z-index: 1;
   display: flex;
   align-items: center;
   height: calc(70px + var(--safe-bottom));
@@ -161,16 +163,127 @@
   color: var(--on-inverse);
   box-shadow: none;
   transition: transform 0.15s ease;
+  z-index: 2;
 }
 
 .add:active {
   transform: translateX(-50%) scale(0.94);
 }
 
+/* 열리면 + 가 × 로 돌아감 */
+.add > svg {
+  transition: transform 0.25s ease;
+}
+
+.add[data-open="true"] > svg {
+  transform: rotate(45deg);
+}
+
+/* 펼쳐지는 등록 버튼 */
+.addMenu {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  width: 0;
+  height: 0;
+  z-index: 0;
+}
+
+/*
+ * 휠처럼: 두 버튼이 + 중심의 같은 원(반지름 110) 위를 시계 방향으로 함께 돌아 올라옴
+ * rotate(각) → 반지름만큼 위로 → 반대로 rotate(아이콘·글자는 똑바로). 각은 위쪽 0°, 시계 방향 +
+ * 닫힘 각은 바 뒤(아래쪽)라 보이지 않고, 열리면 180° 돌아 왼쪽 위(-45°) · 오른쪽 위(45°)에 멈춤
+ */
+.addItem {
+  --a: var(--from);
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  width: 52px;
+  height: 52px;
+  transform: rotate(var(--a)) translateY(-110px) rotate(calc(var(--a) * -1)) scale(0.7);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.42s cubic-bezier(0.3, 1.25, 0.5, 1), opacity 0.2s ease;
+}
+
+.addItem[data-pos="left"] {
+  --from: -225deg;
+  --to: -45deg;
+}
+
+.addItem[data-pos="right"] {
+  --from: -135deg;
+  --to: 45deg;
+}
+
+.addMenu[data-open="true"] .addItem {
+  --a: var(--to);
+  transform: rotate(var(--a)) translateY(-110px) rotate(calc(var(--a) * -1)) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.addCircle {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--raised);
+  color: var(--ink);
+  box-shadow: var(--float);
+}
+
+.addItem:active .addCircle {
+  scale: 0.94;
+}
+
+/* 이름표: 원 아래 가운데 */
+.addLabel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  /* 딤 위라 배경 없이 흰 글씨 */
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 다크 테마: 순백은 눈부셔서 조금 낮춤 */
+:global(:root[data-theme="dark"]) .addLabel {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(:root:not([data-theme="light"])) .addLabel {
+    color: rgba(255, 255, 255, 0.78);
+  }
+}
+
+/* 바깥 어둡게 (하단 바보다 아래) */
+.addBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: rgba(20, 22, 26, 0.48);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .indicator[data-ready="true"],
   .tab,
-  .wrap {
+  .wrap,
+  .addItem,
+  .add > svg {
     transition: none;
   }
 }

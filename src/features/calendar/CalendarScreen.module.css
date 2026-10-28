@@ -6,9 +6,28 @@
   margin: 0 0 14px;
 }
 
-/* 이 줄에서는 탭을 조금 좁게 (작은 화면에서도 한 줄에) */
+/* 보기 방식: 아이콘 두 개 */
 .toolbar :global(.segmented) button {
-  padding: 0 12px;
+  display: grid;
+  place-items: center;
+  /* 높이(34px)와 같게: 선택 배경이 정원 */
+  width: 34px;
+  padding: 0;
+}
+
+/* 기간: 배경 없는 글자 탭 (선택된 쪽 아래 점) */
+.toolbar :global(.tabs) {
+  gap: 16px;
+  padding: 0 0 0 4px;
+}
+
+.toolbar :global(.tabs) button {
+  height: 34px;
+  padding: 0;
+}
+
+.toolbar :global(.tabs) button::after {
+  bottom: 2px;
 }
 
 .toolbarSep {
@@ -20,7 +39,7 @@
 .monthNav {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
 }
 
 .monthNav :global(.icon-btn.sm) {

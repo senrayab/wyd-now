@@ -10,6 +10,7 @@ import { Zoomable } from "@/components/ImageZoom";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
 import { getCategory } from "@/lib/categories";
 import { datePart, dDay, durationLabel, formatDate, formatTime, timePart } from "@/lib/date";
+import { artistsToShow, useFocusArtist } from "@/lib/focus";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
 import { tint } from "@/lib/palette";
 import { usePrefs } from "@/lib/prefs";
@@ -24,6 +25,7 @@ export default function ScheduleDetail() {
   const back = useBack("/calendar");
   const { toast, confirm } = useFeedback();
   const { map } = useArtists();
+  const { focus } = useFocusArtist();
   const { data: schedule, loading } = useStoreQuery((s) => s.schedules.get(id), `schedule:${id}`);
   const { url: imageUrl } = useImageUrl(schedule?.imageId);
 
@@ -39,7 +41,7 @@ export default function ScheduleDetail() {
   }
 
   const category = getCategory(schedule.category);
-  const artists = schedule.artistIds.map((a) => map.get(a)).filter((a) => !!a);
+  const artists = artistsToShow(schedule.artistIds.map((a) => map.get(a)).filter((a) => !!a), focus);
   const startDate = datePart(schedule.startAt);
   const endDate = datePart(schedule.endAt);
   const time = (stamp: string) => formatTime(timePart(stamp), prefs.hour12);

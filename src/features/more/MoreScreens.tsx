@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Bookmark, ChevronRight, Sparkles } from "lucide-react";
-import HomeLink from "@/components/HomeLink";
 import PageHeader from "@/components/PageHeader";
 import { ArtistAvatar } from "@/components/ui";
 import { useFocusArtist } from "@/lib/focus";
@@ -14,7 +13,6 @@ export function MoreHome() {
   return (
     <main>
       <header className="page-header">
-        <HomeLink />
         <h1>더보기</h1>
       </header>
 

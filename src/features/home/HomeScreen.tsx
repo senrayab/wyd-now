@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Search, SlidersHorizontal, Vote } from "lucide-react";
 import Illustration from "@/components/Illustration";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Loading, Spinner } from "@/components/ui";
@@ -12,7 +12,6 @@ import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import { loadRiizeTestData } from "@/lib/services/riize-test-data";
-import { getVoteType, sortVotes, voteStatus } from "@/lib/services/vote-service";
 import type { Artist, Schedule } from "@/lib/storage/types";
 import { FEED_TOPIC, fetchFeed, isStale, readFeedCache, type Feed } from "@/lib/services/riize-news";
 import { FeedList } from "@/features/feed/FeedScreen";
@@ -29,8 +28,6 @@ export default function HomeScreen() {
   const today = todayKey();
   const { artists, map, loading: artistsLoading } = useArtists();
   const { data, loading } = useStoreQuery((s) => s.schedules.listInRange(addDays(today, -7), addDays(today, 120)), `home:${today}`);
-  const { data: spaces } = useStoreQuery((s) => s.mySpaces.list(), "spaces");
-  const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
   const { data: allNews } = useStoreQuery((s) => s.news.list(), "news");
   const { focus } = useFocusArtist();
   const { toast } = useFeedback();
@@ -54,8 +51,6 @@ export default function HomeScreen() {
   const weekItems = all.filter((s) => datePart(s.startAt) <= week[6] && datePart(s.endAt) >= today);
   const upcoming = all.filter((s) => s.endAt >= now || (s.allDay && datePart(s.endAt) >= today));
   const next = upcoming[0];
-  const followed = artists.filter((a) => spaces?.some((sp) => sp.artistId === a.id && sp.followed));
-  const liveVotes = sortVotes(votes ?? []).filter((v) => voteStatus(v).kind !== "closed" && inFocus(v.artistIds, focus));
   const isEmpty = !loading && !artistsLoading && all.length === 0 && artists.length === 0;
   const listed = range === "today" ? todays : weekItems;
   const shown = expanded ? listed : listed.slice(0, AGENDA_LIMIT);
@@ -188,74 +183,10 @@ export default function HomeScreen() {
           {/* 다음 일정 */}
           {next && <NextCard schedule={next} artists={map} hour12={prefs.hour12} />}
 
-          {/* 작은 위젯 두 개 */}
-          <div className={styles.widgets}>
-            <Link href={next ? `/schedule?id=${next.id}` : "/calendar"} className={`card ${styles.widget}`}>
-              <span className="eyebrow">Next</span>
-              <b className={`${styles.big} num`}>{next ? dDay(datePart(next.startAt)) : "—"}</b>
-              <small>{next ? next.title : "예정된 일정 없음"}</small>
-            </Link>
-            {focus ? (
-              // 한 팀 전용 모드: 팔로우 대신 내 아티스트 바로가기
-              <Link href={`/artist?id=${focus.id}`} className={`card ${styles.widget}`}>
-                <span className={styles.faces}>
-                  <ArtistAvatar artist={focus} size={34} />
-                </span>
-                <strong>{focus.name}</strong>
-                <small>다가오는 일정 {upcoming.length}개</small>
-              </Link>
-            ) : (
-              <Link href="/artists" className={`card ${styles.widget}`}>
-                <span className={styles.faces}>
-                  {(followed.length ? followed : artists).slice(0, 4).map((a) => (
-                    <ArtistAvatar key={a.id} artist={a} size={34} />
-                  ))}
-                </span>
-                <strong>팔로우 {followed.length}팀</strong>
-                <small>아티스트 {artists.length}팀 등록</small>
-              </Link>
-            )}
-          </div>
-
-          {/* 투표 */}
-          <section className={`card ${styles.votes}`}>
-            <div className={styles.votesHead}>
-              <h2>투표</h2>
-              <Link href="/votes" className="btn btn-soft btn-sm">
-                전체 보기
-              </Link>
-            </div>
-            {liveVotes.length ? (
-              liveVotes.slice(0, 4).map((v) => {
-                const type = getVoteType(v.type);
-                const Icon = type.icon;
-                return (
-                  <div key={v.id} className={styles.voteRow}>
-                    <Link href={`/vote?id=${v.id}`} className={styles.voteMain}>
-                      <span className="list-icon">
-                        <Icon size={17} />
-                      </span>
-                      <span>
-                        <strong>{v.name}</strong>
-                        <small className="num">
-                          {voteStatus(v).label} · {type.label}
-                        </small>
-                      </span>
-                    </Link>
-                    {v.url && (
-                      <a href={v.url} target="_blank" rel="noopener noreferrer" className="round-action" aria-label={`${v.name} 열기`}>
-                        <ArrowUpRight size={15} />
-                      </a>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <p className={styles.none}>
-                모아 둔 투표 사이트가 없어요. <Link href="/votes">투표 사이트 모으기</Link>
-              </p>
-            )}
-          </section>
+          {/* 투표: 목록은 투표 메뉴에서, 홈에서는 바로 가는 버튼 하나 */}
+          <Link href="/votes" className={`btn btn-soft btn-block ${styles.voteBtn}`}>
+            <Vote size={17} /> 투표하러 가기
+          </Link>
 
           {/* 최근 소식: 뉴스 최신 기사 몇 개 (못 받았으면 기사 모음) */}
           <section className="section">

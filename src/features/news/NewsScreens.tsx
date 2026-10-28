@@ -10,7 +10,7 @@ import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
 import { formatDate, todayKey } from "@/lib/date";
-import { inFocus, useFocusArtist } from "@/lib/focus";
+import { artistsToShow, inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
 import { convertToWebP } from "@/lib/image/image-service";
 import type { ImageChange } from "@/lib/services/image-attach";
@@ -88,6 +88,7 @@ export function NewsDetailScreen() {
   const router = useRouter();
   const { toast, confirm } = useFeedback();
   const { map } = useArtists();
+  const { focus } = useFocusArtist();
   const { data: item, loading } = useStoreQuery((s) => s.news.get(id), `news:${id}`);
   const { url: imageUrl } = useImageUrl(item?.imageId);
 
@@ -103,7 +104,7 @@ export function NewsDetailScreen() {
     );
   }
 
-  const linked = item.artistIds.map((a) => map.get(a)).filter((a) => !!a);
+  const linked = artistsToShow(item.artistIds.map((a) => map.get(a)).filter((a) => !!a), focus);
   const source = item.source || hostOf(item.url);
 
   async function onShare() {

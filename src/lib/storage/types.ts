@@ -24,7 +24,8 @@ export type ImageOwner =
   | { kind: "artist"; id: string }
   | { kind: "my-photo"; id: string } // id = artistId
   | { kind: "news"; id: string }
-  | { kind: "release"; id: string };
+  | { kind: "release"; id: string }
+  | { kind: "vote"; id: string };
 
 export interface StoredImage {
   id: string;
@@ -94,12 +95,20 @@ export interface VoteSite {
   name: string;
   url: string;
   type: VoteType;
-  /** 투표 방법·대상 같은 공개 안내 */
+  /** 투표 사이트 이름 (예: Mnet Plus). 이전 데이터에는 없을 수 있어 주소로 대신 표시 */
+  site?: string;
+  /** 투표 대상·주제 */
+  target?: string;
+  /** 투표 안내: 참여 방법 · 유의사항 */
   description?: string;
+  imageId?: string;
   artistIds: string[];
-  /** YYYY-MM-DD, 선택 */
+  /** YYYY-MM-DD, 선택 (둘 다 없으면 상시) */
   startDate?: string;
   endDate?: string;
+  /** HH:mm 한국 시간. 없으면 시작 00:00 · 마감 23:59 */
+  startTime?: string;
+  endTime?: string;
   createdAt: string;
   updatedAt: string;
 }
