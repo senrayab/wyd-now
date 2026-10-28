@@ -125,12 +125,6 @@
   background: var(--fill);
 }
 
-.thumbEmpty {
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-}
-
 .note {
   margin: 14px 4px 0;
   font-size: 12px;

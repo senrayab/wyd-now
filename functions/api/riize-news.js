@@ -136,8 +136,15 @@ function hostOf(u) {
   }
 }
 
-/** 네이버는 언론사 이름을 주지 않아서 우선 주소(도메인)로 표시. 앱이 썸네일을 읽을 때 매체명으로 바꿈 */
-const hostLabel = (u) => hostOf(u);
+/**
+ * 네이버는 언론사 이름을 주지 않아서 설정의 sourceNames(주소 → 매체명)로 바꿈.
+ * 표에 없으면 주소로 두고, 앱이 원문을 읽을 수 있으면 매체명으로 바꿈
+ */
+const SOURCE_NAMES = Object.entries(config.sourceNames ?? {});
+const hostLabel = (u) => {
+  const host = hostOf(u);
+  return SOURCE_NAMES.find(([d]) => host === d || host.endsWith(`.${d}`))?.[1] ?? host;
+};
 
 const excluded = (u) => {
   const host = hostOf(u);

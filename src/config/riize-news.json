@@ -1,19 +1,149 @@
 {
   "title": "뉴스",
-  "group": { "id": "all", "label": "전체", "query": "RIIZE", "names": ["RIIZE", "라이즈"] },
+  "group": {
+    "id": "all",
+    "label": "전체",
+    "query": "RIIZE",
+    "names": [
+      "RIIZE",
+      "라이즈"
+    ]
+  },
   "members": [
-    { "id": "shotaro", "label": "쇼타로", "names": ["쇼타로", "SHOTARO"] },
-    { "id": "eunseok", "label": "은석", "names": ["은석", "EUNSEOK"] },
-    { "id": "sungchan", "label": "성찬", "names": ["성찬", "SUNGCHAN"] },
-    { "id": "wonbin", "label": "원빈", "names": ["원빈", "WONBIN"] },
-    { "id": "sohee", "label": "소희", "names": ["소희", "SOHEE"] },
-    { "id": "anton", "label": "앤톤", "names": ["앤톤", "ANTON"] }
+    {
+      "id": "shotaro",
+      "label": "쇼타로",
+      "names": [
+        "쇼타로",
+        "SHOTARO"
+      ]
+    },
+    {
+      "id": "eunseok",
+      "label": "은석",
+      "names": [
+        "은석",
+        "EUNSEOK"
+      ]
+    },
+    {
+      "id": "sungchan",
+      "label": "성찬",
+      "names": [
+        "성찬",
+        "SUNGCHAN"
+      ]
+    },
+    {
+      "id": "wonbin",
+      "label": "원빈",
+      "names": [
+        "원빈",
+        "WONBIN"
+      ]
+    },
+    {
+      "id": "sohee",
+      "label": "소희",
+      "names": [
+        "소희",
+        "SOHEE"
+      ]
+    },
+    {
+      "id": "anton",
+      "label": "앤톤",
+      "names": [
+        "앤톤",
+        "ANTON"
+      ]
+    }
   ],
-  "titleKeywords": ["Insomnia", "인섬니아", "브리즈", "BRIIZE"],
-  "excludeSources": ["weverse.io", "note.com", "youtube.com", "youtu.be", "t.co", "x.com", "twitter.com", "instagram.com", "tiktok.com", "facebook.com"],
+  "titleKeywords": [
+    "Insomnia",
+    "인섬니아",
+    "브리즈",
+    "BRIIZE"
+  ],
+  "excludeSources": [
+    "weverse.io",
+    "note.com",
+    "youtube.com",
+    "youtu.be",
+    "t.co",
+    "x.com",
+    "twitter.com",
+    "instagram.com",
+    "tiktok.com",
+    "facebook.com"
+  ],
   "days": 7,
   "fetchLimit": 100,
   "pageSize": 20,
   "refreshMinutes": 30,
-  "manualRefreshMinutes": 2
+  "manualRefreshMinutes": 2,
+  "sourceNames": {
+    "sports.khan.co.kr": "스포츠경향",
+    "khan.co.kr": "경향신문",
+    "biz.chosun.com": "조선비즈",
+    "sportschosun.com": "스포츠조선",
+    "chosun.com": "조선일보",
+    "sports.donga.com": "스포츠동아",
+    "donga.com": "동아일보",
+    "enter.etoday.co.kr": "이투데이",
+    "etoday.co.kr": "이투데이",
+    "atstar1.com": "앳스타일",
+    "tenasia.co.kr": "텐아시아",
+    "sportsseoul.com": "스포츠서울",
+    "joynews24.com": "조이뉴스24",
+    "mhnse.com": "MHN",
+    "slist.kr": "싱글리스트",
+    "edaily.co.kr": "이데일리",
+    "heraldmuse.com": "헤럴드뮤즈",
+    "heraldcorp.com": "헤럴드경제",
+    "newspim.com": "뉴스핌",
+    "ize.co.kr": "아이즈",
+    "news1.kr": "뉴스1",
+    "koreatimes.co.kr": "코리아타임스",
+    "topstarnews.net": "톱스타뉴스",
+    "mydaily.co.kr": "마이데일리",
+    "koreajoongangdaily.com": "코리아중앙데일리",
+    "joongang.co.kr": "중앙일보",
+    "yna.co.kr": "연합뉴스",
+    "bntnews.co.kr": "bnt뉴스",
+    "sportsworldi.com": "스포츠월드",
+    "newsen.com": "뉴스엔",
+    "osen.co.kr": "OSEN",
+    "xportsnews.com": "엑스포츠뉴스",
+    "starnewskorea.com": "스타뉴스",
+    "isplus.com": "일간스포츠",
+    "mk.co.kr": "매일경제",
+    "hankyung.com": "한국경제",
+    "mt.co.kr": "머니투데이",
+    "sedaily.com": "서울경제",
+    "fnnews.com": "파이낸셜뉴스",
+    "newsis.com": "뉴시스",
+    "spotvnews.co.kr": "스포티비뉴스",
+    "dispatch.co.kr": "디스패치",
+    "tvreport.co.kr": "TV리포트",
+    "asiae.co.kr": "아시아경제",
+    "kmib.co.kr": "국민일보",
+    "hani.co.kr": "한겨레",
+    "ytn.co.kr": "YTN",
+    "sbs.co.kr": "SBS",
+    "kbs.co.kr": "KBS",
+    "imbc.com": "MBC",
+    "jtbc.co.kr": "JTBC",
+    "nocutnews.co.kr": "노컷뉴스",
+    "ohmynews.com": "오마이뉴스",
+    "inews24.com": "아이뉴스24",
+    "ajunews.com": "아주경제",
+    "dailian.co.kr": "데일리안",
+    "segye.com": "세계일보",
+    "munhwa.com": "문화일보",
+    "seoul.co.kr": "서울신문",
+    "hankookilbo.com": "한국일보",
+    "sportsq.co.kr": "스포츠Q",
+    "stardailynews.co.kr": "스타데일리뉴스"
+  }
 }

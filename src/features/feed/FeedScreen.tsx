@@ -184,17 +184,13 @@ function FeedRow({ item, scrappedNewsId }: { item: FeedItem; scrappedNewsId?: st
           </span>
         )}
       </div>
-      <a href={item.link} target="_blank" rel="noopener noreferrer" className={styles.thumbLink} tabIndex={-1} aria-hidden>
-        {/* 썸네일: 없거나 못 불러오면 기본 그림 (목록은 그대로) */}
-        {image && !broken ? (
-          // eslint-disable-next-line @next/next/no-img-element -- 외부 뉴스 썸네일 (최적화 서버 없음)
+      {/* 썸네일: 없거나 못 불러오면 빈 칸 없이 제목이 넓게 (기본 그림은 비어 보여서 안 씀) */}
+      {image && !broken && (
+        <a href={item.link} target="_blank" rel="noopener noreferrer" className={styles.thumbLink} tabIndex={-1} aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element -- 외부 뉴스 썸네일 (최적화 서버 없음) */}
           <img src={image} alt="" loading="lazy" referrerPolicy="no-referrer" className={styles.thumb} onError={() => setBroken(true)} />
-        ) : (
-          <span className={`${styles.thumb} ${styles.thumbEmpty}`}>
-            <Newspaper size={18} />
-          </span>
-        )}
-      </a>
+        </a>
+      )}
     </li>
   );
 }
@@ -205,7 +201,9 @@ function useFeedMeta(item: FeedItem, ref: React.RefObject<HTMLLIElement | null>)
 
   useEffect(() => {
     const el = ref.current;
-    if (item.image || data || !el) return;
+    // 썸네일이 있어도 출처가 아직 주소(예: tenasia.co.kr)면 매체명을 읽으러 감
+    const needsSource = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(item.source);
+    if ((item.image && !needsSource) || data || !el) return;
     const observer = new IntersectionObserver((entries) => {
       if (!entries.some((e) => e.isIntersecting)) return;
       observer.disconnect();
@@ -213,7 +211,7 @@ function useFeedMeta(item: FeedItem, ref: React.RefObject<HTMLLIElement | null>)
     }, { rootMargin: "200px" });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [item.image, item.link, data, ref]);
+  }, [item.image, item.source, item.link, data, ref]);
 
   return data;
 }
