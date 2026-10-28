@@ -19,7 +19,6 @@ import {
   Star,
   Tags,
   Vote,
-  Newspaper,
   Type,
   type LucideIcon,
 } from "lucide-react";
@@ -46,12 +45,11 @@ export const MORE_MENU: MenuSection[] = [
     id: "explore",
     href: "/more/explore",
     label: "둘러보기",
-    description: "카테고리별·기간별 일정, 기사 모음, 투표 사이트",
+    description: "카테고리별·기간별 일정, 투표 사이트",
     icon: Compass,
     colors: ["#ff6f9f", "#ffe1ec"],
     items: [
       { href: "/more/categories", label: "카테고리 가이드", description: "카테고리 뜻과 색, 카테고리별 일정", icon: Tags },
-      { href: "/news", label: "기사 모음", description: "직접 골라 등록해 둔 기사", icon: Newspaper },
       { href: "/votes", label: "투표 사이트 모음", description: "음악방송·시상식·투표 앱 바로가기", icon: Vote },
       { href: "/calendar?view=list", label: "다가오는 일정 전체", description: "오늘 이후 일정을 날짜순으로", icon: ListChecks },
       { href: "/calendar?view=list&range=past", label: "지난 일정 아카이브", description: "이미 끝난 일정 다시 보기", icon: Archive },

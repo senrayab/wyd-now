@@ -446,14 +446,16 @@
 }
 
 /* 폼: 날짜 + 시각 */
+/* 시작 · 마감: 이름은 위 줄, 날짜와 시각은 반씩 (좁은 폰에서도 "오전 12:00" 이 잘리지 않게) */
 .when {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 6px 8px;
 }
 
 .when > span {
+  grid-column: 1 / -1;
   font-size: 13px;
   color: var(--muted);
 }

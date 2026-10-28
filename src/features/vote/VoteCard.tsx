@@ -21,7 +21,8 @@ import styles from "./Vote.module.css";
  */
 export default function VoteCard({ vote, artists, bookmarkable, editable }: { vote: VoteSite; artists: Map<string, Artist>; bookmarkable?: boolean; editable?: boolean }) {
   const status = voteStatus(vote);
-  const site = siteName(vote);
+  // 사이트 이름이 제목과 같으면(예: 상시 사이트 ‘Mnet Plus’) 겹쳐서 생략
+  const site = siteName(vote) === vote.name ? "" : siteName(vote);
   const period = cardPeriod(vote);
   // 연결된 아티스트 이름: 내 아티스트 전용 모드에서 그 아티스트뿐이면 생략 (다른 팀과 함께면 표시)
   const { focus } = useFocusArtist();
@@ -160,7 +161,7 @@ export function VoteTodoRow({ vote, editing }: { vote: VoteSite; editing?: boole
         <strong>{vote.name}</strong>
         <small>
           <StatusBadge vote={vote} />
-          <span>{[siteName(vote), vote.target].filter(Boolean).join(" · ")}</span>
+          <span>{[siteName(vote) === vote.name ? "" : siteName(vote), vote.target].filter(Boolean).join(" · ")}</span>
         </small>
       </Link>
       {editing ? (

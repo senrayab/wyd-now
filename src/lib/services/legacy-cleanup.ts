@@ -4,7 +4,8 @@
  * 정리한 경우 그 자리에 RIIZE 샘플을 넣습니다.
  */
 import { getDataStore } from "../storage";
-import { loadRiizeSampleNews, loadUrgentVoteSample } from "./riize-sample-news";
+import { removeUnscrappedNews } from "./news-service";
+import { loadUrgentVoteSample } from "./riize-sample-news";
 import { fixEpilogueTitle, loadRiizeReleases, RELEASES_SAMPLE_KEY } from "./riize-sample-releases";
 import { hasRiize, loadRiizeTestData } from "./riize-test-data";
 
@@ -34,7 +35,6 @@ async function addNewSamples() {
   }
   const riize = (await getDataStore().artists.list()).find((a) => a.name.toUpperCase() === "RIIZE");
   if (!riize) return;
-  await loadRiizeSampleNews(riize.id);
   await loadUrgentVoteSample(riize.id);
   try {
     localStorage.setItem(SAMPLE_V2_KEY, "1");
@@ -57,6 +57,8 @@ async function addReleaseSamples() {
 
 async function run() {
   await removeLegacy();
+  // 기사 모음 기능을 없애면서: 스크랩하지 않은 기사(직접 등록 · 샘플)는 지움
+  await removeUnscrappedNews();
   await addNewSamples();
   await addReleaseSamples();
   await fixEpilogueTitle();

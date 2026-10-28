@@ -1,41 +1,31 @@
+/*
+ * 저장된 기사 = 내 공간에 스크랩한 뉴스 기사만.
+ * (직접 등록하던 ‘기사 모음’은 없앴고, 스크랩을 해제하면 기사 데이터도 함께 지웁니다)
+ */
 import { getDataStore } from "../storage";
-import type { NewsInput, NewsItem } from "../storage/types";
-import { applyImageChange, type ImageChange } from "./image-attach";
-import { isValidUrl } from "./schedule-service";
+import type { NewsItem } from "../storage/types";
 
-export type NewsFormValues = Omit<NewsInput, "imageId">;
-
-export function validateNews(values: NewsFormValues) {
-  const errors: Partial<Record<"title" | "url", string>> = {};
-  if (!values.title.trim()) errors.title = "기사 제목을 입력해 주세요.";
-  if (!isValidUrl(values.url)) errors.url = "기사 주소(https://…)를 입력해 주세요.";
-  return errors;
-}
-
-export async function saveNews(values: NewsFormValues, image: ImageChange, existing?: NewsItem) {
-  const { news } = getDataStore();
-  const clean: NewsFormValues = {
-    ...values,
-    title: values.title.trim(),
-    url: values.url.trim(),
-    source: values.source?.trim() || undefined,
-    summary: values.summary?.trim() || undefined,
-  };
-  if (existing) {
-    const imageId = await applyImageChange(image, existing.imageId, { kind: "news", id: existing.id });
-    return news.update(existing.id, { ...clean, imageId });
-  }
-  const created = await news.create({ ...clean, imageId: undefined });
-  if (image.kind !== "replace") return created;
-  const imageId = await applyImageChange(image, undefined, { kind: "news", id: created.id });
-  return news.update(created.id, { imageId });
-}
-
-export async function deleteNews(item: NewsItem) {
+async function removeNews(item: NewsItem) {
   const { news, images, scraps } = getDataStore();
   if (item.imageId) await images.remove(item.imageId);
   await scraps.remove(item.id);
   await news.remove(item.id);
+}
+
+/** 스크랩 해제: 스크랩과 저장해 둔 기사를 함께 지움 */
+export async function unscrapNews(newsId: string) {
+  const item = await getDataStore().news.get(newsId);
+  if (item) await removeNews(item);
+  else await getDataStore().scraps.remove(newsId);
+}
+
+/** 스크랩되지 않은 기사(예전 기사 모음 · 샘플 기사)를 지움. 지운 개수를 돌려줌 */
+export async function removeUnscrappedNews() {
+  const { news, scraps } = getDataStore();
+  const kept = new Set((await scraps.list()).map((s) => s.newsId));
+  const stale = (await news.list()).filter((n) => !kept.has(n.id));
+  for (const item of stale) await removeNews(item);
+  return stale.length;
 }
 
 /**

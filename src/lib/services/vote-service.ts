@@ -103,7 +103,7 @@ export function sortVotes(list: VoteSite[], now = nowSeoul()) {
   return [...g.open, ...g.upcoming, ...g.always, ...g.closed];
 }
 
-/** 사이트 이름: 입력값, 없으면(이전 데이터) 자주 쓰는 사이트 이름이나 주소 */
+/** 사이트 이름: 예전에 입력한 값, 없으면 자주 쓰는 사이트 이름이나 주소 도메인 (등록 화면에서는 따로 받지 않음) */
 export function siteName(vote: Pick<VoteSite, "site" | "url">) {
   if (vote.site) return vote.site;
   const known = DEFAULT_SITES.find((d) => d.url === vote.url);
@@ -150,12 +150,11 @@ export function cardPeriod(vote: Period, now = nowSeoul()) {
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-export type VoteErrors = Partial<Record<"name" | "site" | "url" | "startDate" | "endDate", string>>;
+export type VoteErrors = Partial<Record<"name" | "url" | "startDate" | "endDate", string>>;
 
 export function validateVote(values: VoteInput, hasPeriod: boolean) {
   const errors: VoteErrors = {};
   if (!values.name.trim()) errors.name = "투표 제목을 입력해 주세요.";
-  if (!values.site?.trim()) errors.site = "투표 사이트 이름을 입력해 주세요.";
   // 주소는 나중에 채워도 됨. 적었다면 올바른 형식이어야 함
   if (values.url.trim() && !isValidUrl(values.url)) errors.url = "http:// 또는 https:// 로 시작하는 주소를 입력해 주세요.";
   if (hasPeriod) {

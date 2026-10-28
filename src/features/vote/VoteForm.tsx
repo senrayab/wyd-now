@@ -11,7 +11,7 @@ import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
 import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import type { ImageChange } from "@/lib/services/image-attach";
-import { nowSeoul, saveVote, siteName, validateVote, VOTE_TYPES, voteTab, type VoteErrors } from "@/lib/services/vote-service";
+import { nowSeoul, saveVote, validateVote, VOTE_TYPES, voteTab, type VoteErrors } from "@/lib/services/vote-service";
 import type { VoteInput, VoteSite } from "@/lib/storage/types";
 import styles from "./Vote.module.css";
 
@@ -24,8 +24,6 @@ export default function VoteFormScreen({ mode }: { mode: "new" | "edit" }) {
     (s) => (mode === "edit" ? s.votes.get(id) : Promise.resolve(undefined)),
     `vote-form:${mode}:${id}`,
   );
-  // 기존 사이트 이름을 입력 추천으로
-  const { data: all } = useStoreQuery((s) => s.votes.list(), "votes");
 
   if (mode === "edit" && loading) return <div style={{ paddingTop: 96 }}><Loading /></div>;
   if (mode === "edit" && !existing) {
@@ -42,13 +40,12 @@ export default function VoteFormScreen({ mode }: { mode: "new" | "edit" }) {
   const artist = params.get("artist");
   // 이전 데이터에는 사이트 이름이 없어서 주소로 채워 둠
   const initial: VoteInput = existing
-    ? { ...existing, site: existing.site ?? siteName(existing) }
-    : { name: "", site: "", url: "", type: "musicshow", artistIds: artist ? [artist] : [] };
-  const sites = [...new Set((all ?? []).map(siteName).filter(Boolean))];
-  return <VoteForm key={existing?.id ?? "new"} initial={initial} existing={existing} sites={sites} />;
+    ? { ...existing }
+    : { name: "", url: "", type: "musicshow", artistIds: artist ? [artist] : [] };
+  return <VoteForm key={existing?.id ?? "new"} initial={initial} existing={existing} />;
 }
 
-function VoteForm({ initial, existing, sites }: { initial: VoteInput; existing?: VoteSite; sites: string[] }) {
+function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSite }) {
   const router = useRouter();
   const cancel = useBack(existing ? `/vote?id=${existing.id}` : "/votes");
   const { toast } = useFeedback();
@@ -126,19 +123,8 @@ function VoteForm({ initial, existing, sites }: { initial: VoteInput; existing?:
         </div>
 
         <div className="field">
-          <label htmlFor="vote-site">투표 사이트</label>
-          <input id="vote-site" className="input" placeholder="예: Mnet Plus" value={values.site ?? ""} aria-invalid={!!errors.site} onChange={(e) => set("site", e.target.value)} />
-          {/* 등록한 적 있는 사이트는 눌러서 바로 */}
-          {sites.length > 0 && (
-            <div className="chips" role="group" aria-label="등록한 사이트">
-              {sites.map((name) => (
-                <button key={name} type="button" className="chip" aria-pressed={values.site === name} onClick={() => set("site", name)}>
-                  {name}
-                </button>
-              ))}
-            </div>
-          )}
-          {errors.site ? <span className="error">{errors.site}</span> : <span className="hint">직접 입력하거나 등록한 적 있는 사이트를 눌러 고르세요.</span>}
+          <label htmlFor="vote-target">투표 대상</label>
+          <input id="vote-target" className="input" placeholder="예: 이번 주 1위 후보, 올해의 신인상" value={values.target ?? ""} onChange={(e) => set("target", e.target.value)} />
         </div>
 
         <div className="field">
@@ -178,11 +164,6 @@ function VoteForm({ initial, existing, sites }: { initial: VoteInput; existing?:
               기간 없이 언제든 투표할 수 있는 곳은 ‘상시’로 보여요.
             </span>
           )}
-        </div>
-
-        <div className="field">
-          <label htmlFor="vote-target">투표 대상</label>
-          <input id="vote-target" className="input" placeholder="예: 이번 주 1위 후보, 올해의 신인상" value={values.target ?? ""} onChange={(e) => set("target", e.target.value)} />
         </div>
 
         <div className="field">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Cake, CalendarOff, ChevronLeft, ExternalLink, Heart, ImagePlus, Lock, Newspaper, Pencil, Plus, SearchX, Trash2, Vote, X } from "lucide-react";
+import { Cake, CalendarOff, ChevronLeft, ExternalLink, Heart, ImagePlus, Lock, Pencil, Plus, SearchX, Trash2, Vote, X } from "lucide-react";
 import ImageActions from "@/components/ImageActions";
 import { useBack } from "@/components/PageHeader";
 import ScheduleRow from "@/components/ScheduleRow";
@@ -17,7 +17,6 @@ import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import { addMyPhoto, biasIdsOf, deleteArtist, MAX_BIAS, MAX_MY_PHOTOS, removeMyPhoto, setFollowed, toggleBiasMember } from "@/lib/services/artist-service";
 import type { Artist, Member, MySpace, Schedule, StoredImage } from "@/lib/storage/types";
-import NewsTimeline from "@/features/news/NewsTimeline";
 import { DiscographySection } from "@/features/release/ReleaseScreens";
 import VoteCard from "@/features/vote/VoteCard";
 import { sortVotes } from "@/lib/services/vote-service";
@@ -35,7 +34,6 @@ export default function ArtistDetail() {
   const { data: schedules } = useStoreQuery((s) => s.schedules.listByArtist(id), `artist-schedules:${id}`);
   const { data: space } = useStoreQuery((s) => s.mySpaces.get(id), `space:${id}`);
   const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
-  const { data: news } = useStoreQuery((s) => s.news.list(), "news");
 
   if (loading) return <div style={{ paddingTop: 96 }}><Loading /></div>;
   if (!artist) {
@@ -188,27 +186,6 @@ export default function ArtistDetail() {
               })()}
             </section>
 
-            <section className="section">
-              <div className="section-head">
-                <h2>소식</h2>
-                <span className="row" style={{ gap: 14 }}>
-                  <Link href={`/news/new?artist=${artist.id}`}>등록</Link>
-                  <Link href={`/news?artist=${artist.id}`}>전체</Link>
-                </span>
-              </div>
-              {(() => {
-                const mine = (news ?? []).filter((n) => n.artistIds.includes(artist.id));
-                return mine.length ? (
-                  <NewsTimeline items={mine.slice(0, 3)} artists={map} />
-                ) : (
-                  <div className="card-flat">
-                    <Empty icon={Newspaper} action={<Link href={`/news/new?artist=${artist.id}`} className="btn btn-soft btn-sm">기사 등록</Link>}>
-                      {artist.name} 소식이 아직 없어요.
-                    </Empty>
-                  </div>
-                );
-              })()}
-            </section>
 
           </>
         )}

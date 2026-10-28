@@ -7,7 +7,7 @@ import { addDays, todayKey } from "../date";
 import { getDataStore } from "../storage";
 import type { CategoryId, LinkItem } from "../storage/types";
 import { loadRiizeReleases } from "./riize-sample-releases";
-import { loadRiizeSampleNews, loadUrgentVoteSample } from "./riize-sample-news";
+import { loadUrgentVoteSample } from "./riize-sample-news";
 import { loadDefaultVoteSites } from "./vote-service";
 
 const TEST_NOTE = "※ 앱 화면 확인용 테스트 일정이에요. 실제 일정과 다를 수 있어요.";
@@ -112,7 +112,6 @@ export async function loadRiizeTestData() {
 
   await store.mySpaces.save({ artistId: riize.id, followed: true, photoIds: [] });
   await loadDefaultVoteSites();
-  await loadRiizeSampleNews(riize.id);
   await loadUrgentVoteSample(riize.id);
   await loadRiizeReleases(riize.id);
   return riize;

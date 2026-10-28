@@ -144,3 +144,19 @@ li + li > .row {
 :global(.icon-btn)[aria-pressed="true"] {
   color: var(--accent-text);
 }
+
+/* 내 공간 편집: 줄 오른쪽 스크랩 해제 */
+.item {
+  display: flex;
+  align-items: center;
+}
+
+.item > .row {
+  flex: 1;
+  min-width: 0;
+}
+
+.remove {
+  flex: none;
+  margin-right: 14px;
+}

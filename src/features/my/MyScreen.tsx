@@ -10,6 +10,7 @@ import NewsTimeline from "@/features/news/NewsTimeline";
 import { VoteTodoRow } from "@/features/vote/VoteCard";
 import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
+import { unscrapNews } from "@/lib/services/news-service";
 import type { NewsItem } from "@/lib/storage/types";
 import { sortVotes, voteStatus } from "@/lib/services/vote-service";
 import { useVoteBookmarks } from "@/lib/vote-bookmarks";
@@ -39,9 +40,11 @@ export default function MyScreen() {
     keepOnly((id) => live.has(id));
   }, [votes, keepOnly]);
   const isEditing = editingVotes && myVotes.length > 0;
+  const [editingScrapsRaw, setEditingScraps] = useState(false);
 
   const byId = new Map((news ?? []).map((n) => [n.id, n]));
   const scrapped = (scraps ?? []).map((s) => byId.get(s.newsId)).filter((n): n is NewsItem => !!n);
+  const editingScraps = editingScrapsRaw && scrapped.length > 0;
   const followed = artists.filter((a) => spaces?.some((sp) => sp.artistId === a.id && sp.followed));
 
   return (
@@ -117,19 +120,27 @@ export default function MyScreen() {
 
       <section className="section">
         <div className="section-head">
-          <h2>스크랩한 기사</h2>
-          <Link href="/news">
-            소식 보기 <ChevronRight size={14} />
-          </Link>
+          <h2>
+            스크랩한 기사 {scrapped.length > 0 && <span className="muted num">{scrapped.length}</span>}
+          </h2>
+          {scrapped.length > 0 ? (
+            <button type="button" className={styles.editBtn} onClick={() => setEditingScraps((v) => !v)} aria-pressed={editingScraps}>
+              {editingScraps ? "완료" : "편집"}
+            </button>
+          ) : (
+            <Link href="/feed">
+              뉴스 보기 <ChevronRight size={14} />
+            </Link>
+          )}
         </div>
         {loading ? (
           <Loading rows={2} />
         ) : scrapped.length ? (
-          <NewsTimeline items={scrapped} artists={map} />
+          <NewsTimeline items={scrapped} artists={map} onRemove={editingScraps ? (id) => void unscrapNews(id) : undefined} />
         ) : (
           <div className="card">
-            <Empty icon={Bookmark} action={<Link href="/news" className="btn btn-primary btn-sm">기사 모음 보러 가기</Link>}>
-              기사 상세 화면의 북마크 버튼을 누르면 여기에 모여요.
+            <Empty icon={Bookmark} action={<Link href="/feed" className="btn btn-primary btn-sm">뉴스 보러 가기</Link>}>
+              뉴스에서 기사 옆 북마크를 누르면 여기에 모여요.
             </Empty>
           </div>
         )}

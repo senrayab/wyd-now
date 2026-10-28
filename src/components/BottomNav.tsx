@@ -23,7 +23,7 @@ const LEFT: Tab[] = [
 const RIGHT: Tab[] = [
   { href: "/votes", label: "투표", icon: Vote, match: (p) => p === "/votes" || p === "/vote" || p.startsWith("/vote/") },
   // 아티스트·소식·내 공간은 더보기 안에 있으므로 더보기로 표시
-  { href: "/more", label: "더보기", icon: Ellipsis, match: (p) => p.startsWith("/more") || p.startsWith("/artist") || p.startsWith("/news") || p === "/my" },
+  { href: "/more", label: "더보기", icon: Ellipsis, match: (p) => p.startsWith("/more") || p.startsWith("/artist") || p === "/my" },
 ];
 const TABS = [...LEFT, ...RIGHT];
 

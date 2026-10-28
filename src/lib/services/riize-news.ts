@@ -171,9 +171,9 @@ export function loadFeedMeta(link: string): Promise<FeedMeta> {
   return request;
 }
 
-/* ---------- 스크랩: 뉴스 기사를 기사 모음에 넣고 내 공간 스크랩으로 ---------- */
+/* ---------- 스크랩: 뉴스 기사를 이 기기에 저장하고 내 공간 스크랩으로 ---------- */
 
-/** 이미 같은 주소로 기사 모음에 있으면 그 기사를, 없으면 새로 만들어 스크랩 */
+/** 이미 같은 주소로 저장한 기사가 있으면 그 기사를, 없으면 새로 만들어 스크랩 */
 export async function scrapFeedItem(item: FeedItem, source: string, artistId?: string) {
   const { news, scraps } = getDataStore();
   const existing = (await news.list()).find((n) => n.url === item.link);

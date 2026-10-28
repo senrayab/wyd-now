@@ -15,7 +15,6 @@ import { loadRiizeTestData } from "@/lib/services/riize-test-data";
 import type { Artist, Schedule } from "@/lib/storage/types";
 import { FEED_TOPIC, fetchFeed, isStale, readFeedCache, type Feed } from "@/lib/services/riize-news";
 import { FeedList } from "@/features/feed/FeedScreen";
-import NewsTimeline from "@/features/news/NewsTimeline";
 import styles from "./HomeScreen.module.css";
 
 const onDay = (s: Schedule, key: string) => datePart(s.startAt) <= key && datePart(s.endAt) >= key;
@@ -28,7 +27,6 @@ export default function HomeScreen() {
   const today = todayKey();
   const { artists, map, loading: artistsLoading } = useArtists();
   const { data, loading } = useStoreQuery((s) => s.schedules.listInRange(addDays(today, -7), addDays(today, 120)), `home:${today}`);
-  const { data: allNews } = useStoreQuery((s) => s.news.list(), "news");
   const { focus } = useFocusArtist();
   const { toast } = useFeedback();
   const [seeding, setSeeding] = useState(false);
@@ -44,7 +42,6 @@ export default function HomeScreen() {
   const d = parseLocal(today);
   // 내 아티스트 전용 모드면 그 아티스트(+ 공용) 항목만
   const all = (data ?? []).filter((s) => inFocus(s.artistIds, focus));
-  const news = (allNews ?? []).filter((n) => inFocus(n.artistIds, focus));
   const now = nowStamp();
   const week = weekDays(today, prefs.weekStart);
   const todays = all.filter((s) => onDay(s, today));
@@ -188,21 +185,19 @@ export default function HomeScreen() {
             <Vote size={17} /> 투표하러 가기
           </Link>
 
-          {/* 최근 소식: 뉴스 최신 기사 몇 개 (못 받았으면 기사 모음) */}
+          {/* 최근 소식: 뉴스 최신 기사 몇 개, 전체는 뉴스 화면에서 */}
           <section className="section">
             <div className="section-head">
               <h2>최근 소식</h2>
-              <Link href={latest.length ? "/feed" : "/news"}>전체</Link>
+              <Link href="/feed">전체</Link>
             </div>
             {latest.length ? (
               <FeedList items={latest} />
-            ) : news.length ? (
-              <NewsTimeline items={news.slice(0, 2)} artists={map} />
             ) : (
-              <Link href="/news/new" className={`card ${styles.newsEmpty}`}>
+              <Link href="/feed" className={`card ${styles.newsEmpty}`}>
                 <span>
-                  <strong>기사 모으기</strong>
-                  <small>기사와 공식 소식을 타임라인으로 모아 보세요.</small>
+                  <strong>뉴스 보기</strong>
+                  <small>최근 7일 기사를 모아 보여 줘요.</small>
                 </span>
                 <span className="round-action" aria-hidden>
                   <ArrowUpRight size={15} />

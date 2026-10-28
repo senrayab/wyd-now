@@ -11,7 +11,6 @@ import { getCategory } from "@/lib/categories";
 import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
-import NewsTimeline from "@/features/news/NewsTimeline";
 import VoteCard from "@/features/vote/VoteCard";
 import styles from "./SearchScreen.module.css";
 
@@ -23,7 +22,6 @@ export default function SearchScreen() {
   const { artists, map } = useArtists();
   const { data: schedules } = useStoreQuery((s) => s.schedules.list(), "all-schedules");
   const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
-  const { data: news } = useStoreQuery((s) => s.news.list(), "news");
   const { focus } = useFocusArtist();
 
   const q = query.trim().toLowerCase();
@@ -37,11 +35,7 @@ export default function SearchScreen() {
     : [];
 
   const voteHits = q
-    ? (votes ?? []).filter((v) => inFocus(v.artistIds, focus)).filter((v) => [v.name, v.description, v.url].some((t) => t?.toLowerCase().includes(q)) || v.artistIds.some((id) => hitIds.has(id)))
-    : [];
-
-  const newsHits = q
-    ? (news ?? []).filter((n) => inFocus(n.artistIds, focus)).filter((n) => [n.title, n.summary, n.source].some((t) => t?.toLowerCase().includes(q)) || n.artistIds.some((id) => hitIds.has(id)))
+    ? (votes ?? []).filter((v) => inFocus(v.artistIds, focus)).filter((v) => [v.name, v.site, v.target, v.description, v.url].some((t) => t?.toLowerCase().includes(q)) || v.artistIds.some((id) => hitIds.has(id)))
     : [];
 
   const update = (value: string) => {
@@ -72,7 +66,7 @@ export default function SearchScreen() {
 
       {!q ? (
         <Empty icon={Search}>찾고 싶은 일정이나 아티스트를 입력해 주세요.</Empty>
-      ) : artistHits.length + scheduleHits.length + voteHits.length + newsHits.length === 0 ? (
+      ) : artistHits.length + scheduleHits.length + voteHits.length === 0 ? (
         <Empty icon={SearchX}>‘{query}’ 검색 결과가 없어요.</Empty>
       ) : (
         <>
@@ -92,16 +86,6 @@ export default function SearchScreen() {
                   </Link>
                 ))}
               </div>
-            </section>
-          )}
-          {newsHits.length > 0 && (
-            <section className="section" style={{ marginTop: 20 }}>
-              <div className="section-head">
-                <h2>
-                  소식 <span className="muted num">{newsHits.length}</span>
-                </h2>
-              </div>
-              <NewsTimeline items={newsHits} artists={map} />
             </section>
           )}
           {voteHits.length > 0 && (

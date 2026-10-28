@@ -22,7 +22,7 @@ import {
   type FeedItem,
   type FeedMeta,
 } from "@/lib/services/riize-news";
-import { getDataStore } from "@/lib/storage";
+import { unscrapNews } from "@/lib/services/news-service";
 import styles from "./Feed.module.css";
 
 const memberLabel = new Map(NEWS_CONFIG.members.map((m) => [m.id, m.label]));
@@ -129,7 +129,7 @@ export default function FeedScreen() {
 
 /** 기사 목록 카드 (뉴스 화면, 홈 최근 소식에서 같이 씀) */
 export function FeedList({ items }: { items: FeedItem[] }) {
-  // 스크랩 여부: 기사 모음(주소) ↔ 내 스크랩
+  // 스크랩 여부: 저장해 둔 기사(주소) ↔ 내 스크랩
   const { data: savedNews } = useStoreQuery((s) => s.news.list(), "news");
   const { data: scraps } = useStoreQuery((s) => s.scraps.list(), "scraps");
   const scrappedIds = new Set((scraps ?? []).map((s) => s.newsId));
@@ -158,11 +158,11 @@ function FeedRow({ item, scrappedNewsId }: { item: FeedItem; scrappedNewsId?: st
     setBusy(true);
     try {
       if (scrappedNewsId) {
-        await getDataStore().scraps.remove(scrappedNewsId);
+        await unscrapNews(scrappedNewsId);
         toast("스크랩을 해제했어요.");
       } else {
         await scrapFeedItem(item, source, focus?.id);
-        toast("내 공간에 스크랩했어요. 기사 모음에도 담겼어요.");
+        toast("내 공간에 스크랩했어요.");
       }
     } catch {
       toast("스크랩하지 못했어요. 다시 시도해 주세요.");

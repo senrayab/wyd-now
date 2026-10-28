@@ -12,7 +12,7 @@ import { recordVisit } from "@/lib/nav-history";
 import { cleanupLegacySamples } from "@/lib/services/legacy-cleanup";
 
 /** 입력 화면에서는 하단 메뉴를 숨겨 실수로 벗어나지 않게 */
-const HIDE_NAV = ["/schedule/new", "/schedule/edit", "/artist/new", "/artist/edit", "/vote/new", "/vote/edit", "/news/new", "/news/edit"];
+const HIDE_NAV = ["/schedule/new", "/schedule/edit", "/artist/new", "/artist/edit", "/vote/new", "/vote/edit"];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
