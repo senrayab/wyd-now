@@ -51,7 +51,12 @@ export default function MyScreen() {
     <main>
       <PageHeader back="/more" title="내 공간" />
       <p className={styles.lead}>
-        <Lock size={13} /> 이 기기에만 저장되는 나만의 기록이에요. 공용 정보와는 따로 보관돼요.
+        <Lock size={13} />
+        <span>
+          이 기기에만 저장되는 나만의 기록이에요.
+          <br />
+          공용 정보와는 따로 보관돼요.
+        </span>
       </p>
 
       {/* 내 아티스트 전용 모드: 최애 같은 MY 공간을 여기서 */}
