@@ -76,7 +76,7 @@ export default function MyScreen() {
           <NewsTimeline items={scrapped} artists={map} />
         ) : (
           <div className="card">
-            <Empty icon={Bookmark} action={<Link href="/news" className="btn btn-primary btn-sm">아티스트 소식 보러 가기</Link>}>
+            <Empty icon={Bookmark} action={<Link href="/news" className="btn btn-primary btn-sm">기사 모음 보러 가기</Link>}>
               기사 상세 화면의 북마크 버튼을 누르면 여기에 모여요.
             </Empty>
           </div>

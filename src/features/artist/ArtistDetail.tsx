@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Cake, CalendarOff, ChevronLeft, ExternalLink, Heart, ImagePlus, Lock, Newspaper, Pencil, Plus, SearchX, Trash2, Vote, X } from "lucide-react";
 import ImageActions from "@/components/ImageActions";
@@ -399,7 +400,8 @@ function PhotoThumb({ image, onOpen }: { image: StoredImage; onOpen: () => void 
 function PhotoViewer({ image, artistId, title, onClose }: { image: StoredImage; artistId: string; title: string; onClose: () => void }) {
   const { url } = useImageUrl(image.id);
   const { confirm, toast } = useFeedback();
-  return (
+  // body 로 portal — 화면 등장 애니메이션(transform)이 걸린 카드 안에서는 position: fixed 가 카드 기준이 됨
+  return createPortal(
     <div className={styles.viewer} role="dialog" aria-modal="true" aria-label="사진 보기" onClick={onClose}>
       <div className={styles.viewerInner} onClick={(e) => e.stopPropagation()}>
         <button type="button" className={`icon-btn sm ${styles.viewerClose}`} onClick={onClose} aria-label="닫기">
@@ -426,6 +428,7 @@ function PhotoViewer({ image, artistId, title, onClose }: { image: StoredImage; 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

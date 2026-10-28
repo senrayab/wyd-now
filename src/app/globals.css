@@ -234,7 +234,7 @@ svg.lucide {
 
 /* 글자 옆 아이콘: 한글 글리프가 줄 상자 가운데보다 살짝 위에 그려져서
    아이콘이 낮아 보이므로 그만큼 올림 (아이콘만 있는 원형 버튼은 제외) */
-:is(.btn, .chip, a, [class*="count"], [class*="follow"]) > svg.lucide:not(:is(.icon-btn, .round-action, .list-icon) > svg) {
+:is(.btn, .chip, a, [class*="count"], [class*="follow"]) > svg.lucide:not(:is(.icon-btn, .round-action, .list-icon, .home-link) > svg) {
   translate: 0 -0.06em;
 }
 
@@ -273,6 +273,21 @@ svg.lucide {
   gap: 10px;
   padding: 18px 0 14px;
   min-height: 72px;
+}
+
+/* 탭 화면 제목 앞 홈 아이콘: 흰 원 없이 아이콘만 (누르는 영역은 넉넉하게) */
+.home-link {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 40px;
+  margin: 0 -4px 0 -6px;
+  color: var(--ink);
+}
+
+.home-link:active {
+  opacity: 0.6;
 }
 
 .page-header h1 {

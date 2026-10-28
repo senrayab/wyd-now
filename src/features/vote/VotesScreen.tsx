@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Clock3, Download, Inbox, LayoutGrid, List, Plus, SearchX, Vote } from "lucide-react";
 import { useFeedback } from "@/components/Feedback";
+import HomeLink from "@/components/HomeLink";
 import { Empty, Loading, Spinner } from "@/components/ui";
 import { todayKey, weekDays } from "@/lib/date";
 import { inFocus, useFocusArtist } from "@/lib/focus";
@@ -79,6 +80,7 @@ export default function VotesScreen() {
   return (
     <main>
       <header className="page-header">
+        <HomeLink />
         <h1>투표</h1>
         <div className="header-actions">
           <button

@@ -1,0 +1,15 @@
+{
+  "title": "RIIZE NEWS",
+  "group": { "id": "all", "label": "전체", "query": "RIIZE", "names": ["RIIZE", "라이즈"] },
+  "members": [
+    { "id": "shotaro", "label": "쇼타로", "names": ["쇼타로", "SHOTARO"] },
+    { "id": "eunseok", "label": "은석", "names": ["은석", "EUNSEOK"] },
+    { "id": "sungchan", "label": "성찬", "names": ["성찬", "SUNGCHAN"] },
+    { "id": "wonbin", "label": "원빈", "names": ["원빈", "WONBIN"] },
+    { "id": "sohee", "label": "소희", "names": ["소희", "SOHEE"] },
+    { "id": "anton", "label": "앤톤", "names": ["앤톤", "ANTON"] }
+  ],
+  "excludeSources": ["weverse.io", "note.com", "youtube.com", "youtu.be", "t.co", "x.com", "twitter.com", "instagram.com", "tiktok.com", "facebook.com"],
+  "days": 7,
+  "refreshMinutes": 30
+}

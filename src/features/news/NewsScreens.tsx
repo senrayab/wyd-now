@@ -23,7 +23,7 @@ import NewsTimeline from "./NewsTimeline";
 import ScrapButton from "./ScrapButton";
 import styles from "./News.module.css";
 
-/** /news — 아티스트 소식 타임라인 */
+/** /news — 기사 모음 (직접 등록한 기사 타임라인) */
 export function NewsListScreen() {
   const params = useSearchParams();
   const router = useRouter();
@@ -37,7 +37,7 @@ export function NewsListScreen() {
     <main>
       <PageHeader
         back="/"
-        title="아티스트 소식"
+        title="기사 모음"
         actions={
           <>
             <Link href="/my" className="icon-btn" aria-label="내 스크랩">

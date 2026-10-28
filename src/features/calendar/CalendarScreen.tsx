@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Clock3, Inbox, Plus, Search, X } from "lucide-react";
+import HomeLink from "@/components/HomeLink";
 import ScheduleRow from "@/components/ScheduleRow";
 import { Empty, Loading } from "@/components/ui";
 import { CATEGORIES, getCategory, isCategoryId } from "@/lib/categories";
@@ -36,6 +37,7 @@ export default function CalendarScreen() {
   return (
     <main>
       <header className="page-header">
+        <HomeLink />
         <h1>캘린더</h1>
         <div className="header-actions">
           <Link href="/search" className="icon-btn" aria-label="일정 검색">

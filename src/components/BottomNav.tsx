@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useLayoutEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Ellipsis, House, Plus, Vote, type LucideIcon } from "lucide-react";
+import { CalendarDays, Ellipsis, Newspaper, Plus, Vote, type LucideIcon } from "lucide-react";
 import styles from "./BottomNav.module.css";
 
 interface Tab {
@@ -13,10 +13,10 @@ interface Tab {
   match: (p: string) => boolean;
 }
 
-/** 가운데 + 버튼을 기준으로 왼쪽 2개 · 오른쪽 2개 */
+/** 가운데 + 버튼을 기준으로 왼쪽 2개 · 오른쪽 2개 (홈은 각 탭 화면 제목 앞의 홈 아이콘으로) */
 const LEFT: Tab[] = [
-  { href: "/", label: "홈", icon: House, match: (p) => p === "/" },
   { href: "/calendar", label: "캘린더", icon: CalendarDays, match: (p) => p.startsWith("/calendar") || p.startsWith("/schedule") || p === "/search" },
+  { href: "/feed", label: "뉴스", icon: Newspaper, match: (p) => p.startsWith("/feed") },
 ];
 const RIGHT: Tab[] = [
   { href: "/votes", label: "투표", icon: Vote, match: (p) => p === "/votes" || p === "/vote" || p.startsWith("/vote/") },

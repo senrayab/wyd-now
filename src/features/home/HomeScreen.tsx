@@ -259,7 +259,7 @@ export default function HomeScreen() {
             ) : (
               <Link href="/news/new" className={`card ${styles.newsEmpty}`}>
                 <span>
-                  <strong>아티스트 소식 모으기</strong>
+                  <strong>기사 모으기</strong>
                   <small>기사와 공식 소식을 타임라인으로 모아 보세요.</small>
                 </span>
                 <span className="round-action" aria-hidden>
