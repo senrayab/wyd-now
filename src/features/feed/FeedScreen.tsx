@@ -36,11 +36,6 @@ export default function FeedScreen() {
   const [error, setError] = useState<string>();
   // 처음엔 pageSize 개, "더 보기" 마다 pageSize 개씩 (이미 받은 목록 안에서 펼침)
   const [shown, setShown] = useState(NEWS_CONFIG.pageSize);
-  // 스크랩 여부: 기사 모음(주소) ↔ 내 스크랩
-  const { data: savedNews } = useStoreQuery((s) => s.news.list(), "news");
-  const { data: scraps } = useStoreQuery((s) => s.scraps.list(), "scraps");
-  const scrappedIds = new Set((scraps ?? []).map((s) => s.newsId));
-  const scrappedByLink = new Map((savedNews ?? []).filter((n) => scrappedIds.has(n.id)).map((n) => [n.url, n.id]));
 
   const refresh = useCallback(async (fresh = false) => {
     setLoading(true);
@@ -112,11 +107,7 @@ export default function FeedScreen() {
         )
       ) : (
         <>
-          <ul className={`card ${styles.list}`}>
-            {items.slice(0, shown).map((item) => (
-              <FeedRow key={item.id} item={item} scrappedNewsId={scrappedByLink.get(item.link)} />
-            ))}
-          </ul>
+          <FeedList items={items.slice(0, shown)} />
           {items.length > shown && (
             <button type="button" className={`btn btn-ghost btn-block ${styles.more}`} onClick={() => setShown((n) => n + NEWS_CONFIG.pageSize)}>
               더 보기 <span className="muted num">{items.length - shown}</span>
@@ -129,6 +120,22 @@ export default function FeedScreen() {
         {feed?.source === "naver" ? "네이버 뉴스 검색" : "빙 뉴스"} 결과를 모아 보여 줘요. 기사를 누르면 언론사 원문으로 이동하고, 날짜 옆 북마크로 내 공간에 스크랩할 수 있어요.
       </p>
     </main>
+  );
+}
+
+/** 기사 목록 카드 (뉴스 화면, 홈 최근 소식에서 같이 씀) */
+export function FeedList({ items }: { items: FeedItem[] }) {
+  // 스크랩 여부: 기사 모음(주소) ↔ 내 스크랩
+  const { data: savedNews } = useStoreQuery((s) => s.news.list(), "news");
+  const { data: scraps } = useStoreQuery((s) => s.scraps.list(), "scraps");
+  const scrappedIds = new Set((scraps ?? []).map((s) => s.newsId));
+  const scrappedByLink = new Map((savedNews ?? []).filter((n) => scrappedIds.has(n.id)).map((n) => [n.url, n.id]));
+  return (
+    <ul className={`card ${styles.list}`}>
+      {items.map((item) => (
+        <FeedRow key={item.id} item={item} scrappedNewsId={scrappedByLink.get(item.link)} />
+      ))}
+    </ul>
   );
 }
 

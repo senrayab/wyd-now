@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, Search, SlidersHorizontal } from "lucide-react";
 import Illustration from "@/components/Illustration";
 import { useFeedback } from "@/components/Feedback";
@@ -14,12 +14,15 @@ import { usePrefs } from "@/lib/prefs";
 import { loadRiizeTestData } from "@/lib/services/riize-test-data";
 import { getVoteType, sortVotes, voteStatus } from "@/lib/services/vote-service";
 import type { Artist, Schedule } from "@/lib/storage/types";
+import { FEED_TOPIC, fetchFeed, isStale, readFeedCache, type Feed } from "@/lib/services/riize-news";
+import { FeedList } from "@/features/feed/FeedScreen";
 import NewsTimeline from "@/features/news/NewsTimeline";
 import styles from "./HomeScreen.module.css";
 
 const onDay = (s: Schedule, key: string) => datePart(s.startAt) <= key && datePart(s.endAt) >= key;
 
 const AGENDA_LIMIT = 6;
+const LATEST_NEWS = 3;
 
 export default function HomeScreen() {
   const prefs = usePrefs();
@@ -35,6 +38,11 @@ export default function HomeScreen() {
   const [range, setRange] = useState<"today" | "week">("today");
   // 홈 카드가 끝없이 길어지지 않게 처음엔 몇 개만, 나머지는 펼쳐서
   const [expanded, setExpanded] = useState(false);
+  // 뉴스: 이 기기에 받아 둔 목록을 먼저, 30분이 지났으면 서버 보관본으로 바꿈 (새로고침 버튼과 달리 네이버를 새로 부르지 않음)
+  const [feed, setFeed] = useState<Feed | null>(() => readFeedCache(FEED_TOPIC));
+  useEffect(() => {
+    if (isStale(readFeedCache(FEED_TOPIC))) fetchFeed(FEED_TOPIC).then(setFeed, () => {});
+  }, []);
 
   const d = parseLocal(today);
   // 내 아티스트 전용 모드면 그 아티스트(+ 공용) 항목만
@@ -51,6 +59,7 @@ export default function HomeScreen() {
   const isEmpty = !loading && !artistsLoading && all.length === 0 && artists.length === 0;
   const listed = range === "today" ? todays : weekItems;
   const shown = expanded ? listed : listed.slice(0, AGENDA_LIMIT);
+  const latest = (feed?.items ?? []).slice(0, LATEST_NEWS);
 
   async function seed() {
     setSeeding(true);
@@ -248,13 +257,15 @@ export default function HomeScreen() {
             )}
           </section>
 
-          {/* 최근 소식 */}
+          {/* 최근 소식: 뉴스 최신 기사 몇 개 (못 받았으면 기사 모음) */}
           <section className="section">
             <div className="section-head">
               <h2>최근 소식</h2>
-              <Link href="/news">전체</Link>
+              <Link href={latest.length ? "/feed" : "/news"}>전체</Link>
             </div>
-            {news.length ? (
+            {latest.length ? (
+              <FeedList items={latest} />
+            ) : news.length ? (
               <NewsTimeline items={news.slice(0, 2)} artists={map} />
             ) : (
               <Link href="/news/new" className={`card ${styles.newsEmpty}`}>
