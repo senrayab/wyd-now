@@ -102,10 +102,12 @@ async function bingFeed(topic) {
     }
     const image = decode(pick("News:Image") ?? "");
     return {
-      title: decode(pick("title") ?? ""),
+      // 빙은 특수문자를 두 번 바꿔 넣는 경우가 있어서(&amp;amp;) 두 번 풀어 줌
+      title: decode(decode(pick("title") ?? "")),
       summary: decode(stripTags(decode(pick("description") ?? ""))),
       link,
-      source: decode(pick("News:Source") ?? ""),
+      // "톱스타뉴스 on MSN" 처럼 MSN 을 거친 기사는 언론사 이름만
+      source: decode(decode(pick("News:Source") ?? "")).replace(/\s+on MSN$/i, ""),
       sourceUrl: link,
       pubDate: pick("pubDate"),
       // 빙 썸네일: https + 16:9(320×180) 로 잘라서
