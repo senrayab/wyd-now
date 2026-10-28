@@ -54,7 +54,7 @@ export default function MyScreen() {
         <Lock size={13} /> 이 기기에만 저장되는 나만의 기록이에요. 공용 정보와는 따로 보관돼요.
       </p>
 
-      {/* 내 아티스트 전용 모드: 최애·내 사진 같은 MY 공간을 여기서 */}
+      {/* 내 아티스트 전용 모드: 최애 같은 MY 공간을 여기서 */}
       {focus && focusSpace && (
         <div className={styles.mySpace}>
           {/* 한 팀 전용이라 팔로우는 의미가 없어서 숨김 */}

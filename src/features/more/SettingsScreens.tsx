@@ -206,7 +206,7 @@ export function ArtistFocusSettings() {
     <main>
       <PageHeader back="/more/settings" title="내 아티스트" />
       <p className={styles.lead}>
-        한 아티스트를 고르면 홈·캘린더·소식·투표에 그 아티스트 소식만 보이고, 등록할 때 아티스트를 고르지 않아도 자동으로 연결돼요. 특정 아티스트용이 아닌 투표 사이트 같은 공용 정보는 함께 보여요.
+        한 아티스트를 고르면 홈·캘린더·투표에 그 아티스트 일정과 투표만 보이고, 등록할 때 아티스트를 고르지 않아도 자동으로 연결돼요. 특정 아티스트용이 아닌 상시 투표 같은 공용 정보는 함께 보여요.
       </p>
       <OptionGroup<string>
         title="전용으로 쓸 아티스트"

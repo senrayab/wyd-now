@@ -180,7 +180,7 @@ const votes: VoteRepository = {
   async update(id, patch) {
     const database = await db();
     const current = await database.get("votes", id);
-    if (!current) throw new Error("투표 사이트를 찾을 수 없어요.");
+    if (!current) throw new Error("투표를 찾을 수 없어요.");
     const item: VoteSite = { ...current, ...patch, id, updatedAt: now() };
     await database.put("votes", item);
     notifyChange();

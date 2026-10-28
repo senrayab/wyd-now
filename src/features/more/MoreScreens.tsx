@@ -35,7 +35,7 @@ export function MoreHome() {
         <span className={styles.myText}>
           <strong>{focus ? focus.name : "아티스트"}</strong>
           {/* 전용 모드의 아티스트 페이지는 프로필·멤버·채널·디스코그래피만 */}
-          <small>{focus ? "프로필 · 멤버 · 디스코그래피" : "프로필 · 일정 · 소식 · MY 공간"}</small>
+          <small>{focus ? "프로필 · 멤버 · 디스코그래피" : "프로필 · 일정 · 투표 · MY 공간"}</small>
         </span>
         <ChevronRight size={17} className="muted" />
       </Link>
@@ -46,8 +46,8 @@ export function MoreHome() {
         </span>
         <span className={styles.myText}>
           <strong>내 공간</strong>
-          {/* 전용 모드에서는 MY 공간(최애·내 사진)이 여기로 옴 */}
-          <small>{focus ? "최애 · 내 사진 · 스크랩한 기사" : "스크랩한 기사 · 팔로우 · 오늘 투표"}</small>
+          {/* 전용 모드에서는 MY 공간(최애)이 여기로 옴 */}
+          <small>{focus ? "최애 · 북마크한 투표 · 스크랩한 기사" : "북마크한 투표 · 스크랩한 기사 · 팔로우"}</small>
         </span>
         <ChevronRight size={17} className="muted" />
       </Link>

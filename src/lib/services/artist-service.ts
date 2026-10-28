@@ -1,4 +1,3 @@
-import { convertToWebP } from "../image/image-service";
 import { getDataStore } from "../storage";
 import type { Artist, ArtistInput, MySpace } from "../storage/types";
 import { applyImageChange, type ImageChange } from "./image-attach";
@@ -41,7 +40,7 @@ export async function saveArtist(values: ArtistFormValues, image: ImageChange, e
   return artists.update(created.id, { imageId, coverImageId });
 }
 
-/** 아티스트 삭제: 프로필·배경 이미지, 디스코그래피, 내 공간(사진 포함)을 지우고 일정에서는 연결만 해제 */
+/** 아티스트 삭제: 프로필·배경 이미지, 디스코그래피, 내 공간(남아 있는 사진 포함)을 지우고 일정에서는 연결만 해제 */
 export async function deleteArtist(artist: Artist) {
   const store = getDataStore();
   if (artist.imageId) await store.images.remove(artist.imageId);
@@ -93,31 +92,15 @@ export async function toggleBiasMember(artistId: string, memberId: string): Prom
   return "added";
 }
 
-export const MAX_MY_PHOTOS = 12;
-
-export async function addMyPhoto(artistId: string, file: File) {
+/** 내 사진 기능을 없애면서: 기기에 남은 내 사진 이미지를 지우고 내 공간의 사진 목록을 비움. 지운 장수를 돌려줌 */
+export async function removeAllMyPhotos() {
   const { mySpaces, images } = getDataStore();
-  const space = await mySpaces.get(artistId);
-  if (space.photoIds.length >= MAX_MY_PHOTOS) {
-    throw new Error(`사진은 아티스트마다 ${MAX_MY_PHOTOS}장까지 보관할 수 있어요.`);
+  let removed = 0;
+  for (const space of await mySpaces.list()) {
+    const photos = await images.listByOwner({ kind: "my-photo", id: space.artistId });
+    for (const p of photos) await images.remove(p.id);
+    removed += photos.length;
+    if (space.photoIds.length) await mySpaces.save({ ...space, photoIds: [] });
   }
-  const webp = await convertToWebP(file);
-  const saved = await images.save({
-    blob: webp.blob,
-    mimeType: "image/webp",
-    baseName: webp.baseName,
-    width: webp.width,
-    height: webp.height,
-    size: webp.blob.size,
-    owner: { kind: "my-photo", id: artistId },
-  });
-  await mySpaces.save({ ...space, photoIds: [...space.photoIds, saved.id] });
-  return saved;
-}
-
-export async function removeMyPhoto(artistId: string, photoId: string) {
-  const { mySpaces, images } = getDataStore();
-  const space = await mySpaces.get(artistId);
-  await images.remove(photoId);
-  await mySpaces.save({ ...space, photoIds: space.photoIds.filter((id) => id !== photoId) });
+  return removed;
 }

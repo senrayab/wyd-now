@@ -4,6 +4,7 @@
  * 정리한 경우 그 자리에 RIIZE 샘플을 넣습니다.
  */
 import { getDataStore } from "../storage";
+import { removeAllMyPhotos } from "./artist-service";
 import { removeUnscrappedNews } from "./news-service";
 import { loadUrgentVoteSample } from "./riize-sample-news";
 import { fixEpilogueTitle, loadRiizeReleases, RELEASES_SAMPLE_KEY } from "./riize-sample-releases";
@@ -59,6 +60,8 @@ async function run() {
   await removeLegacy();
   // 기사 모음 기능을 없애면서: 스크랩하지 않은 기사(직접 등록 · 샘플)는 지움
   await removeUnscrappedNews();
+  // 내 사진 기능을 없애면서: 남은 사진 이미지 삭제
+  await removeAllMyPhotos();
   await addNewSamples();
   await addReleaseSamples();
   await fixEpilogueTitle();

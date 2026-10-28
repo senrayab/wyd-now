@@ -69,9 +69,7 @@ export default function VotesScreen() {
         </div>
       </header>
       <p className={styles.lead}>
-        북마크한 투표는 내 공간에 모여요. 거기서 오늘 투표했는지 체크할 수 있어요.
-        <br />
-        새 투표는 아래 + 버튼에서 등록하고, 수정·삭제는 카드의 ⋯ 메뉴에서 할 수 있어요.
+        북마크한 투표는 내 공간에 모이고, 오늘 투표했는지 확인해요.
       </p>
 
       <div className={`segmented ${styles.tabs}`} role="tablist" aria-label="투표 상태">

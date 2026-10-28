@@ -14,8 +14,8 @@ import styles from "./Guide.module.css";
 
 function useCounts() {
   return useStoreQuery(async (s) => {
-    const [artists, schedules, spaces] = await Promise.all([s.artists.list(), s.schedules.list(), s.mySpaces.list()]);
-    return { artists: artists.length, schedules: schedules.length, photos: spaces.reduce((n, sp) => n + sp.photoIds.length, 0) };
+    const [artists, schedules, votes] = await Promise.all([s.artists.list(), s.schedules.list(), s.votes.list()]);
+    return { artists: artists.length, schedules: schedules.length, votes: votes.length };
   }, "counts");
 }
 
@@ -32,8 +32,8 @@ function Counts() {
         <dd className="num">{data?.schedules ?? "–"}</dd>
       </div>
       <div>
-        <dt>내 사진</dt>
-        <dd className="num">{data?.photos ?? "–"}</dd>
+        <dt>투표</dt>
+        <dd className="num">{data?.votes ?? "–"}</dd>
       </div>
     </dl>
   );
@@ -87,7 +87,7 @@ export function BackupScreen() {
       <div className="stack" style={{ marginTop: 18 }}>
         <div className="card-flat">
           <p className="prose" style={{ marginBottom: 14 }}>
-            아티스트, 일정, 내 공간, 이미지를 JSON 파일 하나로 내보내요. 다른 기기나 브라우저에서 복원할 수 있어요.
+            아티스트, 일정, 투표, 내 공간, 이미지를 JSON 파일 하나로 내보내요. 다른 기기나 브라우저에서 복원할 수 있어요.
           </p>
           <button type="button" className="btn btn-primary btn-block" onClick={onExport} disabled={!!busy}>
             {busy === "export" ? <Spinner size={16} /> : <Download size={17} />} {busy === "export" ? "백업 파일 만드는 중" : "백업 파일 내보내기"}
@@ -121,12 +121,10 @@ export function StorageScreen() {
   const { toast } = useFeedback();
   const [info, setInfo] = useState<StorageInfo | null>(null);
   const { data: imageBytes } = useStoreQuery(async (s) => {
-    const spaces = await s.mySpaces.list();
     const owners = [
       ...(await s.schedules.list()).map((x) => x.imageId),
       ...(await s.artists.list()).map((x) => x.imageId),
       ...(await s.votes.list()).map((x) => x.imageId),
-      ...spaces.flatMap((sp) => sp.photoIds),
     ].filter((x): x is string => !!x);
     const images = await Promise.all(owners.map((id) => s.images.get(id)));
     return images.reduce((n, i) => n + (i?.size ?? 0), 0);
@@ -210,7 +208,7 @@ export function ResetScreen() {
   }
 
   async function onClear() {
-    const ok = await confirm({ title: "모든 정보를 삭제할까요?", message: "아티스트, 일정, 내 공간, 이미지가 모두 지워지고 되돌릴 수 없어요.\n필요하면 먼저 백업해 주세요.", confirmLabel: "모두 삭제", danger: true });
+    const ok = await confirm({ title: "모든 정보를 삭제할까요?", message: "아티스트, 일정, 투표, 내 공간, 이미지가 모두 지워지고 되돌릴 수 없어요.\n필요하면 먼저 백업해 주세요.", confirmLabel: "모두 삭제", danger: true });
     if (!ok) return;
     setBusy("clear");
     await getDataStore().clearAll();
@@ -229,7 +227,7 @@ export function ResetScreen() {
             <strong style={{ fontSize: 15 }}>RIIZE 샘플 데이터</strong>
           </div>
           <p className="prose" style={{ marginBottom: 14 }}>
-            실제 RIIZE 프로필(멤버 6명, 데뷔일, 공식 채널, 멤버 생일)과 화면 확인용 테스트 일정을 불러와요.
+            실제 RIIZE 프로필(멤버 6명, 데뷔일, 공식 채널, 멤버 생일)과 디스코그래피, 자주 쓰는 투표 사이트, 화면 확인용 테스트 일정을 불러와요.
           </p>
           <button type="button" className="btn btn-soft btn-block" onClick={onRiize} disabled={!!busy}>
             {busy === "riize" ? (

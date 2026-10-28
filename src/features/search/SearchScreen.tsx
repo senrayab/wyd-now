@@ -51,7 +51,7 @@ export default function SearchScreen() {
         <input
           className="input"
           type="search"
-          placeholder="일정, 아티스트, 투표, 소식"
+          placeholder="일정, 아티스트, 투표"
           aria-label="검색어"
           autoFocus
           value={query}

@@ -101,11 +101,11 @@ export function InstallScreen() {
         </div>
         <p className="prose">
           {offlineReady
-            ? "앱 화면이 이 기기에 저장되어 있어요. 인터넷이 끊겨도 일정 조회·등록·수정·삭제, 이미지 보기와 PNG 저장을 할 수 있어요."
+            ? "앱 화면이 이 기기에 저장되어 있어요. 인터넷이 끊겨도 일정·투표 조회와 등록·수정·삭제, 저장된 이미지 보기를 할 수 있어요."
             : "처음 방문했을 때는 화면 파일을 내려받는 중이에요. 인터넷이 연결된 상태에서 한 번 새로고침하면 준비돼요."}
         </p>
         <p className="muted" style={{ fontSize: 12.5, marginTop: 10, lineHeight: 1.6 }}>
-          지도·공식 링크처럼 외부 사이트로 이동하는 기능은 인터넷이 필요해요.
+          뉴스, 지도·공식 링크·투표 사이트처럼 인터넷에서 가져오거나 외부로 이동하는 기능은 인터넷이 필요해요.
         </p>
       </div>
     </main>
@@ -115,35 +115,35 @@ export function InstallScreen() {
 const FAQ = [
   {
     q: "어떤 앱인가요?",
-    a: "아티스트의 공연·방송·라디오·예능·팬사인·콘텐츠·발매 일정을 모아 보는 정보 앱이에요. 개인 메모가 아닌, 모두에게 필요한 공식 정보를 다뤄요.",
+    a: "아티스트의 공연·방송·라디오·예능·팬사인·콘텐츠·발매 일정과 투표, 뉴스를 모아 보는 정보 앱이에요. 개인 메모가 아닌, 모두에게 필요한 공식 정보를 다뤄요.",
   },
   {
     q: "일정은 어떻게 등록하나요?",
-    a: "아래 메뉴 오른쪽의 + 버튼을 누르거나, 캘린더에서 날짜를 고른 뒤 ‘이 날 일정 등록’을 누르세요. 아티스트 페이지에서 등록하면 해당 아티스트가 자동으로 선택돼요.",
+    a: "하단 메뉴 가운데의 + 버튼을 누르고 ‘일정 등록’을 고르거나, 캘린더에서 날짜를 고른 뒤 ‘이 날 일정 등록’을 누르세요. 투표도 같은 + 버튼의 ‘투표 등록’에서 등록해요.",
   },
   {
     q: "정보는 어디에 저장되나요?",
-    a: "지금은 이 기기의 브라우저 저장소(IndexedDB)에 저장돼요. 다른 기기로 옮기려면 더보기 → 데이터 → 백업 · 복원을 이용하세요. 서버 동기화는 추후 지원할 예정이에요.",
+    a: "이 기기의 브라우저 저장소에 저장돼요. 다른 기기로 옮기려면 더보기 → 데이터 → 백업 · 복원을 이용하세요. 서버 동기화는 추후 지원할 예정이에요.",
   },
   {
     q: "이미지를 올리면 화질이 바뀌나요?",
-    a: "용량을 줄이기 위해 WebP 형식으로 변환해 보관해요. 긴 변이 2560px보다 크면 비율을 유지한 채 줄여요. 저장하거나 공유할 때는 어디서든 열리는 PNG 파일로 바꿔 드려요.",
+    a: "용량을 줄이기 위해 WebP 형식으로 변환해 보관해요. 긴 변이 2560px보다 크면 비율을 유지한 채 줄여요.",
   },
   {
-    q: "투명 배경 PNG도 그대로 유지되나요?",
-    a: "네. WebP로 보관할 때와 PNG로 저장할 때 모두 투명도가 유지돼요. 단, JPG처럼 처음부터 투명도가 없는 이미지는 투명해지지 않아요.",
+    q: "투명 배경 이미지도 그대로 유지되나요?",
+    a: "네. WebP로 보관해도 투명한 부분은 그대로 유지돼요. 단, JPG처럼 처음부터 투명도가 없는 이미지는 투명해지지 않아요.",
   },
   {
     q: "투표 메뉴는 무엇인가요?",
-    a: "음악방송·시상식·투표 앱의 투표 일정을 모아 두는 곳이에요. 진행 중 · 예정 · 지난 투표로 나뉘고, 바로가기를 누르면 해당 사이트로 이동해요. 북마크한 투표는 ‘내 공간’에서 오늘 투표했는지 체크할 수 있어요.",
+    a: "음악방송·시상식·투표 앱의 투표 일정을 모아 두는 곳이에요. 진행 중 · 예정 · 지난 투표로 나뉘고, 바로가기를 누르면 해당 사이트로 이동해요. 수정·복사·삭제는 카드의 ⋯ 메뉴에서 해요. 북마크한 투표는 ‘내 공간’에 모이고, 거기서 오늘 투표했는지 체크할 수 있어요.",
   },
   {
     q: "뉴스는 어디서 보나요?",
-    a: "홈의 ‘최근 소식’에서 ‘전체’를 누르면 최근 7일 기사를 자동으로 모아 보여 줘요. 기사 옆 북마크를 누르면 ‘내 공간’에 스크랩되고, 스크랩은 이 기기에만 저장돼요.",
+    a: "홈의 ‘최근 소식’에서 ‘전체’를 누르면 최근 7일 기사를 자동으로 모아 보여 줘요. 기사 옆 북마크를 누르면 ‘내 공간’에 스크랩되고, 스크랩은 이 기기에만 저장돼요. 스크랩을 해제하면 저장해 둔 기사도 함께 지워져요.",
   },
   {
-    q: "‘MY’ 공간은 무엇인가요?",
-    a: "아티스트 페이지 안의 작은 개인 공간이에요. 팔로우, 최애 멤버, 내 사진을 이 기기에만 보관하고 공개 정보와는 분리돼요.",
+    q: "‘내 공간’은 무엇인가요?",
+    a: "나만 보는 개인 기록을 모아 두는 곳이에요(더보기 → 내 공간). 북마크한 투표(오늘 투표 체크), 스크랩한 기사가 모이고, 최애 멤버는 내 아티스트 전용 모드면 여기서, 아니면 아티스트 페이지의 MY 칸에서 골라요. 모두 이 기기에만 저장되고 공개 정보와는 분리돼요.",
   },
   {
     q: "알림을 받을 수 있나요?",
@@ -198,9 +198,9 @@ export function PrivacyScreen() {
         <h3 style={{ marginTop: 0 }}>수집하는 정보</h3>
         <p>wyd now 는 회원가입이나 로그인이 없고, 이름·연락처 같은 개인정보를 수집하지 않아요.</p>
         <h3>저장 위치</h3>
-        <p>등록한 아티스트, 일정, 투표 사이트, 소식, 이미지와 MY 공간·스크랩은 모두 이 기기의 브라우저 저장소(IndexedDB)에만 저장되며 서버로 전송되지 않아요. 오늘 투표 완료 체크는 localStorage 에 저장되고 날짜가 바뀌면 지워져요. 화면 설정은 브라우저 localStorage 에 저장돼요.</p>
+        <p>등록한 아티스트, 일정, 투표, 이미지와 내 공간(팔로우·최애)·스크랩한 기사는 모두 이 기기의 브라우저 저장소(IndexedDB)에만 저장되며 서버로 전송되지 않아요. 투표 북마크, 오늘 투표 완료 체크(날짜가 바뀌면 지워짐), 화면 설정, 최근 받은 뉴스 목록은 브라우저 localStorage 에 저장돼요.</p>
         <h3>외부 서비스</h3>
-        <p>글꼴 파일을 jsDelivr CDN 에서 내려받아요. 지도·공식 링크를 누르면 해당 외부 사이트로 이동하며, 그 사이트의 정책이 적용돼요.</p>
+        <p>뉴스는 wyd now 서버가 네이버 뉴스 검색·빙 뉴스에서 기사 제목·출처·링크를 받아 전달해요. 이때 내 정보는 함께 보내지 않아요. 글꼴 파일은 jsDelivr CDN 에서 내려받아요. 지도·공식 링크·투표 사이트·기사 원문을 누르면 해당 외부 사이트로 이동하며, 그 사이트의 정책이 적용돼요.</p>
         <h3>삭제</h3>
         <p>더보기 → 데이터 → 샘플 · 초기화에서 모든 정보를 지울 수 있고, 브라우저의 사이트 데이터 삭제로도 지워져요.</p>
         <p className="muted" style={{ marginTop: 14 }}>서버 동기화 기능이 추가되면 이 안내도 함께 업데이트돼요.</p>
@@ -209,33 +209,47 @@ export function PrivacyScreen() {
   );
 }
 
-const LICENSES = [
-  { name: "Tossface", desc: "이모지 글꼴 · Viva Republica", url: "https://github.com/toss/tossface" },
-  { name: "Pretendard", desc: "한글 글꼴 · SIL OFL 1.1", url: "https://github.com/orioncactus/pretendard" },
-  { name: "에스코어드림", desc: "한글 글꼴 · S-Core", url: "https://noonnu.cc/font_page/223" },
-  { name: "Poppins", desc: "영문 글꼴 · SIL OFL 1.1", url: "https://fonts.google.com/specimen/Poppins" },
-  { name: "Lato", desc: "영문 글꼴 · SIL OFL 1.1", url: "https://fonts.google.com/specimen/Lato" },
-  { name: "Lucide", desc: "아이콘 · ISC", url: "https://lucide.dev/license" },
-  { name: "Next.js", desc: "프레임워크 · MIT", url: "https://github.com/vercel/next.js" },
-  { name: "React", desc: "UI 라이브러리 · MIT", url: "https://github.com/facebook/react" },
-  { name: "idb", desc: "IndexedDB 래퍼 · ISC", url: "https://github.com/jakearchibald/idb" },
+/*
+ * 고지가 필요한 것만: 앱과 함께 배포되는 코드(MIT · ISC)와 앱이 직접 담아 배포하는 글꼴(next/font 로 내려받아 함께 배포, SIL OFL).
+ * Pretendard · 에스코어드림 · Tossface 는 앱이 파일을 배포하지 않고 jsDelivr CDN 에서 바로 불러오므로 여기에는 적지 않음.
+ */
+const LICENSES: { group: string; items: { name: string; license: string; url: string }[] }[] = [
+  {
+    group: "글꼴",
+    items: [
+      { name: "Poppins", license: "SIL OFL 1.1", url: "https://fonts.google.com/specimen/Poppins" },
+      { name: "Lato", license: "SIL OFL 1.1", url: "https://fonts.google.com/specimen/Lato" },
+    ],
+  },
+  {
+    group: "코드",
+    items: [
+      { name: "Next.js", license: "MIT", url: "https://github.com/vercel/next.js" },
+      { name: "React", license: "MIT", url: "https://github.com/facebook/react" },
+      { name: "Lucide", license: "ISC", url: "https://lucide.dev/license" },
+      { name: "idb", license: "ISC", url: "https://github.com/jakearchibald/idb" },
+    ],
+  },
 ];
 
 export function LicensesScreen() {
   return (
     <main>
       <PageHeader back="/more/support" title="오픈소스 라이선스" />
-      <div className="list">
-        {LICENSES.map((l) => (
-          <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer" className="list-row">
-            <span className="label">
-              <strong>{l.name}</strong>
-              <small>{l.desc}</small>
-            </span>
-            <ExternalLink size={16} className="muted" />
-          </a>
-        ))}
-      </div>
+      {LICENSES.map((g) => (
+        <section key={g.group}>
+          <h2 className={styles.groupTitle}>{g.group}</h2>
+          <div className={`card ${styles.licenses}`}>
+            {g.items.map((l) => (
+              <a key={l.name} href={l.url} target="_blank" rel="noopener noreferrer" className={styles.license}>
+                <strong>{l.name}</strong>
+                <small>{l.license}</small>
+                <ExternalLink size={14} className="muted" aria-hidden />
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
     </main>
   );
 }
