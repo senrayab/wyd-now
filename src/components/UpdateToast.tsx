@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "./UpdateToast.module.css";
 
 /**
- * 새 버전 알림: 새로 배포된 버전이 준비되면 아래에 작은 알림을 띄우고, 누를 때만 새로고침.
+ * 새 버전 알림: 새로 배포된 버전이 준비되면 아래에 작은 안내 한 줄("새로고침해 주세요")을 띄움.
  * (자동 새로고침은 입력하던 내용을 날릴 수 있어서 하지 않음)
  * - 시작할 때 서비스 워커 등록 → 새 버전이 있으면 설치 → 제어권을 넘겨받으면(controllerchange) 알림
  * - 오래 켜 둔 앱도 알 수 있게, 화면으로 돌아올 때마다 새 버전을 확인
@@ -41,15 +41,10 @@ export default function UpdateToast() {
   }, []);
 
   if (!ready) return null;
+  // 버튼 없이 안내 한 줄. 홈 화면 앱에는 새로고침 버튼이 없어서 안내를 눌러도 새로고침되게
   return (
-    <div className={styles.toast} role="status">
-      <span>새 버전이 있어요</span>
-      <button type="button" onClick={() => window.location.reload()} aria-label="새 버전으로 새로고침">
-        새로고침
-      </button>
-      <button type="button" className={styles.close} onClick={() => setReady(false)} aria-label="알림 닫기">
-        ×
-      </button>
+    <div className={styles.toast} role="status" onClick={() => window.location.reload()}>
+      새 버전이 있어요. 새로고침해 주세요.
     </div>
   );
 }

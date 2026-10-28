@@ -6,36 +6,16 @@
   bottom: calc(var(--nav-h) + 44px + var(--safe-bottom));
   transform: translateX(-50%);
   z-index: 95;
-  display: flex;
-  align-items: center;
-  gap: 10px;
   max-width: calc(100% - 48px);
-  padding: 7px 8px 7px 14px;
+  padding: 8px 16px;
   border-radius: 999px;
   background: var(--inverse);
   color: var(--on-inverse);
   font-size: 12.5px;
   white-space: nowrap;
   box-shadow: var(--float);
+  cursor: pointer;
   animation: rise 0.25s ease;
-}
-
-.toast button {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.toast .close {
-  width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--on-inverse);
-  opacity: 0.6;
 }
 
 @keyframes rise {
