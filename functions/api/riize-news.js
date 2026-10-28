@@ -50,6 +50,24 @@ export async function onRequestGet({ request, waitUntil }) {
   const topic = TOPICS.get(url.searchParams.get("topic") ?? config.group.id);
   if (!topic) return json({ error: "unknown-topic" }, 400);
 
+  // 진단용(임시): 외부 피드가 이 서버에서 어떻게 응답하는지 상태 코드와 앞부분만
+  if (url.searchParams.get("debug") === "1") {
+    const probe = async (u, headers) => {
+      try {
+        const r = await fetch(u, { headers, redirect: "manual", signal: AbortSignal.timeout(8000) });
+        return { status: r.status, location: r.headers.get("location"), head: (await r.text()).slice(0, 160) };
+      } catch (e) {
+        return { error: String(e) };
+      }
+    };
+    const g = `https://news.google.com/rss/search?q=${encodeURIComponent(googleQuery(topic))}&hl=ko&gl=KR&ceid=KR:ko`;
+    return json({
+      googleBot: await probe(g, { "user-agent": "Mozilla/5.0 (compatible; wyd-now news)" }),
+      googleNoUa: await probe(g, {}),
+      googleBrowser: await probe(g, { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36", "accept-language": "ko-KR,ko;q=0.9" }),
+    });
+  }
+
   // 같은 주제는 30분 동안 캐시 (Cache API 를 못 쓰는 환경이면 매번 새로 읽음)
   const cacheKey = new Request(`${url.origin}/api/riize-news?topic=${topic.id}`);
   const cache = globalThis.caches?.default;
