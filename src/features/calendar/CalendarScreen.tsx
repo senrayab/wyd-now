@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { ReactNode } from "react";
 import { CalendarDays, CalendarOff, ChevronLeft, ChevronRight, Clock3, Inbox, Plus, Search, X } from "lucide-react";
 import HomeLink from "@/components/HomeLink";
 import ScheduleRow from "@/components/ScheduleRow";
@@ -34,6 +35,21 @@ export default function CalendarScreen() {
     setParams({ view: v });
   };
 
+  // 보기 방식 › 그 보기의 세부 조작(월 이동 / 기간)을 한 줄에
+  const switcher = (
+    <>
+      <div className="segmented" role="group" aria-label="보기 방식">
+        <button type="button" aria-pressed={view === "month"} onClick={() => switchView("month")}>
+          월간
+        </button>
+        <button type="button" aria-pressed={view === "list"} onClick={() => switchView("list")}>
+          목록
+        </button>
+      </div>
+      <ChevronRight size={15} className={styles.toolbarSep} aria-hidden />
+    </>
+  );
+
   return (
     <main>
       <header className="page-header">
@@ -49,19 +65,11 @@ export default function CalendarScreen() {
         </div>
       </header>
 
-      <div className="segmented" role="group" aria-label="보기 방식">
-        <button type="button" aria-pressed={view === "month"} onClick={() => switchView("month")}>
-          월간
-        </button>
-        <button type="button" aria-pressed={view === "list"} onClick={() => switchView("list")}>
-          목록
-        </button>
-      </div>
-
       {view === "month" ? (
-        <MonthView selected={selected} today={today} onSelect={(date) => setParams({ date })} />
+        <MonthView switcher={switcher} selected={selected} today={today} onSelect={(date) => setParams({ date })} />
       ) : (
         <ListView
+          switcher={switcher}
           category={isCategoryId(params.get("cat")) ? params.get("cat") : null}
           artistId={params.get("artist")}
           past={params.get("range") === "past"}
@@ -72,7 +80,7 @@ export default function CalendarScreen() {
   );
 }
 
-function MonthView({ selected, today, onSelect }: { selected: string; today: string; onSelect: (date: string) => void }) {
+function MonthView({ switcher, selected, today, onSelect }: { switcher: ReactNode; selected: string; today: string; onSelect: (date: string) => void }) {
   const prefs = usePrefs();
   const { map } = useArtists();
   const sel = parseLocal(selected);
@@ -109,16 +117,19 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
 
   return (
     <>
-      <div className={styles.monthHead}>
-        <button type="button" className="icon-btn sm" onClick={() => moveMonth(-1)} aria-label="이전 달">
-          <ChevronLeft size={18} />
-        </button>
-        <h2 className="num">
-          {year}. <b>{String(month + 1).padStart(2, "0")}</b>
-        </h2>
-        <button type="button" className="icon-btn sm" onClick={() => moveMonth(1)} aria-label="다음 달">
-          <ChevronRight size={18} />
-        </button>
+      <div className={styles.toolbar}>
+        {switcher}
+        <div className={styles.monthNav}>
+          <button type="button" className="icon-btn sm" onClick={() => moveMonth(-1)} aria-label="이전 달">
+            <ChevronLeft size={17} />
+          </button>
+          <h2 className="num">
+            {year}. <b>{String(month + 1).padStart(2, "0")}</b>
+          </h2>
+          <button type="button" className="icon-btn sm" onClick={() => moveMonth(1)} aria-label="다음 달">
+            <ChevronRight size={17} />
+          </button>
+        </div>
         <span className="spacer" />
         {selected !== today && (
           <button type="button" className="chip" onClick={() => onSelect(today)}>
@@ -210,11 +221,13 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
 }
 
 function ListView({
+  switcher,
   category,
   artistId,
   past,
   onChange,
 }: {
+  switcher: ReactNode;
   category: string | null;
   artistId: string | null;
   past: boolean;
@@ -242,7 +255,8 @@ function ListView({
 
   return (
     <>
-      <div className={styles.listFilters}>
+      <div className={styles.toolbar}>
+        {switcher}
         <div className="segmented" role="group" aria-label="기간">
           <button type="button" aria-pressed={!past} onClick={() => onChange({ range: null })}>
             다가오는
@@ -251,13 +265,13 @@ function ListView({
             지난 일정
           </button>
         </div>
+      </div>
+      <div className="chips" role="group" aria-label="카테고리">
         {artist && (
           <button type="button" className="chip" aria-pressed onClick={() => onChange({ artist: null })}>
             {artist.name} <X size={14} />
           </button>
         )}
-      </div>
-      <div className="chips" role="group" aria-label="카테고리">
         <button type="button" className="chip" aria-pressed={!category} onClick={() => onChange({ cat: null })}>
           전체
         </button>

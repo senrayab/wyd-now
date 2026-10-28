@@ -1,17 +1,41 @@
-.monthHead {
+/* 보기 방식 › 월 이동 / 기간: 한 줄 */
+.toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 22px 4px 14px;
+  gap: 4px;
+  margin: 0 0 14px;
 }
 
-.monthHead h2 {
-  font-size: 20px;
+/* 이 줄에서는 탭을 조금 좁게 (작은 화면에서도 한 줄에) */
+.toolbar :global(.segmented) button {
+  padding: 0 12px;
+}
+
+.toolbarSep {
+  flex: none;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.monthNav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.monthNav :global(.icon-btn.sm) {
+  width: 30px;
+  height: 30px;
+}
+
+.monthNav h2 {
+  font-size: 17px;
   font-weight: 400;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
-.monthHead h2 b {
+.monthNav h2 b {
   font-weight: 700;
   color: var(--ink);
 }
@@ -103,12 +127,4 @@
   background: transparent;
   box-shadow: inset 0 0 0 1.2px var(--muted);
   opacity: 0.8;
-}
-
-.listFilters {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0 8px;
 }
