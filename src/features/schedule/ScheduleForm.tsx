@@ -11,6 +11,7 @@ import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
 import { CATEGORIES } from "@/lib/categories";
 import { datePart, isDateKey, timePart, todayKey } from "@/lib/date";
+import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import type { ImageChange } from "@/lib/services/image-attach";
 import { saveSchedule, validateSchedule, type ScheduleFormValues } from "@/lib/services/schedule-service";
@@ -60,6 +61,7 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
   const cancel = useBack(existing ? `/schedule?id=${existing.id}` : "/calendar");
   const { toast } = useFeedback();
   const { artists } = useArtists();
+  const { focus } = useFocusArtist();
   const [values, setValues] = useState<ScheduleFormValues>(initial);
   const [image, setImage] = useState<ImageChange>({ kind: "keep" });
   const [errors, setErrors] = useState<ReturnType<typeof validateSchedule>>({});
@@ -95,7 +97,8 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
     }
     setSaving(true);
     try {
-      const saved = await saveSchedule(normalized, image, existing);
+      const linked = focus && !normalized.artistIds.length ? { ...normalized, artistIds: [focus.id] } : normalized;
+      const saved = await saveSchedule(linked, image, existing);
       toast(existing ? "일정을 수정했어요." : "일정을 등록했어요.");
       router.replace(`/schedule?id=${saved.id}`);
     } catch {
@@ -140,25 +143,28 @@ function ScheduleForm({ initial, existing }: { initial: ScheduleFormValues; exis
           {errors.title && <span className="error">{errors.title}</span>}
         </div>
 
-        <div className="field">
-          <span className="field-label">아티스트</span>
-          {artists.length ? (
-            <div className={styles.artistPick}>
-              {artists.map((a) => (
-                <button key={a.id} type="button" className="chip" aria-pressed={values.artistIds.includes(a.id)} onClick={() => toggleArtist(a.id)}>
-                  <ArtistAvatar artist={a} size={22} /> {a.name}
-                </button>
-              ))}
-              <Link href="/artist/new" className="chip">
-                <Plus size={14} /> 새 아티스트
+        {/* 내 아티스트 전용 모드에서는 고를 필요 없이 저장할 때 자동 연결 */}
+        {!focus && (
+          <div className="field">
+            <span className="field-label">아티스트</span>
+            {artists.length ? (
+              <div className={styles.artistPick}>
+                {artists.map((a) => (
+                  <button key={a.id} type="button" className="chip" aria-pressed={values.artistIds.includes(a.id)} onClick={() => toggleArtist(a.id)}>
+                    <ArtistAvatar artist={a} size={22} /> {a.name}
+                  </button>
+                ))}
+                <Link href="/artist/new" className="chip">
+                  <Plus size={14} /> 새 아티스트
+                </Link>
+              </div>
+            ) : (
+              <Link href="/artist/new" className="btn btn-ghost btn-sm">
+                <Plus size={15} /> 아티스트를 먼저 등록해 주세요
               </Link>
-            </div>
-          ) : (
-            <Link href="/artist/new" className="btn btn-ghost btn-sm">
-              <Plus size={15} /> 아티스트를 먼저 등록해 주세요
-            </Link>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <div className={`card-flat ${styles.timeBox}`}>
           <div className={styles.timeRow}>

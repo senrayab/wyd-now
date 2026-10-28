@@ -41,7 +41,7 @@ export async function saveArtist(values: ArtistFormValues, image: ImageChange, e
   return artists.update(created.id, { imageId, coverImageId });
 }
 
-/** 아티스트 삭제: 프로필·배경 이미지, 내 공간(사진 포함)을 지우고 일정에서는 연결만 해제 */
+/** 아티스트 삭제: 프로필·배경 이미지, 디스코그래피, 내 공간(사진 포함)을 지우고 일정에서는 연결만 해제 */
 export async function deleteArtist(artist: Artist) {
   const store = getDataStore();
   if (artist.imageId) await store.images.remove(artist.imageId);
@@ -49,6 +49,10 @@ export async function deleteArtist(artist: Artist) {
   const photos = await store.images.listByOwner({ kind: "my-photo", id: artist.id });
   await Promise.all(photos.map((p) => store.images.remove(p.id)));
   await store.mySpaces.remove(artist.id);
+  for (const r of await store.releases.listByArtist(artist.id)) {
+    if (r.imageId) await store.images.remove(r.imageId);
+    await store.releases.remove(r.id);
+  }
   const linked = await store.schedules.listByArtist(artist.id);
   await Promise.all(
     linked.map((s) => store.schedules.update(s.id, { artistIds: s.artistIds.filter((id) => id !== artist.id) })),

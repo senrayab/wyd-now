@@ -16,6 +16,7 @@ import {
   Settings,
   ShieldCheck,
   Smartphone,
+  Star,
   Tags,
   Vote,
   Newspaper,
@@ -65,6 +66,7 @@ export const MORE_MENU: MenuSection[] = [
     icon: Settings,
     colors: ["#8b7cf6", "#ebe8ff"],
     items: [
+      { href: "/more/settings/artist", label: "내 아티스트", description: "한 아티스트 전용으로 쓰기", icon: Star },
       { href: "/more/settings/theme", label: "화면 테마", description: "라이트 · 다크 · 시스템 설정", icon: Palette },
       { href: "/more/settings/font", label: "글꼴", description: "한글·영문 글꼴 선택", icon: Type },
       { href: "/more/settings/calendar", label: "캘린더", description: "주 시작 요일, 시간 표시, 기본 보기", icon: CalendarCog },

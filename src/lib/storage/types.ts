@@ -23,7 +23,8 @@ export type ImageOwner =
   | { kind: "schedule"; id: string }
   | { kind: "artist"; id: string }
   | { kind: "my-photo"; id: string } // id = artistId
-  | { kind: "news"; id: string };
+  | { kind: "news"; id: string }
+  | { kind: "release"; id: string };
 
 export interface StoredImage {
   id: string;
@@ -119,6 +120,34 @@ export interface NewsItem {
   updatedAt: string;
 }
 
+export type ReleaseKind = "album" | "mini" | "single" | "digital" | "ost" | "etc";
+
+export interface Track {
+  title: string;
+  /** 타이틀곡 */
+  isTitle?: boolean;
+}
+
+/** 아티스트의 앨범·싱글 (디스코그래피, 공용 정보) */
+export interface Release {
+  id: string;
+  artistId: string;
+  title: string;
+  kind: ReleaseKind;
+  /** YYYY-MM-DD */
+  releaseDate: string;
+  tracks: Track[];
+  /** 타이틀곡 공식 뮤직비디오 */
+  mvUrl?: string;
+  /** 음원 사이트 등 */
+  links: LinkItem[];
+  /** 앨범 소개 (공개 정보) */
+  description?: string;
+  imageId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /** 내가 스크랩한 기사 (이 기기에만 저장하는 개인 기록) */
 export interface MyScrap {
   newsId: string;
@@ -142,6 +171,7 @@ export type ArtistInput = Omit<Artist, Generated>;
 export type ScheduleInput = Omit<Schedule, Generated>;
 export type VoteInput = Omit<VoteSite, Generated>;
 export type NewsInput = Omit<NewsItem, Generated>;
+export type ReleaseInput = Omit<Release, Generated>;
 export type NewImage = Omit<StoredImage, "id" | "createdAt">;
 
 export interface BackupFile {
@@ -156,5 +186,7 @@ export interface BackupFile {
   /** 소식 메뉴 추가 이전 백업에는 없음 */
   news?: NewsItem[];
   scraps?: MyScrap[];
+  /** 디스코그래피 추가 이전 백업에는 없음 */
+  releases?: Release[];
   images: (Omit<StoredImage, "blob"> & { dataUrl: string })[];
 }

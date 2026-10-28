@@ -11,11 +11,13 @@ import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
 import { datePart, dDay, formatDate, formatShortDate, todayKey } from "@/lib/date";
 import { ACCEPT_ATTR } from "@/lib/image/image-service";
+import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import { addMyPhoto, biasIdsOf, deleteArtist, MAX_BIAS, MAX_MY_PHOTOS, removeMyPhoto, setFollowed, toggleBiasMember } from "@/lib/services/artist-service";
 import type { Artist, Member, MySpace, Schedule, StoredImage } from "@/lib/storage/types";
 import NewsTimeline from "@/features/news/NewsTimeline";
+import { DiscographySection } from "@/features/release/ReleaseScreens";
 import VoteCard from "@/features/vote/VoteCard";
 import { sortVotes } from "@/lib/services/vote-service";
 import styles from "./ArtistDetail.module.css";
@@ -24,7 +26,8 @@ export default function ArtistDetail() {
   const id = useSearchParams().get("id") ?? "";
   const router = useRouter();
   const prefs = usePrefs();
-  const back = useBack("/artists");
+  const { focus } = useFocusArtist();
+  const back = useBack(focus ? "/" : "/artists");
   const { toast, confirm } = useFeedback();
   const { map } = useArtists();
   const { data: artist, loading } = useStoreQuery((s) => s.artists.get(id), `artist:${id}`);
@@ -44,6 +47,7 @@ export default function ArtistDetail() {
     );
   }
 
+  const dedicated = focus?.id === artist.id;
   const today = todayKey();
   const upcoming = (schedules ?? []).filter((s) => datePart(s.endAt) >= today);
   const pastCount = (schedules ?? []).length - upcoming.length;
@@ -130,80 +134,94 @@ export default function ArtistDetail() {
           </section>
         )}
 
-        {space && <MySpaceCard artist={artist} space={space} schedules={schedules ?? []} />}
+        <DiscographySection artist={artist} />
 
-        <section className="section">
-          <div className="section-head">
-            <h2>다가오는 일정</h2>
-            <Link href={`/calendar?view=list&artist=${artist.id}`}>전체 보기</Link>
-          </div>
-          {upcoming.length ? (
-            <div className="stack">
-              {upcoming.slice(0, 5).map((s) => (
-                <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate />
-              ))}
-            </div>
-          ) : (
-            <div className="card-flat">
-              <Empty icon={CalendarOff}>예정된 일정이 없어요.</Empty>
-            </div>
-          )}
-          {pastCount > 0 && (
-            <Link href={`/calendar?view=list&artist=${artist.id}&range=past`} className={`btn btn-ghost btn-block ${styles.past}`}>
-              지난 일정 {pastCount}개 보기
-            </Link>
-          )}
-        </section>
+        {/* 내 아티스트 전용 모드에서는 일정·투표·소식은 홈·메뉴에서, MY 공간은 '내 공간'에서 봄 */}
+        {!dedicated && (
+          <>
+            {space && <MySpaceCard artist={artist} space={space} schedules={schedules ?? []} />}
 
-        <section className="section">
-          <div className="section-head">
-            <h2>투표</h2>
-            <Link href={`/vote/new?artist=${artist.id}`}>등록</Link>
-          </div>
-          {(() => {
-            const mine = sortVotes((votes ?? []).filter((v) => v.artistIds.includes(artist.id)));
-            return mine.length ? (
-              <div className="stack">
-                {mine.map((v) => (
-                  <VoteCard key={v.id} vote={v} artists={map} />
-                ))}
+            <section className="section">
+              <div className="section-head">
+                <h2>다가오는 일정</h2>
+                <Link href={`/calendar?view=list&artist=${artist.id}`}>전체 보기</Link>
               </div>
-            ) : (
-              <div className="card-flat">
-                <Empty icon={Vote} action={<Link href="/votes" className="btn btn-soft btn-sm">투표 사이트 모음 보기</Link>}>
-                  {artist.name} 전용으로 등록된 투표가 없어요.
-                </Empty>
-              </div>
-            );
-          })()}
-        </section>
+              {upcoming.length ? (
+                <div className="stack">
+                  {upcoming.slice(0, 5).map((s) => (
+                    <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate />
+                  ))}
+                </div>
+              ) : (
+                <div className="card-flat">
+                  <Empty icon={CalendarOff}>예정된 일정이 없어요.</Empty>
+                </div>
+              )}
+              {pastCount > 0 && (
+                <Link href={`/calendar?view=list&artist=${artist.id}&range=past`} className={`btn btn-ghost btn-block ${styles.past}`}>
+                  지난 일정 {pastCount}개 보기
+                </Link>
+              )}
+            </section>
 
-        <section className="section">
-          <div className="section-head">
-            <h2>소식</h2>
-            <span className="row" style={{ gap: 14 }}>
-              <Link href={`/news/new?artist=${artist.id}`}>등록</Link>
-              <Link href={`/news?artist=${artist.id}`}>전체</Link>
-            </span>
-          </div>
-          {(() => {
-            const mine = (news ?? []).filter((n) => n.artistIds.includes(artist.id));
-            return mine.length ? (
-              <NewsTimeline items={mine.slice(0, 3)} artists={map} />
-            ) : (
-              <div className="card-flat">
-                <Empty icon={Newspaper} action={<Link href={`/news/new?artist=${artist.id}`} className="btn btn-soft btn-sm">기사 등록</Link>}>
-                  {artist.name} 소식이 아직 없어요.
-                </Empty>
+            <section className="section">
+              <div className="section-head">
+                <h2>투표</h2>
+                <Link href={`/vote/new?artist=${artist.id}`}>등록</Link>
               </div>
-            );
-          })()}
-        </section>
+              {(() => {
+                const mine = sortVotes((votes ?? []).filter((v) => v.artistIds.includes(artist.id)));
+                return mine.length ? (
+                  <div className="stack">
+                    {mine.map((v) => (
+                      <VoteCard key={v.id} vote={v} artists={map} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card-flat">
+                    <Empty icon={Vote} action={<Link href="/votes" className="btn btn-soft btn-sm">투표 사이트 모음 보기</Link>}>
+                      {artist.name} 전용으로 등록된 투표가 없어요.
+                    </Empty>
+                  </div>
+                );
+              })()}
+            </section>
+
+            <section className="section">
+              <div className="section-head">
+                <h2>소식</h2>
+                <span className="row" style={{ gap: 14 }}>
+                  <Link href={`/news/new?artist=${artist.id}`}>등록</Link>
+                  <Link href={`/news?artist=${artist.id}`}>전체</Link>
+                </span>
+              </div>
+              {(() => {
+                const mine = (news ?? []).filter((n) => n.artistIds.includes(artist.id));
+                return mine.length ? (
+                  <NewsTimeline items={mine.slice(0, 3)} artists={map} />
+                ) : (
+                  <div className="card-flat">
+                    <Empty icon={Newspaper} action={<Link href={`/news/new?artist=${artist.id}`} className="btn btn-soft btn-sm">기사 등록</Link>}>
+                      {artist.name} 소식이 아직 없어요.
+                    </Empty>
+                  </div>
+                );
+              })()}
+            </section>
+
+          </>
+        )}
 
         <div className={styles.actions}>
-          <Link href={`/schedule/new?artist=${artist.id}`} className="btn btn-primary" style={{ flex: 1 }}>
-            <Plus size={17} /> 일정 등록
-          </Link>
+          {dedicated ? (
+            <Link href={`/release/new?artist=${artist.id}`} className="btn btn-ghost" style={{ flex: 1 }}>
+              <Plus size={17} /> 앨범 등록
+            </Link>
+          ) : (
+            <Link href={`/schedule/new?artist=${artist.id}`} className="btn btn-primary" style={{ flex: 1 }}>
+              <Plus size={17} /> 일정 등록
+            </Link>
+          )}
           <button type="button" className="btn btn-danger" onClick={onDelete} aria-label="아티스트 삭제">
             <Trash2 size={17} />
           </button>
@@ -221,8 +239,8 @@ function HeroCover({ imageId }: { imageId: string }) {
   return <img src={url} alt="" className={styles.heroCover} />;
 }
 
-/** 작은 개인 공간: 팔로우 · 최애 멤버 · 내 사진 (이 기기에만 저장) */
-function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySpace; schedules: Schedule[] }) {
+/** 작은 개인 공간: 팔로우 · 최애 멤버 · 내 사진 (이 기기에만 저장). 전용 모드에서는 '내 공간'(/my)에서 씀 */
+export function MySpaceCard({ artist, space, schedules, showFollow = true }: { artist: Artist; space: MySpace; schedules: Schedule[]; showFollow?: boolean }) {
   const inputId = useId();
   const { toast } = useFeedback();
   const { data: photos } = useStoreQuery((s) => s.images.listByOwner({ kind: "my-photo", id: artist.id }), `photos:${artist.id}:${space.photoIds.join()}`);
@@ -261,18 +279,20 @@ function MySpaceCard({ artist, space, schedules }: { artist: Artist; space: MySp
           <Lock size={10} /> My · 나만 보는 공간
         </span>
         <span className="spacer" />
-        <button
-          type="button"
-          className={styles.follow}
-          aria-pressed={space.followed}
-          onClick={async () => {
-            await setFollowed(artist.id, !space.followed);
-            toast(space.followed ? "팔로우를 해제했어요." : "팔로우했어요. 홈에서 모아 볼 수 있어요.");
-          }}
-        >
-          <Heart size={14} fill={space.followed ? "currentColor" : "none"} />
-          {space.followed ? "팔로우 중" : "팔로우"}
-        </button>
+        {showFollow && (
+          <button
+            type="button"
+            className={styles.follow}
+            aria-pressed={space.followed}
+            onClick={async () => {
+              await setFollowed(artist.id, !space.followed);
+              toast(space.followed ? "팔로우를 해제했어요." : "팔로우했어요. 홈에서 모아 볼 수 있어요.");
+            }}
+          >
+            <Heart size={14} fill={space.followed ? "currentColor" : "none"} />
+            {space.followed ? "팔로우 중" : "팔로우"}
+          </button>
+        )}
       </div>
 
       <h2 className={styles.myTitle}>

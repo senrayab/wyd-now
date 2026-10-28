@@ -4,7 +4,9 @@ import Link from "next/link";
 import { Bookmark, ChevronRight, Lock } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
 import { ArtistAvatar, Empty, Loading } from "@/components/ui";
+import { MySpaceCard } from "@/features/artist/ArtistDetail";
 import NewsTimeline from "@/features/news/NewsTimeline";
+import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import type { NewsItem } from "@/lib/storage/types";
 import { useVoteDone } from "@/lib/vote-done";
@@ -17,6 +19,9 @@ export default function MyScreen() {
   const { data: news } = useStoreQuery((s) => s.news.list(), "news");
   const { data: spaces } = useStoreQuery((s) => s.mySpaces.list(), "spaces");
   const { count: votedToday } = useVoteDone();
+  const { focus } = useFocusArtist();
+  const { data: focusSpace } = useStoreQuery((s) => (focus ? s.mySpaces.get(focus.id) : Promise.resolve(undefined)), `space:${focus?.id}`);
+  const { data: focusSchedules } = useStoreQuery((s) => (focus ? s.schedules.listByArtist(focus.id) : Promise.resolve([])), `artist-schedules:${focus?.id}`);
 
   const byId = new Map((news ?? []).map((n) => [n.id, n]));
   const scrapped = (scraps ?? []).map((s) => byId.get(s.newsId)).filter((n): n is NewsItem => !!n);
@@ -29,23 +34,34 @@ export default function MyScreen() {
         <Lock size={13} /> 이 기기에만 저장되는 나만의 기록이에요. 공용 정보와는 따로 보관돼요.
       </p>
 
-      <div className={styles.stats}>
-        <div className="card">
-          <span className="eyebrow">Scraps</span>
-          <b className="num">{scrapped.length}</b>
-          <small>스크랩한 기사</small>
+      {/* 내 아티스트 전용 모드: 최애·내 사진 같은 MY 공간을 여기서 */}
+      {focus && focusSpace && (
+        <div className={styles.mySpace}>
+          {/* 한 팀 전용이라 팔로우는 의미가 없어서 숨김 */}
+          <MySpaceCard artist={focus} space={focusSpace} schedules={focusSchedules ?? []} showFollow={false} />
         </div>
-        <Link href="/artists" className="card">
-          <span className="eyebrow">Following</span>
-          <b className="num">{followed.length}</b>
-          <small>팔로우 아티스트</small>
-        </Link>
-        <Link href="/votes" className="card">
-          <span className="eyebrow">Today</span>
-          <b className="num">{votedToday}</b>
-          <small>투표 완료</small>
-        </Link>
-      </div>
+      )}
+
+      {/* 숫자 요약: 전용 모드에서는 위 MY 카드와 겹쳐서 숨김 */}
+      {!focus && (
+        <div className={styles.stats}>
+          <div className="card">
+            <span className="eyebrow">Scraps</span>
+            <b className="num">{scrapped.length}</b>
+            <small>스크랩한 기사</small>
+          </div>
+          <Link href="/artists" className="card">
+            <span className="eyebrow">Following</span>
+            <b className="num">{followed.length}</b>
+            <small>팔로우 아티스트</small>
+          </Link>
+          <Link href="/votes" className="card">
+            <span className="eyebrow">Today</span>
+            <b className="num">{votedToday}</b>
+            <small>투표 완료</small>
+          </Link>
+        </div>
+      )}
 
       <section className="section">
         <div className="section-head">
@@ -67,7 +83,7 @@ export default function MyScreen() {
         )}
       </section>
 
-      {followed.length > 0 && (
+      {!focus && followed.length > 0 && (
         <section className="section">
           <div className="section-head">
             <h2>팔로우 중인 아티스트</h2>

@@ -40,3 +40,12 @@
   font-size: 11.5px;
   color: var(--muted);
 }
+
+/* 전용 모드의 MY 공간 카드 (아티스트 페이지에서 쓰던 카드의 위쪽 여백 제거) */
+.mySpace {
+  margin-bottom: 16px;
+}
+
+.mySpace > :global(section) {
+  margin-top: 0;
+}

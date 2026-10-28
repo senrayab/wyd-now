@@ -64,7 +64,7 @@
   border-top: 1px solid var(--line);
 }
 
-.option .label {
+.option :global(.label) {
   flex: 1;
 }
 
@@ -103,6 +103,28 @@
   height: 8px;
   border-radius: 50%;
   background: #fff;
+}
+
+/* 이름만으로 아티스트 바로 추가 */
+.quickAdd {
+  display: flex;
+  gap: 8px;
+}
+
+.quickAdd :global(.input) {
+  flex: 1;
+  min-width: 0;
+}
+
+.quickAdd :global(.btn) {
+  flex: none;
+  padding: 0 18px;
+}
+
+.lead a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .groupTitle {

@@ -1,4 +1,17 @@
 /* 제목: 가는 날짜 한 줄 + 굵은 한 줄 */
+/* 내 아티스트 전용 모드: 헤더의 프로필 원 (아이콘 버튼과 같은 40px) */
+.focusBtn {
+  flex: none;
+  display: block;
+  line-height: 0;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.focusBtn:active {
+  transform: scale(0.94);
+}
+
 .title {
   padding: 18px 4px 22px;
 }

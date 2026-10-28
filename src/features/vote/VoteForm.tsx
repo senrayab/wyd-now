@@ -7,6 +7,7 @@ import { Plus, SearchX } from "lucide-react";
 import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Switch, Spinner } from "@/components/ui";
+import { useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { saveVote, validateVote, VOTE_TYPES } from "@/lib/services/vote-service";
 import type { VoteInput, VoteSite } from "@/lib/storage/types";
@@ -45,6 +46,7 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
   const cancel = useBack(existing ? `/vote?id=${existing.id}` : "/votes");
   const { toast } = useFeedback();
   const { artists } = useArtists();
+  const { focus } = useFocusArtist();
   const [values, setValues] = useState(initial);
   const [hasPeriod, setHasPeriod] = useState(!!(initial.startDate || initial.endDate));
   const [errors, setErrors] = useState<ReturnType<typeof validateVote>>({});
@@ -68,7 +70,7 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
     }
     setSaving(true);
     try {
-      const saved = await saveVote(final, existing);
+      const saved = await saveVote(focus && !final.artistIds.length ? { ...final, artistIds: [focus.id] } : final, existing);
       toast(existing ? "수정했어요." : "투표 사이트를 등록했어요.");
       router.replace(`/vote?id=${saved.id}`);
     } catch {
@@ -131,27 +133,30 @@ function VoteForm({ initial, existing }: { initial: VoteInput; existing?: VoteSi
           )}
         </div>
 
-        <div className="field">
-          <span className="field-label">아티스트</span>
-          <div className="row" style={{ flexWrap: "wrap" }}>
-            {artists.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className="chip"
-                style={{ paddingLeft: 5 }}
-                aria-pressed={values.artistIds.includes(a.id)}
-                onClick={() => set("artistIds", values.artistIds.includes(a.id) ? values.artistIds.filter((x) => x !== a.id) : [...values.artistIds, a.id])}
-              >
-                <ArtistAvatar artist={a} size={22} /> {a.name}
-              </button>
-            ))}
-            <Link href="/artist/new" className="chip">
-              <Plus size={14} /> 새 아티스트
-            </Link>
+        {/* 내 아티스트 전용 모드에서는 고를 필요 없이 저장할 때 자동 연결 */}
+        {!focus && (
+          <div className="field">
+            <span className="field-label">아티스트</span>
+            <div className="row" style={{ flexWrap: "wrap" }}>
+              {artists.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className="chip"
+                  style={{ paddingLeft: 5 }}
+                  aria-pressed={values.artistIds.includes(a.id)}
+                  onClick={() => set("artistIds", values.artistIds.includes(a.id) ? values.artistIds.filter((x) => x !== a.id) : [...values.artistIds, a.id])}
+                >
+                  <ArtistAvatar artist={a} size={22} /> {a.name}
+                </button>
+              ))}
+              <Link href="/artist/new" className="chip">
+                <Plus size={14} /> 새 아티스트
+              </Link>
+            </div>
+            <span className="hint">특정 아티스트를 위한 투표라면 선택해 주세요. 아티스트 페이지에도 보여요.</span>
           </div>
-          <span className="hint">특정 아티스트를 위한 투표라면 선택해 주세요. 아티스트 페이지에도 보여요.</span>
-        </div>
+        )}
 
         <div className="field">
           <label htmlFor="vote-desc">안내</label>

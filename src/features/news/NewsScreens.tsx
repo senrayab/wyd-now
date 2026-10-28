@@ -10,6 +10,7 @@ import PageHeader, { useBack } from "@/components/PageHeader";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Empty, Loading, Spinner } from "@/components/ui";
 import { formatDate, todayKey } from "@/lib/date";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useImageUrl, useStoreQuery } from "@/lib/hooks";
 import { convertToWebP } from "@/lib/image/image-service";
 import type { ImageChange } from "@/lib/services/image-attach";
@@ -29,7 +30,8 @@ export function NewsListScreen() {
   const artistId = params.get("artist");
   const { artists, map } = useArtists();
   const { data, loading } = useStoreQuery((s) => s.news.list(), "news");
-  const shown = (data ?? []).filter((n) => !artistId || n.artistIds.includes(artistId));
+  const { focus } = useFocusArtist();
+  const shown = (data ?? []).filter((n) => inFocus(n.artistIds, focus) && (!artistId || n.artistIds.includes(artistId)));
 
   return (
     <main>
@@ -49,7 +51,8 @@ export function NewsListScreen() {
       />
       <p className={styles.lead}>아티스트 관련 기사와 공식 소식을 모아 두는 곳이에요. 모두가 같은 정보를 보도록 출처가 분명한 기사만 등록해 주세요.</p>
 
-      {artists.length > 0 && (
+      {/* 아티스트별 보기 칩은 여러 아티스트를 함께 볼 때만 */}
+      {!focus && artists.length > 0 && (
         <div className="chips" role="group" aria-label="아티스트">
           <button type="button" className="chip" aria-pressed={!artistId} onClick={() => router.replace("/news", { scroll: false })}>
             전체
@@ -211,6 +214,7 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
   const cancel = useBack(existing ? `/news/view?id=${existing.id}` : "/news");
   const { toast } = useFeedback();
   const { artists } = useArtists();
+  const { focus } = useFocusArtist();
   const [values, setValues] = useState(initial);
   const [image, setImage] = useState<ImageChange>({ kind: "keep" });
   const [errors, setErrors] = useState<ReturnType<typeof validateNews>>({});
@@ -274,7 +278,7 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
     }
     setSaving(true);
     try {
-      const saved = await saveNews(values, image, existing);
+      const saved = await saveNews(focus && !values.artistIds.length ? { ...values, artistIds: [focus.id] } : values, image, existing);
       toast(existing ? "수정했어요." : "기사를 등록했어요.");
       router.replace(`/news/view?id=${saved.id}`);
     } catch {
@@ -313,23 +317,26 @@ function NewsForm({ initial, existing }: { initial: NewsFormValues; existing?: N
           </div>
         </div>
 
-        <div className="field">
-          <span className="field-label">아티스트</span>
-          <div className="row" style={{ flexWrap: "wrap" }}>
-            {artists.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className="chip"
-                style={{ paddingLeft: 5 }}
-                aria-pressed={values.artistIds.includes(a.id)}
-                onClick={() => set("artistIds", values.artistIds.includes(a.id) ? values.artistIds.filter((x) => x !== a.id) : [...values.artistIds, a.id])}
-              >
-                <ArtistAvatar artist={a} size={22} /> {a.name}
-              </button>
-            ))}
+        {/* 내 아티스트 전용 모드에서는 고를 필요 없이 저장할 때 자동 연결 */}
+        {!focus && (
+          <div className="field">
+            <span className="field-label">아티스트</span>
+            <div className="row" style={{ flexWrap: "wrap" }}>
+              {artists.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  className="chip"
+                  style={{ paddingLeft: 5 }}
+                  aria-pressed={values.artistIds.includes(a.id)}
+                  onClick={() => set("artistIds", values.artistIds.includes(a.id) ? values.artistIds.filter((x) => x !== a.id) : [...values.artistIds, a.id])}
+                >
+                  <ArtistAvatar artist={a} size={22} /> {a.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="field">
           <label htmlFor="news-summary">요약</label>

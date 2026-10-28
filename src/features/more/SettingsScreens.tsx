@@ -1,7 +1,16 @@
 "use client";
 
+import Link from "next/link";
+import { useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
+import { useFeedback } from "@/components/Feedback";
+import { Spinner } from "@/components/ui";
+import { ARTIST_COLORS } from "@/lib/palette";
+import { saveArtist } from "@/lib/services/artist-service";
 import PageHeader from "@/components/PageHeader";
 import Illustration from "@/components/Illustration";
+import { useFocusArtist } from "@/lib/focus";
+import { useArtists } from "@/lib/hooks";
 import { setPrefs, usePrefs, type Prefs } from "@/lib/prefs";
 import styles from "./Guide.module.css";
 
@@ -142,6 +151,78 @@ export function CalendarSettings() {
           { value: true, label: "옅은 점으로 표시", description: "월간 캘린더의 마감일에 점이 찍히고, 날짜를 누르면 마감하는 투표가 보여요" },
         ]}
       />
+    </main>
+  );
+}
+
+/** 전체 보기일 때: 이름만으로 아티스트 바로 추가 (멤버·소속사 등은 자세히 등록에서) */
+function QuickAddArtist({ used }: { used: string[] }) {
+  const { toast } = useFeedback();
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setSaving(true);
+    try {
+      // 아직 안 쓴 색부터 (다 쓰면 첫 색)
+      const color = (ARTIST_COLORS.find((c) => !used.includes(c.id)) ?? ARTIST_COLORS[0]).id;
+      await saveArtist({ name: trimmed, type: "group", members: [], links: [], color }, { kind: "keep" });
+      toast(`${trimmed}을(를) 추가했어요.`);
+      setName("");
+    } catch {
+      toast("추가하지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <h2 className={styles.groupTitle}>아티스트 추가</h2>
+      <form className={styles.quickAdd} onSubmit={onSubmit}>
+        <input className="input" placeholder="그룹명 또는 아티스트명" value={name} onChange={(e) => setName(e.target.value)} aria-label="추가할 아티스트 이름" />
+        <button type="submit" className="btn btn-primary" disabled={saving || !name.trim()}>
+          {saving ? <Spinner /> : <Plus size={16} />} 추가
+        </button>
+      </form>
+      <p className={styles.lead} style={{ marginTop: 10 }}>
+        멤버·소속사·프로필 사진까지 넣으려면 <Link href="/artist/new">자세히 등록</Link>을 이용해 주세요.
+      </p>
+    </>
+  );
+}
+
+/** 내 아티스트: 한 아티스트를 고르면 앱 전체가 그 아티스트 전용으로 */
+export function ArtistFocusSettings() {
+  const prefs = usePrefs();
+  const { artists } = useArtists();
+  const { focus } = useFocusArtist();
+  // 따로 고르지 않았으면(자동) 지금 실제로 적용 중인 값을 보여 줌
+  const value = prefs.focusArtist === "auto" ? (focus?.id ?? "all") : prefs.focusArtist;
+  return (
+    <main>
+      <PageHeader back="/more/settings" title="내 아티스트" />
+      <p className={styles.lead}>
+        한 아티스트를 고르면 홈·캘린더·소식·투표에 그 아티스트 소식만 보이고, 등록할 때 아티스트를 고르지 않아도 자동으로 연결돼요. 특정 아티스트용이 아닌 투표 사이트 같은 공용 정보는 함께 보여요.
+      </p>
+      <OptionGroup<string>
+        title="전용으로 쓸 아티스트"
+        value={value}
+        onChange={(focusArtist) => setPrefs({ focusArtist })}
+        options={[
+          ...artists.map((a) => ({ value: a.id, label: a.name, description: [a.type === "group" ? "그룹" : "솔로", a.agency].filter(Boolean).join(" · ") })),
+          { value: "all", label: "전체 보기", description: "여러 아티스트를 함께 보고, 등록할 때 아티스트를 골라요" },
+        ]}
+      />
+      {prefs.focusArtist === "auto" && focus && (
+        <p className={styles.lead} style={{ marginTop: 12 }}>
+          등록된 아티스트가 한 팀뿐이라 자동으로 {focus.name} 전용으로 쓰고 있어요.
+        </p>
+      )}
+      {value === "all" && <QuickAddArtist used={artists.map((a) => a.color)} />}
     </main>
   );
 }

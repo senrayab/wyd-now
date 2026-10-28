@@ -7,6 +7,7 @@ import { useBack } from "@/components/PageHeader";
 import { ArtistAvatar, Empty } from "@/components/ui";
 import { getCategory } from "@/lib/categories";
 import { addDays, datePart, durationLabel, formatTime, isDateKey, nowStamp, parseLocal, timePart, todayKey, WEEKDAYS, weekDays } from "@/lib/date";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import type { Artist, Schedule } from "@/lib/storage/types";
@@ -24,7 +25,8 @@ export default function DayScreen() {
   const week = weekDays(date, prefs.weekStart);
   const { data } = useStoreQuery((s) => s.schedules.listInRange(week[0], week[6]), `week:${week[0]}`);
 
-  const all = data ?? [];
+  const { focus } = useFocusArtist();
+  const all = (data ?? []).filter((s) => inFocus(s.artistIds, focus));
   const onDay = all
     .filter((s) => datePart(s.startAt) <= date && datePart(s.endAt) >= date)
     .sort((a, b) => Number(!a.allDay) - Number(!b.allDay) || a.startAt.localeCompare(b.startAt));

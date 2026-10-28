@@ -1,10 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { Bookmark, ChevronRight, Sparkles } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { ArtistAvatar } from "@/components/ui";
+import { useFocusArtist } from "@/lib/focus";
 import { MORE_MENU, getSection, type MenuSection } from "./menu";
 import styles from "./More.module.css";
 
 export function MoreHome() {
+  const { focus } = useFocusArtist();
   return (
     <main>
       <header className="page-header">
@@ -19,12 +24,16 @@ export function MoreHome() {
         <span className={styles.installPill}>앱 설치</span>
       </Link>
 
-      <Link href="/artists" className={`card ${styles.my}`}>
-        <span className={styles.myIcon} data-tone="ink" aria-hidden>
-          <Sparkles size={18} />
-        </span>
+      <Link href={focus ? `/artist?id=${focus.id}` : "/artists"} className={`card ${styles.my}`}>
+        {focus ? (
+          <ArtistAvatar artist={focus} size={40} />
+        ) : (
+          <span className={styles.myIcon} data-tone="ink" aria-hidden>
+            <Sparkles size={18} />
+          </span>
+        )}
         <span className={styles.myText}>
-          <strong>아티스트</strong>
+          <strong>{focus ? focus.name : "아티스트"}</strong>
           <small>프로필 · 일정 · 소식 · MY 공간</small>
         </span>
         <ChevronRight size={17} className="muted" />

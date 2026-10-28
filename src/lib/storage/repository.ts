@@ -16,6 +16,8 @@ import type {
   StoredImage,
   NewsInput,
   NewsItem,
+  Release,
+  ReleaseInput,
   VoteInput,
   VoteSite,
 } from "./types";
@@ -39,6 +41,11 @@ export type ArtistRepository = CrudRepository<Artist, ArtistInput>;
 export type VoteRepository = CrudRepository<VoteSite, VoteInput>;
 
 export type NewsRepository = CrudRepository<NewsItem, NewsInput>;
+
+export interface ReleaseRepository extends CrudRepository<Release, ReleaseInput> {
+  /** 발매일 최신순 */
+  listByArtist(artistId: string): Promise<Release[]>;
+}
 
 export interface ImageRepository {
   save(image: NewImage): Promise<StoredImage>;
@@ -68,6 +75,7 @@ export interface DataStore {
   images: ImageRepository;
   mySpaces: MySpaceRepository;
   scraps: ScrapRepository;
+  releases: ReleaseRepository;
   exportAll(): Promise<BackupFile>;
   /** 기존 데이터를 지우고 백업으로 교체 */
   importAll(backup: BackupFile): Promise<void>;

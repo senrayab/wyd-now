@@ -7,6 +7,7 @@ import { Clock3, Download, Inbox, LayoutGrid, List, Plus, SearchX, Vote } from "
 import { useFeedback } from "@/components/Feedback";
 import { Empty, Loading, Spinner } from "@/components/ui";
 import { todayKey, weekDays } from "@/lib/date";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { isVoteType, loadDefaultVoteSites, sortVotes, VOTE_TYPES, voteStatus } from "@/lib/services/vote-service";
 import { setPrefs, usePrefs } from "@/lib/prefs";
@@ -41,7 +42,8 @@ export default function VotesScreen() {
   const { count: doneCount } = useVoteDone();
   const type = isVoteType(params.get("type")) ? params.get("type") : null;
 
-  const all = sortVotes(data ?? []);
+  const { focus } = useFocusArtist();
+  const all = sortVotes((data ?? []).filter((v) => inFocus(v.artistIds, focus)));
   const ofType = all.filter((v) => !type || v.type === type);
   const groups = {
     live: ofType.filter((v) => ["open", "upcoming"].includes(voteStatus(v).kind)),

@@ -8,6 +8,7 @@ import PageHeader from "@/components/PageHeader";
 import ScheduleRow from "@/components/ScheduleRow";
 import { ArtistAvatar, Empty } from "@/components/ui";
 import { getCategory } from "@/lib/categories";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import NewsTimeline from "@/features/news/NewsTimeline";
@@ -23,23 +24,24 @@ export default function SearchScreen() {
   const { data: schedules } = useStoreQuery((s) => s.schedules.list(), "all-schedules");
   const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
   const { data: news } = useStoreQuery((s) => s.news.list(), "news");
+  const { focus } = useFocusArtist();
 
   const q = query.trim().toLowerCase();
-  const artistHits = q ? artists.filter((a) => a.name.toLowerCase().includes(q) || a.members.some((m) => m.name.toLowerCase().includes(q))) : [];
+  const artistHits = q ? artists.filter((a) => !focus || a.id === focus.id).filter((a) => a.name.toLowerCase().includes(q) || a.members.some((m) => m.name.toLowerCase().includes(q))) : [];
   const hitIds = new Set(artistHits.map((a) => a.id));
   const scheduleHits = q
-    ? (schedules ?? []).filter((s) =>
+    ? (schedules ?? []).filter((s) => inFocus(s.artistIds, focus)).filter((s) =>
         [s.title, s.place, s.description, getCategory(s.category).label].some((t) => t?.toLowerCase().includes(q)) ||
         s.artistIds.some((id) => hitIds.has(id)),
       )
     : [];
 
   const voteHits = q
-    ? (votes ?? []).filter((v) => [v.name, v.description, v.url].some((t) => t?.toLowerCase().includes(q)) || v.artistIds.some((id) => hitIds.has(id)))
+    ? (votes ?? []).filter((v) => inFocus(v.artistIds, focus)).filter((v) => [v.name, v.description, v.url].some((t) => t?.toLowerCase().includes(q)) || v.artistIds.some((id) => hitIds.has(id)))
     : [];
 
   const newsHits = q
-    ? (news ?? []).filter((n) => [n.title, n.summary, n.source].some((t) => t?.toLowerCase().includes(q)) || n.artistIds.some((id) => hitIds.has(id)))
+    ? (news ?? []).filter((n) => inFocus(n.artistIds, focus)).filter((n) => [n.title, n.summary, n.source].some((t) => t?.toLowerCase().includes(q)) || n.artistIds.some((id) => hitIds.has(id)))
     : [];
 
   const update = (value: string) => {

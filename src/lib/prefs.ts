@@ -16,6 +16,8 @@ export interface Prefs {
   voteLayout: "grid" | "list";
   /** 월간 캘린더에 투표 마감일을 옅은 점으로 표시 */
   showVoteDeadlines: boolean;
+  /** 내 아티스트: "auto"(한 팀뿐이면 그 팀) · "all"(전체 보기) · 아티스트 id */
+  focusArtist: string;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -27,6 +29,7 @@ export const DEFAULT_PREFS: Prefs = {
   calendarView: "month",
   voteLayout: "grid",
   showVoteDeadlines: false,
+  focusArtist: "auto",
 };
 
 const KEY = "wyd:prefs";

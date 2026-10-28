@@ -5,6 +5,7 @@
  */
 import { getDataStore } from "../storage";
 import { loadRiizeSampleNews, loadUrgentVoteSample } from "./riize-sample-news";
+import { loadRiizeReleases, RELEASES_SAMPLE_KEY } from "./riize-sample-releases";
 import { hasRiize, loadRiizeTestData } from "./riize-test-data";
 
 const LEGACY = new Map([
@@ -42,15 +43,29 @@ async function addNewSamples() {
   }
 }
 
+/** RIIZE 가 있는 기기에 디스코그래피 샘플을 한 번만 추가 (지운 앨범이 다시 생기지 않게 표시를 남김) */
+async function addReleaseSamples() {
+  try {
+    if (localStorage.getItem(RELEASES_SAMPLE_KEY)) return;
+  } catch {
+    return;
+  }
+  const riize = (await getDataStore().artists.list()).find((a) => a.name.toUpperCase() === "RIIZE");
+  if (!riize) return;
+  await loadRiizeReleases(riize.id);
+}
+
 async function run() {
   await removeLegacy();
   await addNewSamples();
+  await addReleaseSamples();
   return true;
 }
 
 async function removeLegacy() {
   const store = getDataStore();
-  const legacy = (await store.artists.list()).filter((a) => LEGACY.get(a.name) === a.agency);
+  // has() 먼저: 목록에 없는 이름이면 get() 이 undefined 라, 소속사를 비운 아티스트(agency undefined)와 같다고 판단해 지우던 문제 방지
+  const legacy = (await store.artists.list()).filter((a) => LEGACY.has(a.name) && LEGACY.get(a.name) === a.agency);
   if (legacy.length === 0) return false;
 
   const ids = new Set(legacy.map((a) => a.id));

@@ -8,6 +8,7 @@ import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Loading, Spinner } from "@/components/ui";
 import { CATEGORIES, getCategory } from "@/lib/categories";
 import { addDays, datePart, dDay, formatShortDate, formatTime, MONTHS_EN, nowStamp, parseLocal, timePart, todayKey, WEEKDAYS_EN, weekDays } from "@/lib/date";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { usePrefs } from "@/lib/prefs";
 import { loadRiizeTestData } from "@/lib/services/riize-test-data";
@@ -27,7 +28,8 @@ export default function HomeScreen() {
   const { data, loading } = useStoreQuery((s) => s.schedules.listInRange(addDays(today, -7), addDays(today, 120)), `home:${today}`);
   const { data: spaces } = useStoreQuery((s) => s.mySpaces.list(), "spaces");
   const { data: votes } = useStoreQuery((s) => s.votes.list(), "votes");
-  const { data: news } = useStoreQuery((s) => s.news.list(), "news");
+  const { data: allNews } = useStoreQuery((s) => s.news.list(), "news");
+  const { focus } = useFocusArtist();
   const { toast } = useFeedback();
   const [seeding, setSeeding] = useState(false);
   const [range, setRange] = useState<"today" | "week">("today");
@@ -35,7 +37,9 @@ export default function HomeScreen() {
   const [expanded, setExpanded] = useState(false);
 
   const d = parseLocal(today);
-  const all = data ?? [];
+  // 내 아티스트 전용 모드면 그 아티스트(+ 공용) 항목만
+  const all = (data ?? []).filter((s) => inFocus(s.artistIds, focus));
+  const news = (allNews ?? []).filter((n) => inFocus(n.artistIds, focus));
   const now = nowStamp();
   const week = weekDays(today, prefs.weekStart);
   const todays = all.filter((s) => onDay(s, today));
@@ -43,7 +47,7 @@ export default function HomeScreen() {
   const upcoming = all.filter((s) => s.endAt >= now || (s.allDay && datePart(s.endAt) >= today));
   const next = upcoming[0];
   const followed = artists.filter((a) => spaces?.some((sp) => sp.artistId === a.id && sp.followed));
-  const liveVotes = sortVotes(votes ?? []).filter((v) => voteStatus(v).kind !== "closed");
+  const liveVotes = sortVotes(votes ?? []).filter((v) => voteStatus(v).kind !== "closed" && inFocus(v.artistIds, focus));
   const isEmpty = !loading && !artistsLoading && all.length === 0 && artists.length === 0;
   const listed = range === "today" ? todays : weekItems;
   const shown = expanded ? listed : listed.slice(0, AGENDA_LIMIT);
@@ -65,6 +69,12 @@ export default function HomeScreen() {
       <header className="page-header">
         <span className="logo">wyd now</span>
         <span className="spacer" />
+        {/* 내 아티스트 전용 모드: 검색 앞에 프로필 원 (누르면 아티스트 페이지) */}
+        {focus && (
+          <Link href={`/artist?id=${focus.id}`} className={styles.focusBtn} aria-label={`${focus.name} 페이지`}>
+            <ArtistAvatar artist={focus} size={40} />
+          </Link>
+        )}
         <Link href="/search" className="icon-btn" aria-label="검색">
           <Search size={18} />
         </Link>
@@ -176,15 +186,26 @@ export default function HomeScreen() {
               <b className={`${styles.big} num`}>{next ? dDay(datePart(next.startAt)) : "—"}</b>
               <small>{next ? next.title : "예정된 일정 없음"}</small>
             </Link>
-            <Link href="/artists" className={`card ${styles.widget}`}>
-              <span className={styles.faces}>
-                {(followed.length ? followed : artists).slice(0, 4).map((a) => (
-                  <ArtistAvatar key={a.id} artist={a} size={34} />
-                ))}
-              </span>
-              <strong>팔로우 {followed.length}팀</strong>
-              <small>아티스트 {artists.length}팀 등록</small>
-            </Link>
+            {focus ? (
+              // 한 팀 전용 모드: 팔로우 대신 내 아티스트 바로가기
+              <Link href={`/artist?id=${focus.id}`} className={`card ${styles.widget}`}>
+                <span className={styles.faces}>
+                  <ArtistAvatar artist={focus} size={34} />
+                </span>
+                <strong>{focus.name}</strong>
+                <small>다가오는 일정 {upcoming.length}개</small>
+              </Link>
+            ) : (
+              <Link href="/artists" className={`card ${styles.widget}`}>
+                <span className={styles.faces}>
+                  {(followed.length ? followed : artists).slice(0, 4).map((a) => (
+                    <ArtistAvatar key={a.id} artist={a} size={34} />
+                  ))}
+                </span>
+                <strong>팔로우 {followed.length}팀</strong>
+                <small>아티스트 {artists.length}팀 등록</small>
+              </Link>
+            )}
           </div>
 
           {/* 투표 */}
@@ -233,7 +254,7 @@ export default function HomeScreen() {
               <h2>최근 소식</h2>
               <Link href="/news">전체</Link>
             </div>
-            {news && news.length ? (
+            {news.length ? (
               <NewsTimeline items={news.slice(0, 2)} artists={map} />
             ) : (
               <Link href="/news/new" className={`card ${styles.newsEmpty}`}>

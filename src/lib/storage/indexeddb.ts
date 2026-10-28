@@ -11,6 +11,7 @@ import type {
   MySpaceRepository,
   ScheduleRepository,
   NewsRepository,
+  ReleaseRepository,
   ScrapRepository,
   VoteRepository,
 } from "./repository";
@@ -27,12 +28,14 @@ import type {
   StoredImage,
   NewsInput,
   NewsItem,
+  Release,
+  ReleaseInput,
   VoteInput,
   VoteSite,
 } from "./types";
 
 const DB_NAME = "wyd-now";
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 type ImageRow = StoredImage & { ownerKey: string };
 
@@ -48,6 +51,7 @@ interface WydDB extends DBSchema {
   votes: { key: string; value: VoteSite };
   news: { key: string; value: NewsItem };
   scraps: { key: string; value: MyScrap };
+  releases: { key: string; value: Release; indexes: { artistId: string } };
 }
 
 const ownerKey = (owner: ImageOwner) => `${owner.kind}:${owner.id}`;
@@ -80,6 +84,8 @@ function db() {
       if (oldVersion < 3) database.createObjectStore("news", { keyPath: "id" });
       // v4: 내 스크랩
       if (oldVersion < 4) database.createObjectStore("scraps", { keyPath: "newsId" });
+      // v5: 디스코그래피
+      if (oldVersion < 5) database.createObjectStore("releases", { keyPath: "id" }).createIndex("artistId", "artistId");
     },
   });
   return dbPromise;
@@ -216,6 +222,40 @@ const news: NewsRepository = {
   },
 };
 
+const sortReleases = (list: Release[]) =>
+  list.sort((a, b) => b.releaseDate.localeCompare(a.releaseDate) || b.createdAt.localeCompare(a.createdAt));
+
+const releases: ReleaseRepository = {
+  async list() {
+    return sortReleases(await (await db()).getAll("releases"));
+  },
+  async listByArtist(artistId) {
+    return sortReleases(await (await db()).getAllFromIndex("releases", "artistId", artistId));
+  },
+  async get(id) {
+    return (await db()).get("releases", id);
+  },
+  async create(input: ReleaseInput) {
+    const item: Release = { ...input, id: newId(), createdAt: now(), updatedAt: now() };
+    await (await db()).put("releases", item);
+    notifyChange();
+    return item;
+  },
+  async update(id, patch) {
+    const database = await db();
+    const current = await database.get("releases", id);
+    if (!current) throw new Error("앨범을 찾을 수 없어요.");
+    const item: Release = { ...current, ...patch, id, updatedAt: now() };
+    await database.put("releases", item);
+    notifyChange();
+    return item;
+  },
+  async remove(id) {
+    await (await db()).delete("releases", id);
+    notifyChange();
+  },
+};
+
 const scraps: ScrapRepository = {
   async list() {
     const rows = await (await db()).getAll("scraps");
@@ -294,6 +334,7 @@ async function exportAll(): Promise<BackupFile> {
     votes: await database.getAll("votes"),
     news: await database.getAll("news"),
     scraps: await database.getAll("scraps"),
+    releases: await database.getAll("releases"),
     images: await Promise.all(
       imageRows.map(async (row) => {
         const { blob, ...rest } = stripOwnerKey(row);
@@ -303,7 +344,7 @@ async function exportAll(): Promise<BackupFile> {
   };
 }
 
-const STORES = ["artists", "schedules", "images", "mySpaces", "votes", "news", "scraps"] as const;
+const STORES = ["artists", "schedules", "images", "mySpaces", "votes", "news", "scraps", "releases"] as const;
 
 async function importAll(backup: BackupFile) {
   // blob 변환은 트랜잭션 밖에서 끝내야 트랜잭션이 자동 종료되지 않습니다.
@@ -323,6 +364,7 @@ async function importAll(backup: BackupFile) {
     ...(backup.votes ?? []).map((v) => tx.objectStore("votes").put(v)),
     ...(backup.news ?? []).map((n) => tx.objectStore("news").put(n)),
     ...(backup.scraps ?? []).map((m) => tx.objectStore("scraps").put(m)),
+    ...(backup.releases ?? []).map((r) => tx.objectStore("releases").put(r)),
     ...imageRows.map((i) => tx.objectStore("images").put(i)),
   ]);
   await tx.done;
@@ -345,6 +387,7 @@ export const indexedDbStore: DataStore = {
   images,
   mySpaces,
   scraps,
+  releases,
   exportAll,
   importAll,
   clearAll,

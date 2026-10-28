@@ -6,6 +6,7 @@
 import { addDays, todayKey } from "../date";
 import { getDataStore } from "../storage";
 import type { CategoryId, LinkItem } from "../storage/types";
+import { loadRiizeReleases } from "./riize-sample-releases";
 import { loadRiizeSampleNews, loadUrgentVoteSample } from "./riize-sample-news";
 import { loadDefaultVoteSites } from "./vote-service";
 
@@ -113,5 +114,6 @@ export async function loadRiizeTestData() {
   await loadDefaultVoteSites();
   await loadRiizeSampleNews(riize.id);
   await loadUrgentVoteSample(riize.id);
+  await loadRiizeReleases(riize.id);
   return riize;
 }

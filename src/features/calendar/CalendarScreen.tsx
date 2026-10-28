@@ -7,6 +7,7 @@ import ScheduleRow from "@/components/ScheduleRow";
 import { Empty, Loading } from "@/components/ui";
 import { CATEGORIES, getCategory, isCategoryId } from "@/lib/categories";
 import { addMonths, datePart, formatDate, isDateKey, monthGrid, parseLocal, todayKey, WEEKDAYS } from "@/lib/date";
+import { inFocus, useFocusArtist } from "@/lib/focus";
 import { useArtists, useStoreQuery } from "@/lib/hooks";
 import { setPrefs, usePrefs } from "@/lib/prefs";
 import type { Artist, Schedule, VoteSite } from "@/lib/storage/types";
@@ -79,10 +80,11 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
   const from = grid[0].key;
   const to = grid[grid.length - 1].key;
   const { data } = useStoreQuery((s) => s.schedules.listInRange(from, to), `month:${from}`);
+  const { focus } = useFocusArtist();
   const { data: votes } = useStoreQuery((s) => (prefs.showVoteDeadlines ? s.votes.list() : Promise.resolve([])), `month-votes:${prefs.showVoteDeadlines}`);
 
   const byDay = new Map<string, Schedule[]>();
-  for (const s of data ?? []) {
+  for (const s of (data ?? []).filter((x) => inFocus(x.artistIds, focus))) {
     for (const cell of grid) {
       if (datePart(s.startAt) <= cell.key && datePart(s.endAt) >= cell.key) {
         byDay.set(cell.key, [...(byDay.get(cell.key) ?? []), s]);
@@ -92,7 +94,7 @@ function MonthView({ selected, today, onSelect }: { selected: string; today: str
   const dayList = byDay.get(selected) ?? [];
   // 설정에서 켠 경우만: 마감일별 투표
   const dueByDay = new Map<string, VoteSite[]>();
-  for (const v of votes ?? []) if (v.endDate) dueByDay.set(v.endDate, [...(dueByDay.get(v.endDate) ?? []), v]);
+  for (const v of votes ?? []) if (v.endDate && inFocus(v.artistIds, focus)) dueByDay.set(v.endDate, [...(dueByDay.get(v.endDate) ?? []), v]);
   const dueList = dueByDay.get(selected) ?? [];
   const weekdayLabels = Array.from({ length: 7 }, (_, i) => (i + prefs.weekStart) % 7);
 
@@ -219,10 +221,12 @@ function ListView({
   const prefs = usePrefs();
   const { map } = useArtists();
   const { data, loading } = useStoreQuery((s) => s.schedules.list(), "all-schedules");
+  const { focus } = useFocusArtist();
   const today = todayKey();
   const artist: Artist | undefined = artistId ? map.get(artistId) : undefined;
 
   const filtered = (data ?? [])
+    .filter((s) => inFocus(s.artistIds, focus))
     .filter((s) => (past ? datePart(s.endAt) < today : datePart(s.endAt) >= today))
     .filter((s) => !category || s.category === category)
     .filter((s) => !artistId || s.artistIds.includes(artistId));
