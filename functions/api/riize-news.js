@@ -1,14 +1,15 @@
 /*
  * Cloudflare Pages Function — GET /api/riize-news?topic=all|<멤버 id>
  *
- * 공개 뉴스 검색 RSS 를 서버에서 읽어 최근 기사 목록을 JSON 으로 돌려줍니다.
- * - 구글 뉴스 RSS: 기사 수가 많아 목록의 중심. 단 이미지가 없고 링크는 구글 경유 주소
- * - 빙 뉴스 RSS: 기사 수는 적지만 썸네일과 언론사 원문 주소를 줌 → 같은 기사면 이것으로 보강
- * - 브라우저에서 RSS 를 직접 부르면 CORS 로 막혀서 이 함수가 대신 읽음
- * - 검색어·제외 출처·기간은 src/config/riize-news.json 한 곳에서 관리
+ * 최근 기사 목록을 JSON 으로 돌려줍니다. 기사 본문은 읽거나 저장하지 않고 제목·출처·시각·링크·썸네일 주소만 다룹니다.
+ * - 네이버 검색 API: 목록의 중심. 언론사 원문 주소를 줌. 썸네일은 없음
+ *   2026년부터 네이버 클라우드 플랫폼의 NAVER API HUB 로 이관됨 (기존 openapi.naver.com 은 2027-06-30 종료)
+ *   HUB 앱의 Client ID / Secret 을 Cloudflare Pages 비밀 환경 변수 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 에 (앱·저장소에 노출하지 않음)
+ * - 빙 뉴스 RSS: 썸네일을 줌 → 같은 기사면 썸네일 보강. 네이버 키가 없으면 빙만으로 목록을 만듦
+ * - 구글 뉴스 RSS 는 Cloudflare 서버에서 요청하면 503(비정상 트래픽)으로 막혀서 쓰지 않음
+ * - 검색어·제외 출처·기간·개수는 src/config/riize-news.json 한 곳에서 관리
  * - 같은 주제는 30분 동안 Cloudflare 캐시에 보관해 외부 호출을 최소화
- * - 기사 본문은 읽거나 저장하지 않고 제목·출처·시각·링크·썸네일 주소만 다룸
- * 응답: { topic, fetchedAt, items: [{ id, title, source, link, image?, publishedAt, members }] }
+ * 응답: { topic, source, fetchedAt, items: [{ id, title, source, link, image?, publishedAt, members }] }
  */
 import config from "../../src/config/riize-news.json";
 import { json } from "./_shared.js";
@@ -16,109 +17,69 @@ import { json } from "./_shared.js";
 const TOPICS = new Map([[config.group.id, config.group], ...config.members.map((m) => [m.id, m])]);
 const isGroup = (topic) => topic.id === config.group.id;
 
-/**
- * 구글 검색어
- * - 그룹: group.query 만 ("라이즈" 단독은 같은 이름의 회사 기사까지 섞여서 영문명으로)
- * - 멤버: "(그룹명들) (멤버 이름들)" 조합 (동명이인·일반 단어 기사 줄이기)
- */
-function googleQuery(topic) {
-  const q = isGroup(topic) ? config.group.query : `(${config.group.names.join(" OR ")}) (${topic.names.join(" OR ")})`;
-  return `${q} when:${config.days}d`;
-}
+/** 검색어: 그룹은 영문명("라이즈" 단독은 같은 이름의 회사 기사가 섞임), 멤버는 "그룹명 + 멤버 이름" */
+const searchQuery = (topic) => (isGroup(topic) ? config.group.query : `${config.group.query} ${topic.names[0]}`);
 
-/** 빙은 OR 묶음을 못 알아들어서 "그룹명 + 첫 이름" 으로 */
-function bingQuery(topic) {
-  return isGroup(topic) ? config.group.names.join(" ") : `${config.group.query} ${topic.names[0]}`;
-}
-
-async function fetchRss(url) {
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000), headers: { accept: "application/rss+xml,application/xml", "user-agent": "Mozilla/5.0 (compatible; wyd-now news)" } });
-  const xml = res.ok ? await res.text() : "";
-  // 비정상 응답(RSS 가 아님)은 실패로 처리
-  if (!xml.includes("<rss")) throw new Error("feed-invalid");
-  return xml;
-}
-
-const googleFeed = async (topic) =>
-  parseGoogle(await fetchRss(`https://news.google.com/rss/search?q=${encodeURIComponent(googleQuery(topic))}&hl=ko&gl=KR&ceid=KR:ko`));
-
-const bingFeed = async (topic) =>
-  parseBing(await fetchRss(`https://www.bing.com/news/search?q=${encodeURIComponent(bingQuery(topic))}&format=rss&setlang=ko&cc=KR`));
-
-export async function onRequestGet({ request, waitUntil }) {
+export async function onRequestGet({ request, env, waitUntil }) {
   const url = new URL(request.url);
   const topic = TOPICS.get(url.searchParams.get("topic") ?? config.group.id);
   if (!topic) return json({ error: "unknown-topic" }, 400);
-
-  // 진단용(임시): 외부 피드가 이 서버에서 어떻게 응답하는지 상태 코드와 앞부분만
-  if (url.searchParams.get("debug") === "1") {
-    const probe = async (u, headers) => {
-      try {
-        const r = await fetch(u, { headers, redirect: "manual", signal: AbortSignal.timeout(8000) });
-        return { status: r.status, location: r.headers.get("location"), head: (await r.text()).slice(0, 160) };
-      } catch (e) {
-        return { error: String(e) };
-      }
-    };
-    const g = `https://news.google.com/rss/search?q=${encodeURIComponent(googleQuery(topic))}&hl=ko&gl=KR&ceid=KR:ko`;
-    return json({
-      googleBot: await probe(g, { "user-agent": "Mozilla/5.0 (compatible; wyd-now news)" }),
-      googleNoUa: await probe(g, {}),
-      googleBrowser: await probe(g, { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36", "accept-language": "ko-KR,ko;q=0.9" }),
-    });
-  }
+  const naverKeys = env?.NAVER_CLIENT_ID && env?.NAVER_CLIENT_SECRET ? { id: env.NAVER_CLIENT_ID, secret: env.NAVER_CLIENT_SECRET } : null;
 
   // 같은 주제는 30분 동안 캐시 (Cache API 를 못 쓰는 환경이면 매번 새로 읽음)
-  const cacheKey = new Request(`${url.origin}/api/riize-news?topic=${topic.id}`);
+  const cacheKey = new Request(`${url.origin}/api/riize-news?topic=${topic.id}&src=${naverKeys ? "naver" : "bing"}`);
   const cache = globalThis.caches?.default;
   if (cache) {
     const hit = await cache.match(cacheKey).catch(() => undefined);
     if (hit) return hit;
   }
 
-  // 전체 = 그룹 + 멤버별 구글 피드를 합침 (멤버 기사도 전체에 한 번만). 빙은 해당 주제 하나만
+  // 전체 = 그룹 + 멤버별 검색을 합쳐 중복 제거 (멤버 기사도 전체에 한 번만)
   const topics = isGroup(topic) ? [...TOPICS.values()] : [topic];
-  const [google, bing] = await Promise.all([Promise.allSettled(topics.map(googleFeed)), bingFeed(topic).catch(() => [])]);
-  // 중심 피드(그룹 또는 고른 멤버)가 실패하면 실패로 돌려 앱이 기존 목록을 그대로 쓰게 함
-  if (google[0].status !== "fulfilled" && bing.length === 0) return json({ error: "feed-failed" }, 502);
-  const googleItems = google.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  const [naver, bing] = await Promise.all([
+    naverKeys ? Promise.allSettled(topics.map((t) => naverFeed(t, naverKeys))) : Promise.resolve([]),
+    bingFeed(topic).catch(() => []),
+  ]);
+  const naverItems = naver.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+  // 받은 기사가 하나도 없고 외부 호출도 실패했으면 실패로 돌려 앱이 기존 목록을 그대로 쓰게 함
+  if (naverKeys && naver[0]?.status !== "fulfilled" && bing.length === 0) return json({ error: "feed-failed" }, 502);
 
-  const items = merge(googleItems, bing);
-  const response = json({ topic: topic.id, fetchedAt: new Date().toISOString(), items }, 200, {
+  const items = merge(naverItems, bing);
+  const response = json({ topic: topic.id, source: naverKeys ? "naver" : "bing", fetchedAt: new Date().toISOString(), items }, 200, {
     "cache-control": `public, max-age=${config.refreshMinutes * 60}`,
   });
   if (cache) waitUntil(cache.put(cacheKey, response.clone()).catch(() => {}));
   return response;
 }
 
-/* ---------- RSS 읽기 (정규식: 의존성 없이 가볍게) ---------- */
+/* ---------- 네이버 검색 API ---------- */
 
-/** <item> 마다 태그 값을 꺼내는 함수와 원문 조각 */
-function items(xml) {
+async function naverFeed(topic, keys) {
+  const api = `https://naverapihub.apigw.ntruss.com/search/v1/news?query=${encodeURIComponent(searchQuery(topic))}&display=${config.fetchLimit}&start=1&sort=date`;
+  const res = await fetch(api, {
+    signal: AbortSignal.timeout(8000),
+    headers: { "X-NCP-APIGW-API-KEY-ID": keys.id, "X-NCP-APIGW-API-KEY": keys.secret },
+  });
+  if (!res.ok) throw new Error(`naver ${res.status}`);
+  const body = await res.json();
+  return (body.items ?? []).map((it) => {
+    const link = it.originallink || it.link;
+    return { title: decode(stripTags(it.title ?? "")), link, source: hostLabel(link), sourceUrl: link, pubDate: it.pubDate };
+  });
+}
+
+/* ---------- 빙 뉴스 RSS (썸네일) ---------- */
+
+async function bingFeed(topic) {
+  const q = isGroup(topic) ? config.group.names.join(" ") : searchQuery(topic);
+  const res = await fetch(`https://www.bing.com/news/search?q=${encodeURIComponent(q)}&format=rss&setlang=ko&cc=KR`, {
+    signal: AbortSignal.timeout(8000),
+    headers: { accept: "application/rss+xml,application/xml", "user-agent": "Mozilla/5.0 (compatible; wyd-now news)" },
+  });
+  const xml = res.ok ? await res.text() : "";
+  if (!xml.includes("<rss")) throw new Error("feed-invalid");
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map((m) => {
-    const body = m[1];
-    const pick = (tag) => body.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`))?.[1];
-    return { pick, body };
-  });
-}
-
-function parseGoogle(xml) {
-  return items(xml).map(({ pick, body }) => {
-    const source = decode(pick("source") ?? "");
-    const title = decode(pick("title") ?? "");
-    return {
-      title: source && title.endsWith(` - ${source}`) ? title.slice(0, -(source.length + 3)) : title,
-      link: decode(pick("link") ?? ""),
-      source,
-      // <source url="…"> : 출처 제외 판단용 언론사 주소
-      sourceUrl: body.match(/<source url="([^"]*)"/)?.[1] ?? "",
-      pubDate: pick("pubDate"),
-    };
-  });
-}
-
-function parseBing(xml) {
-  return items(xml).map(({ pick }) => {
+    const pick = (tag) => m[1].match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`))?.[1];
     const apiclick = decode(pick("link") ?? "");
     let link = apiclick;
     try {
@@ -139,27 +100,34 @@ function parseBing(xml) {
   });
 }
 
-/* ---------- 정리: 기간·출처 거르기, 중복 제거, 빙 정보로 보강 ---------- */
+/* ---------- 정리: 기간·출처 거르기, 중복 제거, 썸네일 보강 ---------- */
 
 const keyOf = (title) => title.replace(/[\s"'“”‘’.,…·!?\-–—[\]()<>〈〉《》「」『』]/g, "").toLowerCase();
 
-function excluded(u) {
+function hostOf(u) {
   try {
-    const host = new URL(u).hostname.replace(/^www\.|^m\./, "");
-    return config.excludeSources.some((d) => host === d || host.endsWith(`.${d}`));
+    return new URL(u).hostname.replace(/^www\.|^m\./, "");
   } catch {
-    return false;
+    return "";
   }
 }
 
-function merge(googleItems, bingItems) {
+/** 네이버는 언론사 이름을 주지 않아서 우선 주소(도메인)로 표시. 앱이 썸네일을 읽을 때 매체명으로 바꿈 */
+const hostLabel = (u) => hostOf(u);
+
+const excluded = (u) => {
+  const host = hostOf(u);
+  return !!host && config.excludeSources.some((d) => host === d || host.endsWith(`.${d}`));
+};
+
+function merge(primary, bingItems) {
   const since = Date.now() - config.days * 24 * 3600 * 1000;
   const byKey = new Map();
   const accept = (it) => {
     const time = Date.parse(it.pubDate ?? "");
     return it.title && /^https?:\/\//.test(it.link) && !Number.isNaN(time) && time >= since && !excluded(it.sourceUrl);
   };
-  for (const it of googleItems) {
+  for (const it of primary) {
     if (!accept(it)) continue;
     const key = keyOf(it.title);
     if (!byKey.has(key)) byKey.set(key, { ...it });
@@ -168,8 +136,8 @@ function merge(googleItems, bingItems) {
     if (!accept(it)) continue;
     const key = keyOf(it.title);
     const same = byKey.get(key);
-    // 같은 기사면 언론사 원문 주소·썸네일로 보강, 처음 보는 기사면 추가
-    if (same) Object.assign(same, { link: it.link, image: it.image ?? same.image });
+    // 같은 기사면 썸네일·매체명 보강, 처음 보는 기사면 추가
+    if (same) Object.assign(same, { image: same.image ?? it.image, source: it.source || same.source });
     else byKey.set(key, { ...it });
   }
   return [...byKey.values()]
@@ -183,8 +151,10 @@ function merge(googleItems, bingItems) {
       members: config.members.filter((mem) => mem.names.some((n) => it.title.toLowerCase().includes(n.toLowerCase()))).map((mem) => mem.id),
     }))
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-    .slice(0, 80);
+    .slice(0, config.fetchLimit);
 }
+
+const stripTags = (s) => s.replace(/<[^>]+>/g, "");
 
 const NAMED = { quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " ", amp: "&", lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”", hellip: "…", middot: "·" };
 

@@ -6,6 +6,7 @@
  * 계정 동기화·서버 저장은 하지 않고, 브라우저 저장소는 최근 뉴스 캐시에만 씁니다.
  */
 import config from "@/config/riize-news.json";
+import { getDataStore } from "../storage";
 
 export const NEWS_CONFIG = config;
 export type NewsTopicId = string;
@@ -23,6 +24,8 @@ export interface FeedItem {
 }
 
 export interface Feed {
+  /** 목록을 만든 곳: 네이버 검색 API 또는 (키가 없을 때) 빙 */
+  source?: "naver" | "bing";
   topic: NewsTopicId;
   fetchedAt: string;
   items: FeedItem[];
@@ -80,4 +83,107 @@ export function agoLabel(iso: string, now = Date.now()) {
   if (hours < 48) return "어제";
   const d = new Date(iso);
   return `${d.getMonth() + 1}.${d.getDate()}`;
+}
+
+/* ---------- 썸네일·매체명 보강 (화면에 나온 기사만) ---------- */
+
+export interface FeedMeta {
+  image?: string;
+  source?: string;
+}
+
+const META_KEY = "wyd:feed-meta";
+const META_MAX = 400;
+let metaCache: Record<string, FeedMeta> | null = null;
+
+function loadMeta() {
+  if (metaCache) return metaCache;
+  try {
+    metaCache = JSON.parse(localStorage.getItem(META_KEY) ?? "{}");
+  } catch {
+    metaCache = {};
+  }
+  return metaCache!;
+}
+
+function saveMeta() {
+  try {
+    const entries = Object.entries(loadMeta());
+    // 오래된 것부터 버려 저장 공간을 작게 유지
+    const trimmed = Object.fromEntries(entries.slice(-META_MAX));
+    metaCache = trimmed;
+    localStorage.setItem(META_KEY, JSON.stringify(trimmed));
+  } catch {
+    // 저장이 막힌 환경: 이번 화면에서만
+  }
+}
+
+export const cachedMeta = (link: string): FeedMeta | undefined => loadMeta()[link];
+
+// 한꺼번에 많이 부르지 않게 동시에 3개까지
+const MAX_PARALLEL = 3;
+let running = 0;
+const waiting: (() => void)[] = [];
+const metaInflight = new Map<string, Promise<FeedMeta>>();
+
+async function withSlot<T>(task: () => Promise<T>) {
+  if (running >= MAX_PARALLEL) await new Promise<void>((r) => waiting.push(r));
+  running += 1;
+  try {
+    return await task();
+  } finally {
+    running -= 1;
+    waiting.shift()?.();
+  }
+}
+
+/** 원문 페이지의 대표 이미지·매체명 (기존 /api/link-meta 사용). 실패해도 빈 값으로 저장해 다시 부르지 않음 */
+export function loadFeedMeta(link: string): Promise<FeedMeta> {
+  const hit = cachedMeta(link);
+  if (hit) return Promise.resolve(hit);
+  const pending = metaInflight.get(link);
+  if (pending) return pending;
+  const request = withSlot(async () => {
+    let meta: FeedMeta = {};
+    try {
+      const res = await fetch(`/api/link-meta?url=${encodeURIComponent(link)}`);
+      if ((res.headers.get("content-type") ?? "").includes("application/json")) {
+        if (res.ok) {
+          const body = (await res.json()) as FeedMeta;
+          meta = { image: body.image, source: body.source };
+        }
+        // 사이트가 막아서 못 읽은 경우도 기억해 다시 부르지 않음
+        loadMeta()[link] = meta;
+        saveMeta();
+      }
+    } catch {
+      // 네트워크 오류는 기억하지 않고 다음에 다시 시도
+    }
+    return meta;
+  }).finally(() => metaInflight.delete(link));
+  metaInflight.set(link, request);
+  return request;
+}
+
+/* ---------- 스크랩: 뉴스 기사를 기사 모음에 넣고 내 공간 스크랩으로 ---------- */
+
+/** 이미 같은 주소로 기사 모음에 있으면 그 기사를, 없으면 새로 만들어 스크랩 */
+export async function scrapFeedItem(item: FeedItem, source: string, artistId?: string) {
+  const { news, scraps } = getDataStore();
+  const existing = (await news.list()).find((n) => n.url === item.link);
+  const saved =
+    existing ??
+    (await news.create({
+      title: item.title,
+      url: item.link,
+      source: source || undefined,
+      publishedAt: localDateKey(item.publishedAt),
+      artistIds: artistId ? [artistId] : [],
+    }));
+  await scraps.add(saved.id);
+}
+
+function localDateKey(iso: string) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }

@@ -11,5 +11,7 @@
   ],
   "excludeSources": ["weverse.io", "note.com", "youtube.com", "youtu.be", "t.co", "x.com", "twitter.com", "instagram.com", "tiktok.com", "facebook.com"],
   "days": 7,
+  "fetchLimit": 100,
+  "pageSize": 20,
   "refreshMinutes": 30
 }
