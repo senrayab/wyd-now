@@ -311,7 +311,7 @@ function ListView({
                   {items.length}
                 </span>
               </div>
-              {/* 태블릿·PC: 왼쪽 날짜 · 오른쪽 그날 일정 (모바일은 날짜가 붙은 한 줄 목록 그대로) */}
+              {/* 왼쪽 날짜 · 오른쪽 그날 일정 (타임라인처럼) */}
               <div className={`stack ${styles.days}`}>
                 {byDay(items).map(([day, list]) => (
                   <div key={day} className={styles.day}>
