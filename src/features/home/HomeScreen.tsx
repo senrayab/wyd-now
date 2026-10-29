@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { ArrowUpRight, Search, SlidersHorizontal, Vote } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Search, SlidersHorizontal, Vote } from "lucide-react";
 import Illustration from "@/components/Illustration";
 import { useFeedback } from "@/components/Feedback";
 import { ArtistAvatar, Loading, Spinner } from "@/components/ui";
@@ -66,7 +66,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <main>
+    <main className="wide">
       <header className="page-header">
         <span className="logo">wyd now</span>
         <span className="spacer" />
@@ -114,7 +114,7 @@ export default function HomeScreen() {
       ) : (
         <>
           {/* 카테고리 카드: 첫 카드만 포인트 색 */}
-          <div className={styles.scroller}>
+          <CategorySlider>
             {CATEGORIES.map((c, i) => {
               const count = upcoming.filter((s) => s.category === c.id).length;
               return (
@@ -132,58 +132,63 @@ export default function HomeScreen() {
                 </Link>
               );
             })}
-          </div>
+          </CategorySlider>
 
-          {/* 오늘 / 이번 주 */}
-          <section className={`card ${styles.today}`}>
-            <div className={styles.todayHead}>
-              <div>
-                <h2>{range === "today" ? "오늘의 일정" : "이번 주 일정"}</h2>
-                <small className="muted num">{range === "today" ? formatShortDate(today) : `${formatShortDate(today)} – ${formatShortDate(week[6])}`}</small>
+          {/* 넓은 화면: 왼쪽 오늘 일정 · 오른쪽 다음 일정과 투표 버튼 (모바일은 위에서 아래로 차례대로) */}
+          <div className={styles.board}>
+            {/* 오늘 / 이번 주 */}
+            <section className={`card ${styles.today}`}>
+              <div className={styles.todayHead}>
+                <div>
+                  <h2>{range === "today" ? "오늘의 일정" : "이번 주 일정"}</h2>
+                  <small className="muted num">{range === "today" ? formatShortDate(today) : `${formatShortDate(today)} – ${formatShortDate(week[6])}`}</small>
+                </div>
+                <div className="segmented" role="tablist" aria-label="기간">
+                  <button type="button" role="tab" aria-selected={range === "today"} onClick={() => { setRange("today"); setExpanded(false); }}>
+                    오늘
+                  </button>
+                  <button type="button" role="tab" aria-selected={range === "week"} onClick={() => { setRange("week"); setExpanded(false); }}>
+                    이번 주
+                  </button>
+                </div>
               </div>
-              <div className="segmented" role="tablist" aria-label="기간">
-                <button type="button" role="tab" aria-selected={range === "today"} onClick={() => { setRange("today"); setExpanded(false); }}>
-                  오늘
+              {listed.length > 0 && (
+                <ul className={styles.agenda}>
+                  {shown.map((s) => (
+                    <li key={s.id}>
+                      <Link href={`/schedule?id=${s.id}`}>
+                        <strong>{s.title}</strong>
+                        <small className="num">
+                          {range === "week" && `${formatShortDate(datePart(s.startAt))} · `}
+                          {s.allDay ? "종일" : `${formatTime(timePart(s.startAt), prefs.hour12)} – ${formatTime(timePart(s.endAt), prefs.hour12)}`}
+                          {" · "}
+                          {getCategory(s.category).label}
+                        </small>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {listed.length > AGENDA_LIMIT && (
+                <button type="button" className={`btn btn-soft btn-sm btn-block ${styles.more}`} onClick={() => setExpanded((v) => !v)}>
+                  {expanded ? "접기" : `${listed.length - AGENDA_LIMIT}개 더 보기`}
                 </button>
-                <button type="button" role="tab" aria-selected={range === "week"} onClick={() => { setRange("week"); setExpanded(false); }}>
-                  이번 주
-                </button>
-              </div>
+              )}
+              {!listed.length && (
+                <p className={styles.none}>{range === "today" ? "오늘은 예정된 일정이 없어요." : "이번 주에 남은 일정이 없어요."}</p>
+              )}
+            </section>
+
+            <div className={styles.side}>
+              {/* 다음 일정 */}
+              {next && <NextCard schedule={next} artists={map} hour12={prefs.hour12} />}
+
+              {/* 투표: 목록은 투표 메뉴에서, 홈에서는 바로 가는 버튼 하나 */}
+              <Link href="/votes" className={`btn btn-soft btn-block ${styles.voteBtn}`}>
+                <Vote size={17} /> 투표하러 가기
+              </Link>
             </div>
-            {listed.length > 0 && (
-              <ul className={styles.agenda}>
-                {shown.map((s) => (
-                  <li key={s.id}>
-                    <Link href={`/schedule?id=${s.id}`}>
-                      <strong>{s.title}</strong>
-                      <small className="num">
-                        {range === "week" && `${formatShortDate(datePart(s.startAt))} · `}
-                        {s.allDay ? "종일" : `${formatTime(timePart(s.startAt), prefs.hour12)} – ${formatTime(timePart(s.endAt), prefs.hour12)}`}
-                        {" · "}
-                        {getCategory(s.category).label}
-                      </small>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {listed.length > AGENDA_LIMIT && (
-              <button type="button" className={`btn btn-soft btn-sm btn-block ${styles.more}`} onClick={() => setExpanded((v) => !v)}>
-                {expanded ? "접기" : `${listed.length - AGENDA_LIMIT}개 더 보기`}
-              </button>
-            )}
-            {!listed.length && (
-              <p className={styles.none}>{range === "today" ? "오늘은 예정된 일정이 없어요." : "이번 주에 남은 일정이 없어요."}</p>
-            )}
-          </section>
-
-          {/* 다음 일정 */}
-          {next && <NextCard schedule={next} artists={map} hour12={prefs.hour12} />}
-
-          {/* 투표: 목록은 투표 메뉴에서, 홈에서는 바로 가는 버튼 하나 */}
-          <Link href="/votes" className={`btn btn-soft btn-block ${styles.voteBtn}`}>
-            <Vote size={17} /> 투표하러 가기
-          </Link>
+          </div>
 
           {/* 최근 소식: 뉴스 최신 기사 몇 개, 전체는 뉴스 화면에서 */}
           <section className="section">
@@ -208,6 +213,40 @@ export default function HomeScreen() {
         </>
       )}
     </main>
+  );
+}
+
+/** 가로로 넘기는 카테고리 카드 (넓은 화면에서는 마우스용 양옆 화살표) */
+function CategorySlider({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [edge, setEdge] = useState({ start: true, end: false });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setEdge({ start: el.scrollLeft <= 1, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 1 });
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
+  // 카드 몇 장씩 넘김
+  const slide = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
+  return (
+    <div className={styles.slider}>
+      <div ref={ref} className={styles.scroller}>
+        {children}
+      </div>
+      <button type="button" className={styles.slideBtn} data-side="prev" onClick={() => slide(-1)} disabled={edge.start} aria-label="이전 카테고리">
+        <ChevronLeft size={18} />
+      </button>
+      <button type="button" className={styles.slideBtn} data-side="next" onClick={() => slide(1)} disabled={edge.end} aria-label="다음 카테고리">
+        <ChevronRight size={18} />
+      </button>
+    </div>
   );
 }
 

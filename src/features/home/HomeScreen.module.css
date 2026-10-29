@@ -35,11 +35,11 @@
 .scroller {
   display: flex;
   gap: 10px;
-  margin: 0 -18px;
-  padding: 0 18px 4px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 0 var(--gutter) 4px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 18px;
+  scroll-padding-inline: var(--gutter);
   scrollbar-width: none;
 }
 
@@ -324,4 +324,67 @@
 
 .more {
   margin-top: 6px;
+}
+
+@media (min-width: 768px) {
+  .board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .board > .today,
+  .side > :first-child {
+    margin-top: 14px;
+  }
+}
+
+/* 카테고리 슬라이드: 마우스로 넘길 수 있게 넓은 화면에서만 양옆 화살표 */
+.slider {
+  position: relative;
+}
+
+.slideBtn {
+  display: none;
+}
+
+@media (min-width: 768px) and (hover: hover) {
+  /* 화살표로 넘기므로 화면 끝이 아니라 본문 폭에서 잘림 */
+  .scroller {
+    margin: 0;
+    padding: 0 0 4px;
+    scroll-padding-inline: 0;
+    border-radius: var(--r-xl);
+  }
+
+  .slideBtn {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    /* 흰 원 + 그림자: 카드 위에 떠 보이게 */
+    background: var(--raised);
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.16);
+    transform: translateY(-50%);
+    transition: opacity 0.2s ease;
+  }
+
+  .slideBtn[data-side="prev"] {
+    left: -20px;
+  }
+
+  .slideBtn[data-side="next"] {
+    right: -20px;
+  }
+
+  .slideBtn:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
 }

@@ -51,7 +51,7 @@ export default function VotesScreen() {
   };
 
   const cards = (list: typeof all) => (
-    <div className="stack">
+    <div className="stack wide-cols">
       {list.map((v) => (
         <VoteCard key={v.id} vote={v} artists={map} bookmarkable editable />
       ))}
@@ -59,7 +59,7 @@ export default function VotesScreen() {
   );
 
   return (
-    <main>
+    <main className="wide">
       <header className="page-header">
         <h1>투표</h1>
         <div className="header-actions">

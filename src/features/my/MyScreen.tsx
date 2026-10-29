@@ -48,7 +48,7 @@ export default function MyScreen() {
   const followed = artists.filter((a) => spaces?.some((sp) => sp.artistId === a.id && sp.followed));
 
   return (
-    <main>
+    <main className="wide">
       <PageHeader back="/more" title="내 공간" />
       <p className={styles.lead}>
         <Lock size={13} />
@@ -105,7 +105,7 @@ export default function MyScreen() {
         </div>
         {myVotes.length ? (
           <>
-            <div className="stack">
+            <div className="stack wide-cols">
               {myVotes.map((v) => (
                 <VoteTodoRow key={v.id} vote={v} editing={isEditing} />
               ))}

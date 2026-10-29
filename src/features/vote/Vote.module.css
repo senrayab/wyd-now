@@ -635,3 +635,10 @@
 .menu [data-danger] {
   color: var(--danger);
 }
+
+@media (min-width: 768px) {
+  /* 상태 탭은 너무 길어지지 않게 */
+  .tabs {
+    max-width: 440px;
+  }
+}

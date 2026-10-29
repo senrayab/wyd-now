@@ -50,7 +50,7 @@ export default function CalendarScreen() {
   );
 
   return (
-    <main>
+    <main className="wide">
       <header className="page-header">
         <h1>캘린더</h1>
         <div className="header-actions">
@@ -136,84 +136,89 @@ function MonthView({ switcher, selected, today, onSelect }: { switcher: ReactNod
         )}
       </div>
 
-      <section className={`card ${styles.grid}`} aria-label={`${year}년 ${month + 1}월`}>
-        {weekdayLabels.map((w) => (
-          <span key={w} className={styles.weekday} data-weekday={w}>
-            {WEEKDAYS[w]}
-          </span>
-        ))}
-        {grid.map((cell) => {
-          const items = byDay.get(cell.key) ?? [];
-          const cats = [...new Set(items.map((i) => i.category))].slice(0, 3);
-          return (
-            <button
-              key={cell.key}
-              type="button"
-              className={styles.cell}
-              data-out={!cell.inMonth}
-              data-weekday={cell.weekday}
-              aria-pressed={cell.key === selected}
-              aria-label={`${formatDate(cell.key)} 일정 ${items.length}개${dueByDay.has(cell.key) ? `, 투표 마감 ${dueByDay.get(cell.key)!.length}개` : ""}`}
-              onClick={() => onSelect(cell.key)}
-            >
-              <span className={`${styles.dayNum} num`} data-today={cell.key === today}>
-                {cell.day}
-              </span>
-              <span className={styles.dots}>
-                {cats.map((c) => (
-                  <span key={c} style={{ background: getCategory(c).colors[0] }} />
-                ))}
-                {dueByDay.has(cell.key) && <span className={styles.voteDot} />}
-              </span>
-            </button>
-          );
-        })}
-      </section>
-
-      <section className="section">
-        <div className="section-head">
-          <h2>
-            {formatDate(selected)} <span className="muted num">{dayList.length}</span>
-          </h2>
-          <Link href={`/calendar/day?date=${selected}`}>타임라인</Link>
-        </div>
-        {dayList.length ? (
-          <div className="stack">
-            {dayList.map((s) => (
-              <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} />
-            ))}
-          </div>
-        ) : (
-          <div className="card-flat">
-            <Empty
-              icon={CalendarDays}
-              action={
-                <Link href={`/schedule/new?date=${selected}`} className="btn btn-ghost btn-sm">
-                  <Plus size={15} /> 이 날 일정 등록
-                </Link>
-              }
-            >
-              등록된 일정이 없어요.
-            </Empty>
-          </div>
-        )}
-      </section>
-
-      {dueList.length > 0 && (
-        <section className="section">
-          <div className="section-head">
-            <h2>
-              이 날 마감하는 투표 <span className="muted num">{dueList.length}</span>
-            </h2>
-            <Link href="/votes">투표</Link>
-          </div>
-          <div className="stack">
-            {dueList.map((v) => (
-              <VoteCard key={v.id} vote={v} artists={map} />
-            ))}
-          </div>
+      {/* 넓은 화면: 왼쪽 달력 · 오른쪽 고른 날의 일정 */}
+      <div className={styles.monthBody}>
+        <section className={`card ${styles.grid}`} aria-label={`${year}년 ${month + 1}월`}>
+          {weekdayLabels.map((w) => (
+            <span key={w} className={styles.weekday} data-weekday={w}>
+              {WEEKDAYS[w]}
+            </span>
+          ))}
+          {grid.map((cell) => {
+            const items = byDay.get(cell.key) ?? [];
+            const cats = [...new Set(items.map((i) => i.category))].slice(0, 3);
+            return (
+              <button
+                key={cell.key}
+                type="button"
+                className={styles.cell}
+                data-out={!cell.inMonth}
+                data-weekday={cell.weekday}
+                aria-pressed={cell.key === selected}
+                aria-label={`${formatDate(cell.key)} 일정 ${items.length}개${dueByDay.has(cell.key) ? `, 투표 마감 ${dueByDay.get(cell.key)!.length}개` : ""}`}
+                onClick={() => onSelect(cell.key)}
+              >
+                <span className={`${styles.dayNum} num`} data-today={cell.key === today}>
+                  {cell.day}
+                </span>
+                <span className={styles.dots}>
+                  {cats.map((c) => (
+                    <span key={c} style={{ background: getCategory(c).colors[0] }} />
+                  ))}
+                  {dueByDay.has(cell.key) && <span className={styles.voteDot} />}
+                </span>
+              </button>
+            );
+          })}
         </section>
-      )}
+
+        <div className={styles.dayPane}>
+          <section className="section">
+            <div className="section-head">
+              <h2>
+                {formatDate(selected)} <span className="muted num">{dayList.length}</span>
+              </h2>
+              <Link href={`/calendar/day?date=${selected}`}>타임라인</Link>
+            </div>
+            {dayList.length ? (
+              <div className="stack">
+                {dayList.map((s) => (
+                  <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} />
+                ))}
+              </div>
+            ) : (
+              <div className="card-flat">
+                <Empty
+                  icon={CalendarDays}
+                  action={
+                    <Link href={`/schedule/new?date=${selected}`} className="btn btn-ghost btn-sm">
+                      <Plus size={15} /> 이 날 일정 등록
+                    </Link>
+                  }
+                >
+                  등록된 일정이 없어요.
+                </Empty>
+              </div>
+            )}
+          </section>
+
+          {dueList.length > 0 && (
+            <section className="section">
+              <div className="section-head">
+                <h2>
+                  이 날 마감하는 투표 <span className="muted num">{dueList.length}</span>
+                </h2>
+                <Link href="/votes">투표</Link>
+              </div>
+              <div className="stack">
+                {dueList.map((v) => (
+                  <VoteCard key={v.id} vote={v} artists={map} />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      </div>
     </>
   );
 }
@@ -301,7 +306,7 @@ function ListView({
                   {items.length}
                 </span>
               </div>
-              <div className="stack">
+              <div className="stack wide-cols">
                 {items.map((s) => (
                   <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate past={past} />
                 ))}
