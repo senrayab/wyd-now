@@ -353,10 +353,9 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    /* 흰 원 + 그림자: 카드 위에 떠 보이게 */
+    /* 흰 원: 슬라이드 끝이 흐려져 있어서 그림자 없이도 구분됨 */
     background: var(--raised);
     color: var(--ink);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.16);
     transform: translateY(-50%);
     transition: opacity 0.2s ease;
   }
