@@ -50,7 +50,7 @@ export default function CalendarScreen() {
   );
 
   return (
-    <main className="wide">
+    <main>
       <header className="page-header">
         <h1>캘린더</h1>
         <div className="header-actions">
@@ -115,7 +115,7 @@ function MonthView({ switcher, selected, today, onSelect }: { switcher: ReactNod
 
   return (
     <>
-      <div className={styles.toolbar}>
+      <div className={`sticky-controls ${styles.toolbar}`}>
         {switcher}
         <div className={styles.monthNav}>
           <button type="button" className="icon-btn sm" onClick={() => moveMonth(-1)} aria-label="이전 달">
@@ -136,91 +136,93 @@ function MonthView({ switcher, selected, today, onSelect }: { switcher: ReactNod
         )}
       </div>
 
-      {/* 넓은 화면: 왼쪽 달력 · 오른쪽 고른 날의 일정 */}
-      <div className={styles.monthBody}>
-        <section className={`card ${styles.grid}`} aria-label={`${year}년 ${month + 1}월`}>
-          {weekdayLabels.map((w) => (
-            <span key={w} className={styles.weekday} data-weekday={w}>
-              {WEEKDAYS[w]}
-            </span>
-          ))}
-          {grid.map((cell) => {
-            const items = byDay.get(cell.key) ?? [];
-            const cats = [...new Set(items.map((i) => i.category))].slice(0, 3);
-            return (
-              <button
-                key={cell.key}
-                type="button"
-                className={styles.cell}
-                data-out={!cell.inMonth}
-                data-weekday={cell.weekday}
-                aria-pressed={cell.key === selected}
-                aria-label={`${formatDate(cell.key)} 일정 ${items.length}개${dueByDay.has(cell.key) ? `, 투표 마감 ${dueByDay.get(cell.key)!.length}개` : ""}`}
-                onClick={() => onSelect(cell.key)}
-              >
-                <span className={`${styles.dayNum} num`} data-today={cell.key === today}>
-                  {cell.day}
-                </span>
-                <span className={styles.dots}>
-                  {cats.map((c) => (
-                    <span key={c} style={{ background: getCategory(c).colors[0] }} />
-                  ))}
-                  {dueByDay.has(cell.key) && <span className={styles.voteDot} />}
-                </span>
-              </button>
-            );
-          })}
-        </section>
-
-        <div className={styles.dayPane}>
-          <section className="section">
-            <div className="section-head">
-              <h2>
-                {formatDate(selected)} <span className="muted num">{dayList.length}</span>
-              </h2>
-              <Link href={`/calendar/day?date=${selected}`}>타임라인</Link>
-            </div>
-            {dayList.length ? (
-              <div className="stack">
-                {dayList.map((s) => (
-                  <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} />
+      <section className={`card ${styles.grid}`} aria-label={`${year}년 ${month + 1}월`}>
+        {weekdayLabels.map((w) => (
+          <span key={w} className={styles.weekday} data-weekday={w}>
+            {WEEKDAYS[w]}
+          </span>
+        ))}
+        {grid.map((cell) => {
+          const items = byDay.get(cell.key) ?? [];
+          const cats = [...new Set(items.map((i) => i.category))].slice(0, 3);
+          return (
+            <button
+              key={cell.key}
+              type="button"
+              className={styles.cell}
+              data-out={!cell.inMonth}
+              data-weekday={cell.weekday}
+              aria-pressed={cell.key === selected}
+              aria-label={`${formatDate(cell.key)} 일정 ${items.length}개${dueByDay.has(cell.key) ? `, 투표 마감 ${dueByDay.get(cell.key)!.length}개` : ""}`}
+              onClick={() => onSelect(cell.key)}
+            >
+              <span className={`${styles.dayNum} num`} data-today={cell.key === today}>
+                {cell.day}
+              </span>
+              <span className={styles.dots}>
+                {cats.map((c) => (
+                  <span key={c} style={{ background: getCategory(c).colors[0] }} />
                 ))}
-              </div>
-            ) : (
-              <div className="card-flat">
-                <Empty
-                  icon={CalendarDays}
-                  action={
-                    <Link href={`/schedule/new?date=${selected}`} className="btn btn-ghost btn-sm">
-                      <Plus size={15} /> 이 날 일정 등록
-                    </Link>
-                  }
-                >
-                  등록된 일정이 없어요.
-                </Empty>
-              </div>
-            )}
-          </section>
+                {dueByDay.has(cell.key) && <span className={styles.voteDot} />}
+              </span>
+            </button>
+          );
+        })}
+      </section>
 
-          {dueList.length > 0 && (
-            <section className="section">
-              <div className="section-head">
-                <h2>
-                  이 날 마감하는 투표 <span className="muted num">{dueList.length}</span>
-                </h2>
-                <Link href="/votes">투표</Link>
-              </div>
-              <div className="stack">
-                {dueList.map((v) => (
-                  <VoteCard key={v.id} vote={v} artists={map} />
-                ))}
-              </div>
-            </section>
-          )}
+      <section className="section">
+        <div className="section-head">
+          <h2>
+            {formatDate(selected)} <span className="muted num">{dayList.length}</span>
+          </h2>
+          <Link href={`/calendar/day?date=${selected}`}>타임라인</Link>
         </div>
-      </div>
+        {dayList.length ? (
+          <div className="stack">
+            {dayList.map((s) => (
+              <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} />
+            ))}
+          </div>
+        ) : (
+          <div className="card-flat">
+            <Empty
+              icon={CalendarDays}
+              action={
+                <Link href={`/schedule/new?date=${selected}`} className="btn btn-ghost btn-sm">
+                  <Plus size={15} /> 이 날 일정 등록
+                </Link>
+              }
+            >
+              등록된 일정이 없어요.
+            </Empty>
+          </div>
+        )}
+      </section>
+
+      {dueList.length > 0 && (
+        <section className="section">
+          <div className="section-head">
+            <h2>
+              이 날 마감하는 투표 <span className="muted num">{dueList.length}</span>
+            </h2>
+            <Link href="/votes">투표</Link>
+          </div>
+          <div className="stack">
+            {dueList.map((v) => (
+              <VoteCard key={v.id} vote={v} artists={map} />
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
+}
+
+/** 같은 날 일정끼리 (목록 순서 그대로) */
+function byDay(items: Schedule[]) {
+  const days = new Map<string, Schedule[]>();
+  for (const s of items) days.set(datePart(s.startAt), [...(days.get(datePart(s.startAt)) ?? []), s]);
+  return [...days.entries()];
 }
 
 function ListView({
@@ -258,33 +260,36 @@ function ListView({
 
   return (
     <>
-      <div className={styles.toolbar}>
-        {switcher}
-        {/* 아래 카테고리 칩과 겹쳐 보이지 않게 글자 탭 */}
-        <div className="tabs" role="tablist" aria-label="기간">
-          <button type="button" role="tab" aria-selected={!past} onClick={() => onChange({ range: null })}>
-            다가오는
-          </button>
-          <button type="button" role="tab" aria-selected={past} onClick={() => onChange({ range: "past" })}>
-            지난 일정
-          </button>
+      {/* 태블릿·PC 에서는 기간 탭과 카테고리 칩이 함께 위에 붙어 있음 */}
+      <div className={`sticky-controls ${styles.controls}`}>
+        <div className={styles.toolbar}>
+          {switcher}
+          {/* 아래 카테고리 칩과 겹쳐 보이지 않게 글자 탭 */}
+          <div className="tabs" role="tablist" aria-label="기간">
+            <button type="button" role="tab" aria-selected={!past} onClick={() => onChange({ range: null })}>
+              다가오는
+            </button>
+            <button type="button" role="tab" aria-selected={past} onClick={() => onChange({ range: "past" })}>
+              지난 일정
+            </button>
+          </div>
         </div>
-      </div>
-      <div className="chips" role="group" aria-label="카테고리">
-        {artist && (
-          <button type="button" className="chip" aria-pressed onClick={() => onChange({ artist: null })}>
-            {artist.name} <X size={14} />
+        <div className="chips" role="group" aria-label="카테고리">
+          {artist && (
+            <button type="button" className="chip" aria-pressed onClick={() => onChange({ artist: null })}>
+              {artist.name} <X size={14} />
+            </button>
+          )}
+          <button type="button" className="chip" aria-pressed={!category} onClick={() => onChange({ cat: null })}>
+            전체
           </button>
-        )}
-        <button type="button" className="chip" aria-pressed={!category} onClick={() => onChange({ cat: null })}>
-          전체
-        </button>
-        {CATEGORIES.map((c) => (
-          <button key={c.id} type="button" className="chip" aria-pressed={category === c.id} onClick={() => onChange({ cat: c.id })}>
-            <span className="dot" style={{ width: 7, height: 7, borderRadius: "50%", background: c.colors[0] }} />
-            {c.label}
-          </button>
-        ))}
+          {CATEGORIES.map((c) => (
+            <button key={c.id} type="button" className="chip" aria-pressed={category === c.id} onClick={() => onChange({ cat: c.id })}>
+              <span className="dot" style={{ width: 7, height: 7, borderRadius: "50%", background: c.colors[0] }} />
+              {c.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -306,9 +311,20 @@ function ListView({
                   {items.length}
                 </span>
               </div>
-              <div className="stack wide-cols">
-                {items.map((s) => (
-                  <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate past={past} />
+              {/* 태블릿·PC: 왼쪽 날짜 · 오른쪽 그날 일정 (모바일은 날짜가 붙은 한 줄 목록 그대로) */}
+              <div className={`stack ${styles.days}`}>
+                {byDay(items).map(([day, list]) => (
+                  <div key={day} className={styles.day}>
+                    <div className={styles.dayLabel} aria-hidden>
+                      <b className="num">{Number(day.slice(8))}</b>
+                      <small>{WEEKDAYS[parseLocal(day).getDay()]}</small>
+                    </div>
+                    <div className={styles.dayItems}>
+                      {list.map((s) => (
+                        <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate past={past} />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>

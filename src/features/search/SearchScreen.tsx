@@ -44,7 +44,7 @@ export default function SearchScreen() {
   };
 
   return (
-    <main className="wide">
+    <main>
       <PageHeader back="/" title="검색" compact />
       <label className={styles.box}>
         <Search size={18} />
@@ -95,7 +95,7 @@ export default function SearchScreen() {
                   투표 <span className="muted num">{voteHits.length}</span>
                 </h2>
               </div>
-              <div className="stack wide-cols">
+              <div className="stack">
                 {voteHits.map((v) => (
                   <VoteCard key={v.id} vote={v} artists={map} />
                 ))}
@@ -109,7 +109,7 @@ export default function SearchScreen() {
                   일정 <span className="muted num">{scheduleHits.length}</span>
                 </h2>
               </div>
-              <div className="stack wide-cols">
+              <div className="stack">
                 {scheduleHits.map((s) => (
                   <ScheduleRow key={s.id} schedule={s} artists={map} hour12={prefs.hour12} showDate />
                 ))}

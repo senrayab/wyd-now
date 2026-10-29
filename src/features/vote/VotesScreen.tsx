@@ -51,7 +51,7 @@ export default function VotesScreen() {
   };
 
   const cards = (list: typeof all) => (
-    <div className="stack wide-cols">
+    <div className="stack">
       {list.map((v) => (
         <VoteCard key={v.id} vote={v} artists={map} bookmarkable editable />
       ))}
@@ -59,7 +59,7 @@ export default function VotesScreen() {
   );
 
   return (
-    <main className="wide">
+    <main>
       <header className="page-header">
         <h1>투표</h1>
         <div className="header-actions">
@@ -72,22 +72,16 @@ export default function VotesScreen() {
         북마크한 투표는 내 공간에 모이고, 오늘 투표했는지 확인해요.
       </p>
 
-      <div className={`segmented ${styles.tabs}`} role="tablist" aria-label="투표 상태">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => go({ tab: t.id })}>
-            {t.label} {!loading && <span className="num">{groups[t.id]}</span>}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <Loading />
-      ) : all.length === 0 ? (
-        <div className="card-flat">
-          <Empty icon={Vote}>아직 등록된 투표가 없어요. 아래 + 버튼의 ‘투표 등록’으로 등록해 보세요.</Empty>
+      {/* 태블릿·PC 에서는 상태 탭과 종류 칩이 함께 위에 붙어 있음 */}
+      <div className={`sticky-controls ${styles.controls}`}>
+        <div className={`segmented ${styles.tabs}`} role="tablist" aria-label="투표 상태">
+          {TABS.map((t) => (
+            <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => go({ tab: t.id })}>
+              {t.label} {!loading && <span className="num">{groups[t.id]}</span>}
+            </button>
+          ))}
         </div>
-      ) : (
-        <>
+        {!loading && all.length > 0 && (
           <div className="chips" role="group" aria-label="종류">
             <button type="button" className="chip" aria-pressed={!type} onClick={() => go({ type: null })}>
               전체
@@ -99,7 +93,17 @@ export default function VotesScreen() {
               </button>
             ))}
           </div>
+        )}
+      </div>
 
+      {loading ? (
+        <Loading />
+      ) : all.length === 0 ? (
+        <div className="card-flat">
+          <Empty icon={Vote}>아직 등록된 투표가 없어요. 아래 + 버튼의 ‘투표 등록’으로 등록해 보세요.</Empty>
+        </div>
+      ) : (
+        <>
           {groups[tab] === 0 ? (
             <div className="card-flat" style={{ marginTop: 8 }}>
               <Empty icon={tab === "closed" ? Inbox : SearchX}>{EMPTY[tab]}</Empty>

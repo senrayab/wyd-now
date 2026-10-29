@@ -90,3 +90,14 @@
   opacity: 0.55;
   filter: grayscale(1);
 }
+
+@media (hover: hover) {
+  .row {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .row:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--float);
+  }
+}

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { CalendarDays, CalendarPlus, Ellipsis, House, Plus, Vote, type LucideIcon } from "lucide-react";
 import styles from "./BottomNav.module.css";
 
-interface Tab {
+export interface Tab {
   href: string;
   label: string;
   icon: LucideIcon;
@@ -25,7 +25,8 @@ const RIGHT: Tab[] = [
   // 아티스트·내 공간은 더보기 안에 있으므로 더보기로 표시
   { href: "/more", label: "더보기", icon: Ellipsis, match: (p) => p.startsWith("/more") || p.startsWith("/artist") || p === "/my" },
 ];
-const TABS = [...LEFT, ...RIGHT];
+/** 넓은 화면의 왼쪽 메뉴(SideNav)도 같은 탭을 씀 */
+export const TABS = [...LEFT, ...RIGHT];
 
 export default function BottomNav({ hidden = false }: { hidden?: boolean }) {
   const pathname = usePathname();

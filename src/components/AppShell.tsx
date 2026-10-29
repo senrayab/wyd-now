@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { WifiOff } from "lucide-react";
 import BottomNav from "./BottomNav";
+import SideNav from "./SideNav";
 import { FeedbackProvider } from "./Feedback";
 import UpdateToast from "./UpdateToast";
 import { useOnline } from "@/lib/hooks";
@@ -23,6 +24,36 @@ export default function AppShell({ children }: { children: ReactNode }) {
     recordVisit();
   }, [pathname]);
 
+  // 태블릿·PC: 탭·칩 줄(.sticky-controls)이 제목줄 바로 아래에 붙었는지 표시 → 배경을 한 장으로 (globals.css)
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const app = document.querySelector<HTMLElement>(".app");
+      const head = app ? parseFloat(getComputedStyle(app).getPropertyValue("--head-h")) || 0 : 0;
+      document.querySelectorAll<HTMLElement>(".sticky-controls").forEach((el) => {
+        const stuck = head > 0 && el.getBoundingClientRect().top <= head + 0.5;
+        if (stuck) el.dataset.stuck = "";
+        else delete el.dataset.stuck;
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    schedule();
+    // 화면 안에서 보기를 바꿔도(캘린더 월간 ↔ 목록) 다시 확인
+    const observer = new MutationObserver(schedule);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     listenForInstallPrompt();
     void cleanupLegacySamples();
@@ -31,13 +62,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <FeedbackProvider>
-      <div className="app" data-nav={showNav ? "shown" : "hidden"}>
-        {!online && (
-          <div className="offline-banner" role="status">
-            <WifiOff size={14} /> 오프라인 상태예요. 저장된 정보는 그대로 볼 수 있어요.
-          </div>
-        )}
-        {children}
+      {/* 태블릿·PC(768px~): 왼쪽 메뉴 + 본문. 모바일은 본문만 */}
+      <div className="shell">
+        <SideNav />
+        <div className="app" data-nav={showNav ? "shown" : "hidden"}>
+          {!online && (
+            <div className="offline-banner" role="status">
+              <WifiOff size={14} /> 오프라인 상태예요. 저장된 정보는 그대로 볼 수 있어요.
+            </div>
+          )}
+          {children}
+        </div>
       </div>
       {/* 입력 화면에서도 메뉴를 없애지 않고 숨기기만 → 돌아왔을 때 선택 위치가 그대로 */}
       <BottomNav hidden={!showNav} />

@@ -148,19 +148,70 @@
   opacity: 0.8;
 }
 
+/* 목록: 날짜 묶음. 모바일은 묶음 없이 한 줄 목록 그대로 */
+.day,
+.dayItems {
+  display: contents;
+}
+
+.dayLabel {
+  display: none;
+}
+
 @media (min-width: 768px) {
-  .monthBody {
+  .toolbar {
+    margin-bottom: 0;
+    padding-bottom: 14px;
+  }
+
+  .controls > .toolbar {
+    padding-bottom: 4px;
+  }
+
+  .days {
+    gap: 0;
+  }
+
+  .day {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: 24px;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 16px;
     align-items: start;
+    padding: 14px 0;
   }
 
-  .monthBody .cell {
-    height: 72px;
+  .day + .day {
+    border-top: 1px solid var(--line);
   }
 
-  .dayPane > :first-child {
-    margin-top: 2px;
+  .dayLabel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 6px;
+    line-height: 1.1;
+  }
+
+  .dayLabel b {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .dayLabel small {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* 그날 일정은 한 줄씩 (시간순으로 위에서 아래) */
+  .dayItems {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* 왼쪽에 날짜가 있으니 줄 안의 날짜는 생략 */
+  .dayItems [class*="date"] {
+    display: none;
   }
 }

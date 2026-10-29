@@ -160,3 +160,11 @@ li + li > .row {
   flex: none;
   margin-right: 14px;
 }
+
+@media (hover: hover) {
+  a.row:hover,
+  .row a:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

@@ -326,20 +326,6 @@
   margin-top: 6px;
 }
 
-@media (min-width: 768px) {
-  .board {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 16px;
-    align-items: start;
-  }
-
-  .board > .today,
-  .side > :first-child {
-    margin-top: 14px;
-  }
-}
-
 /* 카테고리 슬라이드: 마우스로 넘길 수 있게 넓은 화면에서만 양옆 화살표 */
 .slider {
   position: relative;
@@ -386,5 +372,55 @@
   .slideBtn:disabled {
     opacity: 0;
     pointer-events: none;
+  }
+}
+
+@media (min-width: 768px) {
+  /* 왼쪽 메뉴가 펼쳐져 있을 때만 (공용 .logo 보다 우선) */
+  :global(html[data-side="full"] .page-header) .headLogo {
+    display: none;
+  }
+}
+
+@media (hover: hover) {
+  /* 가로 스크롤 상자는 위아래로 넘친 부분을 잘라서, 떠오른 카드와 그림자가 들어갈 자리를
+     안쪽 여백으로 만들고 같은 만큼 바깥 여백을 빼 배치는 그대로 */
+  .scroller {
+    padding-top: 10px;
+    padding-bottom: 28px;
+    margin-top: -10px;
+    margin-bottom: -24px;
+  }
+
+  .catCard {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .catCard:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--float);
+  }
+
+  .agenda li a:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* 태블릿·PC: 슬라이드가 본문 폭에서 끝나므로, 넘길 카드가 남은 쪽 끝을 서서히 투명하게 */
+@media (min-width: 768px) {
+  .scroller[data-more-end] {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
+  }
+
+  .scroller[data-more-start] {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 64px);
+    mask-image: linear-gradient(to right, transparent, #000 64px);
+  }
+
+  .scroller[data-more-start][data-more-end] {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 64px, #000 calc(100% - 64px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 64px, #000 calc(100% - 64px), transparent);
   }
 }

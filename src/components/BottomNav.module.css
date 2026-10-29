@@ -287,3 +287,10 @@
     transition: none;
   }
 }
+
+/* 넓은 화면은 왼쪽 메뉴(SideNav)를 씀 */
+@media (min-width: 768px) {
+  .wrap {
+    display: none;
+  }
+}

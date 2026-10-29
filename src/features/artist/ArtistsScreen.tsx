@@ -32,7 +32,7 @@ export default function ArtistsScreen() {
   const countFor = (a: Artist) => schedules?.filter((s) => s.artistIds.includes(a.id)).length ?? 0;
 
   return (
-    <main className="wide">
+    <main>
       <PageHeader
         back="/more"
         title="아티스트"

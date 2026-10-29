@@ -75,4 +75,4 @@ export function usePrefs(): Prefs {
 }
 
 /** <head> 에 인라인으로 넣는 스크립트 (React 가 뜨기 전에 실행) */
-export const PREFS_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem(${JSON.stringify(KEY)})||"{}");var r=document.documentElement;if(p.fontKo)r.dataset.fontKo=p.fontKo;if(p.fontEn)r.dataset.fontEn=p.fontEn;if(p.theme&&p.theme!=="system")r.dataset.theme=p.theme;}catch(e){}})();`;
+export const PREFS_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem(${JSON.stringify(KEY)})||"{}");var r=document.documentElement;if(p.fontKo)r.dataset.fontKo=p.fontKo;if(p.fontEn)r.dataset.fontEn=p.fontEn;if(p.theme&&p.theme!=="system")r.dataset.theme=p.theme;}catch(e){}try{document.documentElement.dataset.side=matchMedia("(min-width: 1024px)").matches&&localStorage.getItem("wyd:side-collapsed")!=="1"?"full":"rail";}catch(e){}})();`;
